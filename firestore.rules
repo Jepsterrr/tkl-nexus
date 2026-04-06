@@ -8,7 +8,14 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
     }
 
-    // All documents in Firestore
+    // Public read-only access for published events
+    // Write access requires admin authentication
+    match /events/{eventId} {
+      allow read: if resource.data.published == true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // All other documents require admin access
     match /{document=**} {
       allow read, write: if request.auth != null && isAdmin();
     }

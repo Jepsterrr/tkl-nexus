@@ -104,6 +104,34 @@ export const TRANSLATIONS = {
       },
     },
 
+    // --- Events page ---
+    events: {
+      badge: 'Events & Aktiviteter',
+      heading: 'Kommande',
+      headingAccent: 'Events',
+      description:
+        'Håll koll på TKL Nexus egna events — från arbetsmarknadsdagar till mingel och sektionsaktiviteter.',
+      filterAll: 'Alla sektioner',
+      filterData: 'Datasektionen',
+      filterGeo: 'Geosektionen',
+      filterI: 'I-sektionen',
+      filterMaskin: 'Maskinsektionen',
+      noEvents: 'Inga kommande events att visa.',
+      noEventsFiltered: 'Inga events matchar valt filter.',
+      eventDate: 'Datum',
+      eventLocation: 'Plats',
+      eventSection: 'Sektion',
+      eventReadMore: 'Läs mer',
+      allSections: 'Alla sektioner',
+      sections: {
+        data: 'Datasektionen',
+        geo: 'Geosektionen',
+        i: 'I-sektionen',
+        maskin: 'Maskinsektionen',
+        general: 'Allmänt',
+      },
+    },
+
     // --- Corporate page ---
     corporate: {
       badge: 'För Företag',
@@ -270,6 +298,34 @@ export const TRANSLATIONS = {
           title: 'Network',
           description: 'Build connections through career fairs, networking events and section activities.',
         },
+      },
+    },
+
+    // --- Events page ---
+    events: {
+      badge: 'Events & Activities',
+      heading: 'Upcoming',
+      headingAccent: 'Events',
+      description:
+        'Stay up to date with TKL Nexus events — from career fairs to networking and section activities.',
+      filterAll: 'All sections',
+      filterData: 'Data Section',
+      filterGeo: 'Geo Section',
+      filterI: 'I Section',
+      filterMaskin: 'Machine Section',
+      noEvents: 'No upcoming events to display.',
+      noEventsFiltered: 'No events match the selected filter.',
+      eventDate: 'Date',
+      eventLocation: 'Location',
+      eventSection: 'Section',
+      eventReadMore: 'Read more',
+      allSections: 'All sections',
+      sections: {
+        data: 'Data Section',
+        geo: 'Geo Section',
+        i: 'I Section',
+        maskin: 'Machine Section',
+        general: 'General',
       },
     },
 

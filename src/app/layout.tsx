@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`${sora.variable} ${dmSans.variable} dark`}>
       <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any"/>
-      <body className="antialiased min-h-screen bg-cosmic-bg overflow-x-hidden">
+      <body className="antialiased min-h-svh bg-cosmic-bg overflow-x-hidden">
         <LanguageProvider>
           <ThemeProvider>
             <a href="#main-content" className="skip-nav">

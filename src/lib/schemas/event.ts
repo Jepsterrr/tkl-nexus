@@ -1,0 +1,37 @@
+import { z } from 'zod';
+
+// Section enum
+export const SectionSchema = z.enum(['data', 'geo', 'i', 'maskin', 'general']);
+export type Section = z.infer<typeof SectionSchema>;
+
+// Firestore Event schema (client-side shape)
+export const EventSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1).max(120),
+  description: z.string().max(2000),
+  date: z.string().datetime({ offset: true }),
+  endDate: z.string().datetime({ offset: true }).optional(),
+  location: z.string().min(1).max(120),
+  imageUrl: z.string().url().optional().or(z.literal('')),
+  tags: z.array(z.string()).default([]),
+  section: SectionSchema,
+  published: z.boolean(),
+  createdAt: z.string().datetime({ offset: true }),
+});
+
+export type TKLEvent = z.infer<typeof EventSchema>;
+
+// Raw Firestore document shape (before parsing)
+export const FirestoreEventDocSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().default(''),
+  date: z.string(),
+  endDate: z.string().optional(),
+  location: z.string().default(''),
+  imageUrl: z.string().optional(),
+  tags: z.array(z.string()).default([]),
+  section: SectionSchema.default('general'),
+  published: z.boolean().default(false),
+  createdAt: z.string(),
+});

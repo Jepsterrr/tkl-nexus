@@ -21,12 +21,12 @@ const storage = getStorage(app);
 // Connect to emulators in development
 if (process.env.NODE_ENV === "development") {
   const host = "127.0.0.1";
-  
+
   // Note: We avoid re-connecting emulators if they are already connected
   // (though Firebase SDK handles most of this, it's good practice in Next.js)
   try {
-    connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
-    connectFirestoreEmulator(db, host, 8080);
+    // connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
+    // connectFirestoreEmulator(db, host, 8080);
     // connectStorageEmulator(storage, host, 9199);
   } catch (e) {
     console.warn("Firebase emulators already connected or failed:", e);

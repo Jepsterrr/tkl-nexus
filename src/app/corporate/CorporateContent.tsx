@@ -1,13 +1,16 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { CalendarDays, LayoutGrid, Handshake, Building2, Users, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { MegaStat } from '@/components/ui/MegaStat';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
+import { DestinationCard } from '@/components/ui/DestinationCard';
 import type { StatItem } from '@/lib/types';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
-import { CalendarDays, LayoutGrid, Handshake, type LucideIcon } from 'lucide-react';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   CalendarDays,
@@ -18,7 +21,16 @@ const ICON_MAP: Record<string, LucideIcon> = {
 export function CorporateContent() {
   const { t } = useLanguage();
   const { corporate } = t;
+  const shouldReduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
   const colors = ACCENT_COLOR_MAP['purple'];
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   const STATS: StatItem[] = [
     { value: '1 600+', label: corporate.stats.members },
@@ -27,49 +39,129 @@ export function CorporateContent() {
   ];
 
   const SERVICES = [
-    { ...corporate.services.events, iconName: 'CalendarDays', linkHref: '/corporate/events', accentColor: 'purple' as const },
-    { ...corporate.services.portal, iconName: 'LayoutGrid', linkHref: '/corporate/post', accentColor: 'purple' as const },
-    { ...corporate.services.partnership, iconName: 'Handshake', linkHref: '/corporate/partnership', accentColor: 'purple' as const },
+    { title: corporate.services.events.title, description: corporate.services.events.description, linkLabel: corporate.services.events.linkLabel, iconName: 'CalendarDays', linkHref: '/events', accentColor: 'purple' as const },
+    { title: corporate.services.portal.title, description: corporate.services.portal.description, linkLabel: corporate.services.portal.linkLabel, iconName: 'LayoutGrid', linkHref: '/corporate/post', accentColor: 'purple' as const },
+    { title: corporate.services.partnership.title, description: corporate.services.partnership.description, linkLabel: corporate.services.partnership.linkLabel, iconName: 'Handshake', linkHref: '/about#kontakt', accentColor: 'purple' as const },
+  ];
+
+  const DESTINATIONS = [
+    {
+      href: '/events',
+      label: corporate.services.events.title,
+      description: corporate.services.events.description,
+      Icon: CalendarDays,
+      accentColor: '#8B5CF6',
+    },
+    {
+      href: '#tjanster',
+      label: corporate.services.portal.title,
+      description: corporate.services.portal.description,
+      Icon: LayoutGrid,
+      accentColor: '#A78BFA',
+    },
+    {
+      href: '/about#kontakt',
+      label: corporate.services.partnership.title,
+      description: corporate.services.partnership.description,
+      Icon: Handshake,
+      accentColor: '#C4B5FD',
+    },
   ];
 
   return (
     <>
-      {/* Hero */}
+      {/* Hero (Epic Design: 3-layer parallax) */}
       <section
+        ref={heroRef}
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
-        aria-labelledby="hero-heading"
+        aria-labelledby="corporate-hero-heading"
       >
-        <GradientOrb color="purple" size={600} top="30%" left="50%" opacity={0.12} animClass="animate-orb-float" />
-        <GradientOrb color="red" size={300} top="70%" left="15%" opacity={0.08} animClass="animate-orb-float-reverse" />
+        {/* Depth-0: Far atmosphere */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse 90% 70% at 5% 10%, rgba(139,92,246,0.12) 0%, transparent 60%),' +
+              'radial-gradient(ellipse 70% 60% at 90% 80%, rgba(139,92,246,0.07) 0%, transparent 60%)',
+          }}
+          aria-hidden="true"
+        />
 
-        <div className="relative max-w-4xl mx-auto w-full">
+        {/* Depth-1: Parallax orbs + grid */}
+        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GradientOrb color="purple" size={600} top="30%" left="60%" opacity={0.12} animClass="animate-orb-float" />
+          <GradientOrb color="red" size={280} top="70%" left="8%" opacity={0.07} animClass="animate-orb-float-reverse" />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),' +
+                'linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px)',
+              backgroundSize: '60px 60px',
+            }}
+          />
+        </motion.div>
+
+        {/* Depth-2: Floating accent dots */}
+        <motion.div
+          className="absolute top-28 right-[14%] w-2 h-2 rounded-full pointer-events-none"
+          style={{ background: '#8B5CF6', boxShadow: '0 0 12px #8B5CF6' }}
+          animate={shouldReduceMotion ? {} : { y: [0, -14, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          aria-hidden="true"
+        />
+        <motion.div
+          className="absolute bottom-36 left-[12%] w-1.5 h-1.5 rounded-full pointer-events-none"
+          style={{ background: '#E30613', boxShadow: '0 0 8px #E30613' }}
+          animate={shouldReduceMotion ? {} : { y: [0, 10, 0], opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+          aria-hidden="true"
+        />
+
+        {/* Depth-4: Content */}
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
           <StaggerReveal className="text-center" delay={0.1}>
             <RevealItem className="flex justify-center mb-6">
               <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
                 style={{
-                  background: 'rgba(139, 92, 246, 0.2)',
-                  border: '1px solid rgba(139, 92, 246, 0.3)',
+                  background: 'rgba(139,92,246,0.15)',
+                  border: '1px solid rgba(139,92,246,0.3)',
                   color: '#8B5CF6',
                 }}
               >
-                <span aria-hidden="true">◆</span>
+                <Building2 className="w-4 h-4" aria-hidden="true" />
                 {corporate.badge}
               </span>
             </RevealItem>
 
             <RevealItem>
               <h1
-                id="hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold hero-text leading-[1.1] tracking-tight"
+                id="corporate-hero-heading"
+                className="text-4xl sm:text-5xl md:text-7xl font-bold hero-text leading-[1.05] tracking-tight"
               >
                 {corporate.heading}{' '}
-                <span className="text-gradient-purple">{corporate.headingAccent}</span>
+                <span
+                  className="relative inline-block"
+                  style={{
+                    background: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {corporate.headingAccent}
+                  <span
+                    className="absolute -bottom-1 left-0 right-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, #8B5CF6, #a78bfa, transparent)' }}
+                    aria-hidden="true"
+                  />
+                </span>
               </h1>
             </RevealItem>
 
             <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
+              <p className="mt-6 text-base sm:text-lg md:text-xl hero-text-muted max-w-2xl mx-auto leading-relaxed">
                 {corporate.description}
               </p>
             </RevealItem>
@@ -80,7 +172,7 @@ export function CorporateContent() {
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
                 style={{
                   background: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
-                  boxShadow: '0 0 28px rgba(139, 92, 246, 0.4), 0 8px 32px rgba(0,0,0,0.3)',
+                  boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
                 {corporate.ctaContact}
@@ -94,8 +186,9 @@ export function CorporateContent() {
               </Link>
             </RevealItem>
           </StaggerReveal>
-        </div>
+        </motion.div>
 
+        {/* Depth-5: Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
@@ -114,7 +207,30 @@ export function CorporateContent() {
         </div>
       </section>
 
-      {/* Services */}
+      {/* Destinations hub */}
+      <section
+        className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        aria-labelledby="corp-destinations-heading"
+      >
+        <div className="max-w-6xl mx-auto">
+          <StaggerReveal className="mb-8">
+            <RevealItem className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-border" aria-hidden="true" />
+              <h2 id="corp-destinations-heading" className="hero-text-subtle text-xs font-bold uppercase tracking-[0.2em] whitespace-nowrap">
+                Hur vi kan samarbeta
+              </h2>
+              <div className="h-px flex-1 bg-border" aria-hidden="true" />
+            </RevealItem>
+          </StaggerReveal>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {DESTINATIONS.map((d, i) => (
+              <DestinationCard key={d.href} {...d} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services (detailed) */}
       <section
         id="tjanster"
         className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 mb-10"
@@ -177,7 +293,7 @@ export function CorporateContent() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA Banner */}
       <section className="py-10 px-4 sm:px-6 lg:px-8 pb-24">
         <GradientOrb color="purple" size={400} top="-10%" left="80%" opacity={0.08} />
         <div className="max-w-6xl mx-auto">

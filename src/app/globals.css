@@ -4,6 +4,7 @@
 
 :root {
   --font-size: 16px;
+  --navbar-height: 72px;
 
   /* TKL Nexus Custom Colors */
   --tkl-red: #E30613;
@@ -193,6 +194,7 @@
   html {
     font-size: var(--font-size);
     scroll-behavior: smooth;
+    scroll-padding-top: var(--navbar-height, 72px);
   }
 
   body {
@@ -271,7 +273,7 @@
     border: 1px solid var(--glass-border);
   }
 
-/* ─── Theme-Agnostic Utility Classes ─────────────────────────────────────── */
+/* Theme-Agnostic Utility Classes */
 
 /* Navbar */
 .nav-glass {
