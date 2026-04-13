@@ -5,6 +5,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { LanguageProvider } from '@/components/providers/LanguageProvider';
+import { HtmlLangSync } from '@/components/providers/HtmlLangSync';
 const sora = Sora({
   variable: '--font-sora',
   subsets: ['latin'],
@@ -19,17 +20,22 @@ const dmSans = DM_Sans({
 });
 export const metadata: Metadata = {
   title: {
-    default: 'TKL Nexus',
+    default: 'TKL Nexus – Karriärportal för LTU-studenter & Företag',
     template: '%s | TKL Nexus',
   },
   description:
     'TKL Nexus kopplar ihop LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal.',
   keywords: ['LTU', 'Teknologkåren', 'exjobb', 'praktik', 'ingenjör', 'karriär', 'Luleå'],
-  metadataBase: new URL('https://nexus.teknologkaren.se'),
+  metadataBase: new URL('https://tklnexus.se'),
   openGraph: {
     siteName: 'TKL Nexus',
     locale: 'sv_SE',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TKL Nexus' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og-image.png'],
   },
 };
 export default function RootLayout({
@@ -40,6 +46,7 @@ export default function RootLayout({
       <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any"/>
       <body className="antialiased min-h-svh bg-cosmic-bg overflow-x-hidden">
         <LanguageProvider>
+          <HtmlLangSync />
           <ThemeProvider>
             <a href="#main-content" className="skip-nav">
               Hoppa till innehåll

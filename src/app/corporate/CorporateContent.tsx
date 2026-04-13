@@ -8,7 +8,6 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { MegaStat } from '@/components/ui/MegaStat';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
-import { DestinationCard } from '@/components/ui/DestinationCard';
 import type { StatItem } from '@/lib/types';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
 
@@ -42,30 +41,6 @@ export function CorporateContent() {
     { title: corporate.services.events.title, description: corporate.services.events.description, linkLabel: corporate.services.events.linkLabel, iconName: 'CalendarDays', linkHref: '/events', accentColor: 'purple' as const },
     { title: corporate.services.portal.title, description: corporate.services.portal.description, linkLabel: corporate.services.portal.linkLabel, iconName: 'LayoutGrid', linkHref: '/corporate/post', accentColor: 'purple' as const },
     { title: corporate.services.partnership.title, description: corporate.services.partnership.description, linkLabel: corporate.services.partnership.linkLabel, iconName: 'Handshake', linkHref: '/about#kontakt', accentColor: 'purple' as const },
-  ];
-
-  const DESTINATIONS = [
-    {
-      href: '/events',
-      label: corporate.services.events.title,
-      description: corporate.services.events.description,
-      Icon: CalendarDays,
-      accentColor: '#8B5CF6',
-    },
-    {
-      href: '#tjanster',
-      label: corporate.services.portal.title,
-      description: corporate.services.portal.description,
-      Icon: LayoutGrid,
-      accentColor: '#A78BFA',
-    },
-    {
-      href: '/about#kontakt',
-      label: corporate.services.partnership.title,
-      description: corporate.services.partnership.description,
-      Icon: Handshake,
-      accentColor: '#C4B5FD',
-    },
   ];
 
   return (

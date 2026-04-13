@@ -11,7 +11,7 @@ import type { NextConfig } from "next";
 const CSP = [
   "default-src 'self'",
   // Scripts: egna + Next.js inline hattar (unsafe-inline behövs för Next.js hydration)
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
   // Styles: egna + Google Fonts CDN
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Fonter: Google Fonts statiska tillgångar
@@ -37,6 +37,8 @@ const CSP = [
   "base-uri 'self'",
   // Form-actions: enbart eget ursprung
   "form-action 'self'",
+  // Tvinga HTTP-resurser att uppgraderas till HTTPS
+  "upgrade-insecure-requests",
 ].join("; ");
 
 const nextConfig: NextConfig = {

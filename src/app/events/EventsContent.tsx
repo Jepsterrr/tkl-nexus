@@ -362,7 +362,7 @@ export function EventsContent() {
                 </div>
                 {loading && <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} /></div>}
                 {error && !loading && <p role="alert" className="text-center hero-text-muted py-16">{error}</p>}
-                {!loading && !error && filtered.length === 0 && <motion.p className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
+                {!loading && !error && filtered.length === 0 && <motion.p role="status" className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
                 {!loading && !error && filtered.length > 0 && (
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -422,7 +422,7 @@ export function EventsContent() {
                     />
 
                     {calendarSelectedDate !== null && filteredLuddEvents.length === 0 && (
-                      <p className="text-center hero-text-muted py-10">
+                      <p role="status" className="text-center hero-text-muted py-10">
                         {ev.calendarNoEvents}
                       </p>
                     )}

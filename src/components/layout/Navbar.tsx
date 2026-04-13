@@ -232,6 +232,7 @@ export function Navbar() {
                         key={lang}
                         onClick={() => setLocale(lang)}
                         aria-current={locale === lang ? 'true' : undefined}
+                        aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                           locale === lang ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
                         }`}

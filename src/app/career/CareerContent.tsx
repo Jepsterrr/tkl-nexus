@@ -242,6 +242,7 @@ export function CareerContent() {
           {/* Tomt State */}
           {!loading && !error && filteredOpps.length === 0 && (
             <motion.div
+              role="status"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center py-24 text-center bg-white/5 border border-white/10 rounded-3xl"

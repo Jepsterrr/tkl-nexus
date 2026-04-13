@@ -114,7 +114,7 @@ export function DealsContent() {
     <>
       {/* HERO SECTION */}
       <section
-        className="relative min-h-[55vh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
+        className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
         aria-labelledby="deals-hero-heading"
       >
         {/* Atmosphere */}
@@ -238,6 +238,7 @@ export function DealsContent() {
           {/* Tomt state */}
           {!loading && !error && filtered.length === 0 && (
             <motion.div
+              role="status"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center py-24 text-center bg-white/5 border border-white/10 rounded-3xl"
