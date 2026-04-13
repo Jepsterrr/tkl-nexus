@@ -1,0 +1,176 @@
+'use client';
+
+import { motion, useReducedMotion } from 'framer-motion';
+import { ExternalLink, Tag, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+import { useLanguage } from '@/components/providers/LanguageProvider';
+import type { TKLDeal, DealCategory } from '@/lib/schemas/deal';
+
+const CATEGORY_COLORS: Record<DealCategory, string> = {
+  rabatt: '#8B5CF6',
+  mat: '#F59E0B',
+  teknik: '#3B82F6',
+  sport: '#10B981',
+  övrigt: '#6B7280',
+};
+
+interface DealCardProps {
+  deal: TKLDeal;
+  idx?: number;
+}
+
+export function DealCard({ deal, idx = 0 }: DealCardProps) {
+  const { t, nav } = useLanguage() as any;
+  const deals = (t as any).deals;
+  const shouldReduceMotion = useReducedMotion();
+  const color = CATEGORY_COLORS[deal.category];
+
+  // i18n
+  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+  const displayTitle = isEnglish && deal.titleEn ? deal.titleEn : deal.title;
+  const displayDesc = isEnglish && deal.descriptionEn ? deal.descriptionEn : deal.description;
+
+  // Kopiera rabattkod
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (!deal.discountCode) return;
+    navigator.clipboard.writeText(deal.discountCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Avatar: antingen logotyp eller initial
+  const avatarLetter = deal.company.charAt(0).toUpperCase();
+
+  return (
+    <motion.article
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12, scale: 0.97 }}
+      transition={{ duration: 0.35, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={shouldReduceMotion ? {} : { y: -3 }}
+      layout
+      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(12px)',
+      }}
+      aria-label={displayTitle}
+    >
+      {/* Shimmer-animation vid hover */}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `linear-gradient(105deg, transparent 40%, ${color}12 50%, transparent 60%)`,
+          backgroundSize: '200% 100%',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Avatar / Logotyp - vänster kolumn */}
+      <div
+        className="shrink-0 w-20 flex items-center justify-center m-4 rounded-xl self-stretch"
+        style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+        aria-hidden="true"
+      >
+        {deal.logoUrl ? (
+          <img
+            src={deal.logoUrl}
+            alt={deal.company}
+            className="w-12 h-12 object-contain rounded-lg"
+          />
+        ) : (
+          <span
+            className="text-2xl font-black select-none"
+            style={{ color, textShadow: `0 0 20px ${color}` }}
+          >
+            {avatarLetter}
+          </span>
+        )}
+      </div>
+
+      {/* Innehåll - höger kolumn */}
+      <div className="flex flex-col justify-between flex-1 py-4 pr-4 min-w-0">
+        {/* Topp: company + kategori-badge */}
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <span className="text-xs font-medium hero-text-subtle truncate">{deal.company}</span>
+          <span
+            className="shrink-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+            style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
+          >
+            <Tag className="w-2.5 h-2.5 inline mr-1" aria-hidden="true" />
+            {deals?.categories?.[deal.category] ?? deal.category}
+          </span>
+        </div>
+
+        {/* Rubrik */}
+        <h3 className="hero-text font-semibold text-sm leading-snug mb-1 line-clamp-2 group-hover:text-white transition-colors">
+          {displayTitle}
+        </h3>
+
+        {/* Beskrivning */}
+        <p className="hero-text-muted text-xs leading-relaxed line-clamp-2 mb-3">
+          {displayDesc}
+        </p>
+
+        {/* Botten: rabatt-info + CTA */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          {/* Rabatttext */}
+          {deal.discount && (
+            <span
+              className="text-xs font-bold"
+              style={{ color }}
+            >
+              {deal.discount}
+            </span>
+          )}
+
+          {/* Rabattkod - om tillgänglig */}
+          {deal.discountCode ? (
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95"
+              style={{
+                background: `${color}18`,
+                border: `1px solid ${color}40`,
+                color,
+              }}
+              aria-label={`Kopiera rabattkod: ${deal.discountCode}`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  {deals?.codeCopied ?? 'Kopierat!'}
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  {deal.discountCode}
+                </>
+              )}
+            </button>
+          ) : deal.link ? (
+            /* Automatisk deal (t.ex. STUK) - öppna länk */
+            <a
+              href={deal.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
+              style={{ color }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {deals?.visit ?? 'Besök'}
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          ) : (
+            /* Automatisk deal utan länk - visa kårlegitimation-info */
+            <span className="text-xs hero-text-subtle italic">
+              {deals?.showMembership ?? 'Visa kårlegitimation'}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}

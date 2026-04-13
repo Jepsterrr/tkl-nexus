@@ -13,6 +13,7 @@
 # testing
 /coverage
 agents.md
+claude.md
 .idx/
 .agents/
 
@@ -26,6 +27,7 @@ agents.md
 # misc
 .DS_Store
 *.pem
+docs/
 
 # debug
 npm-debug.log*

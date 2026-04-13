@@ -122,6 +122,9 @@ export const TRANSLATIONS = {
       eventLocation: 'Plats',
       eventSection: 'Sektion',
       eventReadMore: 'Läs mer',
+      readOnLudd: 'Läs på LUDD',
+      calendarNoEvents: 'Inga events detta datum.',
+      luddFetchError: 'Kunde inte hämta events från campus just nu.',
       allSections: 'Alla sektioner',
       sections: {
         data: 'Datasektionen',
@@ -169,6 +172,47 @@ export const TRANSLATIONS = {
             'Vi hjälper dig att synas på webben, sociala kanaler, på campus och via Nexus Deals.',
           linkLabel: 'Läs om samarbete',
         },
+      },
+    },
+
+    opportunities: {
+      badge: 'Karriärportalen',
+      heading: 'Hitta ditt nästa',
+      headingAccent: 'Karriärsteg',
+      description: 'Knyt kontakt med toppföretag, hitta exjobb, praktikplatser och kickstarta din karriär via Nexus-nätverket.',
+      noOpps: 'Inga annonser tillgängliga just nu.',
+      noOppsFiltered: 'Inga annonser matchar ditt valda filter.',
+      loading: 'Hämtar annonser...',
+      error: 'Kunde inte hämta annonserna.',
+      filters: {
+        all: 'Alla Annonser',
+        jobb: 'Jobb',
+        exjobb: 'Exjobb',
+        praktik: 'Praktik',
+        trainee: 'Trainee'
+      }
+    },
+
+    // --- Deals page ---
+    deals: {
+      badge: 'Kårmedlemsförmåner',
+      heading: 'Exklusiva',
+      headingAccent: 'kårförmåner',
+      description: 'Rabatter och förmåner för dig som är kårmedlem i Teknologkåren vid LTU — automatiska deals och rabattkoder samlat på ett ställe.',
+      filterAll: 'Alla kategorier',
+      noDeals: 'Inga deals tillgängliga just nu.',
+      noDealsFiltered: 'Inga deals matchar filtret.',
+      loading: 'Hämtar deals...',
+      error: 'Kunde inte hämta deals.',
+      codeCopied: 'Kopierat!',
+      visit: 'Besök',
+      showMembership: 'Visa kårlegitimation',
+      categories: {
+        rabatt: 'Rabatt',
+        mat: 'Mat & Dryck',
+        teknik: 'Teknik',
+        sport: 'Sport',
+        övrigt: 'Övrigt',
       },
     },
 
@@ -319,6 +363,9 @@ export const TRANSLATIONS = {
       eventLocation: 'Location',
       eventSection: 'Section',
       eventReadMore: 'Read more',
+      readOnLudd: 'Read on LUDD',
+      calendarNoEvents: 'No events on this date.',
+      luddFetchError: 'Could not fetch campus events right now.',
       allSections: 'All sections',
       sections: {
         data: 'Data Section',
@@ -363,6 +410,47 @@ export const TRANSLATIONS = {
           description: 'We help you get visibility online, on social media, on campus and through Nexus Deals.',
           linkLabel: 'Read about partnership',
         },
+      },
+    },
+
+    opportunities: {
+      badge: 'Career Portal',
+      heading: 'Find your next',
+      headingAccent: 'Career Step',
+      description: 'Connect with top companies, find thesis projects, internships, and launch your career through the Nexus network.',
+      noOpps: 'No opportunities available right now.',
+      noOppsFiltered: 'No opportunities match your filter.',
+      loading: 'Fetching opportunities...',
+      error: 'Could not fetch opportunities.',
+      filters: {
+        all: 'All Opportunities',
+        jobb: 'Jobs',
+        exjobb: 'Thesis',
+        praktik: 'Internships',
+        trainee: 'Trainee'
+      }
+    },
+
+    // --- Deals page ---
+    deals: {
+      badge: 'Member Benefits',
+      heading: 'Exclusive',
+      headingAccent: 'member perks',
+      description: 'Discounts and benefits for Teknologkåren members at LTU — automatic deals and discount codes all in one place.',
+      filterAll: 'All categories',
+      noDeals: 'No deals available right now.',
+      noDealsFiltered: 'No deals match the filter.',
+      loading: 'Fetching deals...',
+      error: 'Could not fetch deals.',
+      codeCopied: 'Copied!',
+      visit: 'Visit',
+      showMembership: 'Show membership card',
+      categories: {
+        rabatt: 'Discount',
+        mat: 'Food & Drinks',
+        teknik: 'Tech',
+        sport: 'Sports',
+        övrigt: 'Other',
       },
     },
 

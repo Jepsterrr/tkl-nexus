@@ -17,6 +17,8 @@ const ORB_CONFIG: Record<AccentColor, { color1: string; color2: string }> = {
   red: { color1: '#E30613', color2: '#a00410' },
   purple: { color1: '#8B5CF6', color2: '#5b21b6' },
   green: { color1: '#10B981', color2: '#047857' },
+  blue: { color1: '#3B82F6', color2: '#1D4ED8' },
+  orange: { color1: '#F59E0B', color2: '#b45309' },
 };
 
 export function GradientOrb({

@@ -28,7 +28,6 @@ const SECTION_COLORS: Record<Section, string> = {
 };
 
 type FilterKey = Section | 'all';
-type CalendarView = 'nexus' | 'ludd';
 type ExtendedEvent = TKLEvent & { externalUrl?: string };
 
 // Event Card
@@ -59,8 +58,8 @@ function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
       layout
       className="group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: `1px solid rgba(255,255,255,0.07)`,
+        background: 'var(--about-card-bg)',
+        border: `1px solid var(--about-card-border)`,
         backdropFilter: 'blur(12px)',
       }}
       aria-label={displayTitle}
@@ -147,7 +146,7 @@ function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
             className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80 cursor-pointer"
             style={{ color }}
           >
-            Läs på LUDD
+            {ev.readOnLudd}
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         ) : (
@@ -199,11 +198,14 @@ export function EventsContent() {
   const [filter, setFilter] = useState<FilterKey>('all');
 
   // State variables for LUDD Data
-  const [calendarView, setCalendarView] = useState<CalendarView>('nexus');
+  const [calendarView, setCalendarView] = useState<'nexus' | 'ludd'>('nexus');
   const [luddEvents, setLuddEvents] = useState<ExtendedEvent[]>([]);
   const [luddLoading, setLuddLoading] = useState(false);
-  const [luddViewMode, setLuddViewMode] = useState<'list' | 'calendar'>('list');
-  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | null>(null);
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | null>(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -286,7 +288,7 @@ export function EventsContent() {
 
   return (
     <>
-      <section ref={heroRef} className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <section ref={heroRef} className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} aria-hidden="true" />
         <GradientOrb color="purple" size={500} top="35%" left="55%" opacity={0.10} animClass="animate-orb-float" />
         <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
@@ -301,7 +303,7 @@ export function EventsContent() {
             </RevealItem>
 
             <RevealItem>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight">
+              <h1 id="events-hero-heading" className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight">
                 {ev.heading}{' '}
                 <span className="relative inline-block" style={{ background: 'linear-gradient(135deg, #8B5CF6, #60A5FA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {ev.headingAccent}
@@ -324,10 +326,11 @@ export function EventsContent() {
         <div className="max-w-6xl mx-auto">
 
           {/* Dual Calendar Toggle */}
-          <div className="flex justify-center mb-10">
-            <div className="inline-flex items-center p-1.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <div className="flex justify-center mb-10 overflow-x-auto">
+            <div className="inline-flex items-center p-1.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shrink-0">
               <button
                 onClick={() => setCalendarView('nexus')}
+                aria-pressed={calendarView === 'nexus'}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   calendarView === 'nexus' ? 'bg-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_16px_rgba(139,92,246,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
@@ -337,12 +340,13 @@ export function EventsContent() {
               </button>
               <button
                 onClick={() => setCalendarView('ludd')}
+                aria-pressed={calendarView === 'ludd'}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   calendarView === 'ludd' ? 'bg-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_16px_rgba(139,92,246,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <CalendarDays className="w-4 h-4" />
-                {isEnglish ? 'Campus Events' : 'Campus Events'}
+                Campus Events
               </button>
             </div>
           </div>
@@ -357,14 +361,21 @@ export function EventsContent() {
                   ))}
                 </div>
                 {loading && <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} /></div>}
-                {error && !loading && <p className="text-center hero-text-muted py-16">{error}</p>}
+                {error && !loading && <p role="alert" className="text-center hero-text-muted py-16">{error}</p>}
                 {!loading && !error && filtered.length === 0 && <motion.p className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
                 {!loading && !error && filtered.length > 0 && (
-                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                    <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={filter}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+                    >
                       {filtered.map((event, idx) => <EventCard key={event.id} event={event} idx={idx} />)}
-                    </AnimatePresence>
-                  </motion.div>
+                    </motion.div>
+                  </AnimatePresence>
                 )}
               </motion.div>
             )}
@@ -378,8 +389,8 @@ export function EventsContent() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Header: powered-by + list/calendar toggle */}
-                <div className="flex items-center justify-between mb-8 pr-2">
+                {/* Header: powered-by */}
+                <div className="flex items-center mb-8">
                   <a
                     href="https://www.ludd.ltu.se/"
                     target="_blank"
@@ -388,37 +399,6 @@ export function EventsContent() {
                   >
                     Powered by <span className="font-bold text-white tracking-wide">/LUDD/</span>
                   </a>
-
-                  {/* Lista / Kalender-toggle */}
-                  <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
-                    <button
-                      onClick={() => setLuddViewMode('list')}
-                      aria-pressed={luddViewMode === 'list'}
-                      aria-label="Listvy"
-                      className="p-2 rounded-lg transition-all duration-200"
-                      style={{
-                        background: luddViewMode === 'list' ? 'rgba(96,165,250,0.15)' : undefined,
-                        color: luddViewMode === 'list' ? '#60A5FA' : 'rgba(255,255,255,0.4)',
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-                        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => setLuddViewMode('calendar')}
-                      aria-pressed={luddViewMode === 'calendar'}
-                      aria-label="Kalendervy"
-                      className="p-2 rounded-lg transition-all duration-200"
-                      style={{
-                        background: luddViewMode === 'calendar' ? 'rgba(96,165,250,0.15)' : undefined,
-                        color: luddViewMode === 'calendar' ? '#60A5FA' : 'rgba(255,255,255,0.4)',
-                      }}
-                    >
-                      <CalendarDays className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
 
                 {luddLoading && (
@@ -428,40 +408,40 @@ export function EventsContent() {
                 )}
 
                 {!luddLoading && luddEvents.length === 0 && (
-                  <p className="text-center hero-text-muted py-16">
-                    Kunde inte hämta events från campus just nu.
+                  <p role="alert" className="text-center hero-text-muted py-16">
+                    {ev.luddFetchError}
                   </p>
                 )}
 
                 {!luddLoading && luddEvents.length > 0 && (
                   <>
-                    {luddViewMode === 'calendar' && (
-                      <LuddCalendar
-                        events={luddEvents}
-                        selectedDate={calendarSelectedDate}
-                        onDaySelect={setCalendarSelectedDate}
-                      />
-                    )}
+                    <LuddCalendar
+                      events={luddEvents}
+                      selectedDate={calendarSelectedDate}
+                      onDaySelect={setCalendarSelectedDate}
+                    />
 
                     {calendarSelectedDate !== null && filteredLuddEvents.length === 0 && (
                       <p className="text-center hero-text-muted py-10">
-                        Inga events den{' '}
-                        {calendarSelectedDate.toLocaleDateString('sv-SE', {
-                          day: 'numeric',
-                          month: 'long',
-                        })}
-                        .
+                        {ev.calendarNoEvents}
                       </p>
                     )}
 
-                    {(luddViewMode === 'list' || filteredLuddEvents.length > 0) && (
-                      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                        <AnimatePresence mode="popLayout">
+                    {calendarSelectedDate !== null && filteredLuddEvents.length > 0 && (
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={calendarSelectedDate.toDateString()}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6"
+                        >
                           {filteredLuddEvents.map((event, idx) => (
                             <EventCard key={`ludd-${event.id}`} event={event} idx={idx} />
                           ))}
-                        </AnimatePresence>
-                      </motion.div>
+                        </motion.div>
+                      </AnimatePresence>
                     )}
                   </>
                 )}

@@ -66,7 +66,7 @@ export function StudentsContent() {
       label: 'Jobb & Exjobb',
       description: 'Exjobb, praktik och traineemöjligheter vid LTU-anslutna företag.',
       Icon: Briefcase,
-      accentColor: '#10B981',
+      accentColor: '#60A5FA',
     },
     {
       href: 'students/deals',

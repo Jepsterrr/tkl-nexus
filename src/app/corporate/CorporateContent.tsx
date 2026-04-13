@@ -207,29 +207,6 @@ export function CorporateContent() {
         </div>
       </section>
 
-      {/* Destinations hub */}
-      <section
-        className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden"
-        aria-labelledby="corp-destinations-heading"
-      >
-        <div className="max-w-6xl mx-auto">
-          <StaggerReveal className="mb-8">
-            <RevealItem className="flex items-center gap-4">
-              <div className="h-px flex-1 bg-border" aria-hidden="true" />
-              <h2 id="corp-destinations-heading" className="hero-text-subtle text-xs font-bold uppercase tracking-[0.2em] whitespace-nowrap">
-                Hur vi kan samarbeta
-              </h2>
-              <div className="h-px flex-1 bg-border" aria-hidden="true" />
-            </RevealItem>
-          </StaggerReveal>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {DESTINATIONS.map((d, i) => (
-              <DestinationCard key={d.href} {...d} index={i} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Services (detailed) */}
       <section
         id="tjanster"

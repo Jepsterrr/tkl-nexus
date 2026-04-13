@@ -43,9 +43,19 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === 'Enter' || e.key === ' ') && hasApplyUrl) {
+      e.preventDefault();
+      handleCardClick();
+    }
+  };
+
   return (
     <motion.article
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={hasApplyUrl ? 0 : undefined}
+      role={hasApplyUrl ? 'link' : undefined}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16, scale: 0.97 }}
@@ -53,13 +63,14 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
       whileHover={shouldReduceMotion ? {} : { y: -4 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
       layout
-      className={`group relative overflow-hidden rounded-2xl flex flex-col ${hasApplyUrl ? 'cursor-pointer' : ''}`}
+      className={`group relative overflow-hidden rounded-2xl flex flex-col ${hasApplyUrl ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent' : ''}`}
       style={{
-        background: 'rgba(255,255,255,0.03)',
+        background: 'var(--about-card-bg)',
         backgroundImage: `linear-gradient(135deg, ${color}08 0%, transparent 50%)`,
-        border: `1px solid rgba(255,255,255,0.07)`,
+        border: `1px solid var(--about-card-border)`,
         backdropFilter: 'blur(12px)',
-      }}
+        '--tw-ring-color': color,
+      } as React.CSSProperties}
       aria-label={displayTitle}
     >
       {/* Accent Edge */}

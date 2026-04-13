@@ -10,10 +10,10 @@ const OUR_PAGES = [
 ];
 
 const SECTION_PAGES = [
-  { href: '/students?section=data' },
-  { href: '/students?section=geo' },
-  { href: '/students?section=i' },
-  { href: '/students?section=maskin' },
+  { href: 'https://teknologkaren.se/om-oss/sektioner/datasektionen' },
+  { href: 'https://teknologkaren.se/om-oss/sektioner/geosektionen' },
+  { href: 'https://teknologkaren.se/om-oss/sektioner/i-sektionen' },
+  { href: 'https://teknologkaren.se/om-oss/sektioner/maskinsektionen' },
 ];
 
 const SECTION_LABELS = ['Datasektionen', 'Geosektionen', 'I-sektionen', 'Maskinsektionen'];

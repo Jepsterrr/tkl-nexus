@@ -13,7 +13,7 @@ export type NavItem = z.infer<typeof NavItemSchema>;
 
 // Hero Section
 
-export const AccentColorSchema = z.enum(['red', 'purple', 'green']);
+export const AccentColorSchema = z.enum(['red', 'purple', 'green', 'blue', 'orange']);
 export type AccentColor = z.infer<typeof AccentColorSchema>;
 
 export const CtaSchema = z.object({
@@ -141,6 +141,26 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #10B981, #34d399)',
     textClass: 'text-gradient-green',
     glowClass: 'glow-green',
+  },
+  blue: {
+    hex: '#3B82F6',
+    glow: 'rgba(59, 130, 246, 0.4)',
+    border: 'rgba(59, 130, 246, 0.3)',
+    bg: 'rgba(59, 130, 246, 0.1)',
+    bgStrong: 'rgba(59, 130, 246, 0.2)',
+    gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+    textClass: 'text-gradient-blue',
+    glowClass: 'glow-blue',
+  },
+  orange: {
+    hex: '#F59E0B',
+    glow: 'rgba(245, 158, 11, 0.4)',
+    border: 'rgba(245, 158, 11, 0.3)',
+    bg: 'rgba(245, 158, 11, 0.1)',
+    bgStrong: 'rgba(245, 158, 11, 0.2)',
+    gradient: 'linear-gradient(135deg, #F59E0B, #fbbf24)',
+    textClass: 'text-gradient-orange',
+    glowClass: 'glow-orange',
   },
 } as const satisfies Record<AccentColor, {
   hex: string;

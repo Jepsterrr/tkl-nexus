@@ -8,7 +8,9 @@ export type Section = z.infer<typeof SectionSchema>;
 export const EventSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1).max(120),
+  titleEn: z.string().max(120).optional(),
   description: z.string().max(2000),
+  descriptionEn: z.string().max(2000).optional(),
   date: z.string().datetime({ offset: true }),
   endDate: z.string().datetime({ offset: true }).optional(),
   location: z.string().min(1).max(120),
@@ -25,7 +27,9 @@ export type TKLEvent = z.infer<typeof EventSchema>;
 export const FirestoreEventDocSchema = z.object({
   id: z.string(),
   title: z.string(),
+  titleEn: z.string().optional(),
   description: z.string().default(''),
+  descriptionEn: z.string().optional(),
   date: z.string(),
   endDate: z.string().optional(),
   location: z.string().default(''),

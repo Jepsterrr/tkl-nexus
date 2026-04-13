@@ -3,19 +3,30 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ALLOW anything for admins
+    // Verifierar admin-tillstånd via e-post-baserad admins-collection
     function isAdmin() {
       return exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
     }
 
-    // Public read-only access for published events
-    // Write access requires admin authentication
+    // Events: publik läsning av publicerade, admin-skydd för skrivning
     match /events/{eventId} {
       allow read: if resource.data.published == true;
       allow write: if request.auth != null && isAdmin();
     }
 
-    // All other documents require admin access
+    // Opportunities (karriärportal): samma mönster som events
+    match /opportunities/{oppId} {
+      allow read: if resource.data.published == true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // Deals (kårmedlemsförmåner): publik läsning av publicerade
+    match /deals/{dealId} {
+      allow read: if resource.data.published == true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // Allt annat kräver admin-tillgång
     match /{document=**} {
       allow read, write: if request.auth != null && isAdmin();
     }

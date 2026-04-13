@@ -61,10 +61,10 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
 
   return (
     <div
-      className="w-full rounded-2xl overflow-hidden mb-8"
+      className="w-full max-w-2xl mx-auto rounded-2xl overflow-hidden mb-8"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--about-card-bg)',
+        border: '1px solid var(--about-card-border)',
         backdropFilter: 'blur(12px)',
       }}
     >
@@ -126,9 +126,10 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
             <button
               key={dayKey}
               onClick={() => onDaySelect(isSelected ? null : day)}
+              disabled={isPast}
               aria-pressed={isSelected}
               aria-label={day.toLocaleDateString('sv-SE')}
-              className="relative flex flex-col items-center justify-center py-2 rounded-xl transition-all duration-200 hover:bg-white/8"
+              className="relative flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200 hover:bg-white/8 disabled:opacity-30 disabled:cursor-default disabled:pointer-events-none"
               style={{
                 background: isSelected ? 'rgba(96,165,250,0.15)' : undefined,
                 border: isSelected
@@ -143,9 +144,7 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
                     ? '#60A5FA'
                     : isToday
                     ? '#93C5FD'
-                    : isPast
-                    ? 'rgba(255,255,255,0.2)'
-                    : 'rgba(255,255,255,0.85)',
+                    : 'var(--hero-text)',
                   fontWeight: isToday || isSelected ? 700 : 400,
                 }}
               >

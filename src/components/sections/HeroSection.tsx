@@ -12,6 +12,8 @@ const BADGE_ICONS: Record<AccentColor, string> = {
   red: '⬡',
   purple: '◆',
   green: '◎',
+  blue: '⬢',
+  orange: '',
 };
 
 export function HeroSection({

@@ -34,11 +34,13 @@ export async function getPublishedEvents(): Promise<TKLEvent[]> {
       }
     });
 
-    // Här kan vi också lägga in filtrering så vi döljer events där `endDate` (eller `date` om endDate saknas) har passerat.
     const now = new Date();
     const futureEvents = events.filter(e => {
-      const endTime = e.endDate ? new Date(e.endDate) : new Date(e.date);
-       // Lägg till 24 h marginal om man vill att eventet ska synas hela sista dagen
+      // Om inget endDate finns, betrakta det som ett "evighets-event"
+      if (!e.endDate) return true;
+
+      const endTime = new Date(e.endDate);
+      // Lägg till 24 h marginal om man vill att eventet ska synas hela sista dagen
       endTime.setHours(endTime.getHours() + 24);
       return endTime > now;
     });
