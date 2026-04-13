@@ -1,119 +1,158 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ArrowRight, Briefcase, MapPin, Clock, Bookmark } from 'lucide-react';
-import type { JobCardProps } from '@/lib/types';
-import { ACCENT_COLOR_MAP } from '@/lib/types';
+import { motion, useReducedMotion } from 'framer-motion';
+import { MapPin, Calendar, Building2, ExternalLink, ArrowRight, Clock } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageProvider';
+import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity';
 
-export function JobCard({
-  title,
-  company,
-  location,
-  type,
-  deadline,
-  category,
-}: JobCardProps) {
-  const accentKey = category === 'corporate' ? 'purple' : 'green';
-  const colors = ACCENT_COLOR_MAP[accentKey];
+interface JobCardProps {
+  job: TKLOpportunity;
+  idx?: number;
+}
+
+const TYPE_COLORS: Record<OpportunityType, string> = {
+  exjobb: '#8B5CF6',
+  jobb: '#3B82F6',
+  praktik: '#10B981',
+  trainee: '#F59E0B',
+};
+
+export function JobCard({ job, idx = 0 }: JobCardProps) {
+  const { t, nav } = useLanguage() as any;
+  const shouldReduceMotion = useReducedMotion();
+  const color = TYPE_COLORS[job.type];
+
+  // Fallback-logik för översatta fält
+  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+  const displayTitle = isEnglish && job.titleEn ? job.titleEn : job.title;
+  const displayDesc = isEnglish && job.descriptionEn ? job.descriptionEn : job.description;
+  const displayStart = isEnglish && job.startDateEn ? job.startDateEn : (job.startDate || '-');
+
+  // Formatera deadline
+  const deadlineDate = job.deadline ? new Date(job.deadline).toLocaleDateString(isEnglish ? 'en-US' : 'sv-SE', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }) : (isEnglish ? 'Ongoing' : 'Löpande');
+
+  const hasApplyUrl = !!job.applyUrl;
+
+  const handleCardClick = () => {
+    if (hasApplyUrl && job.applyUrl) {
+      window.open(job.applyUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative rounded-2xl overflow-hidden cursor-pointer focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-transparent"
+      onClick={handleCardClick}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16, scale: 0.97 }}
+      transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={shouldReduceMotion ? {} : { y: -4 }}
+      whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
+      layout
+      className={`group relative overflow-hidden rounded-2xl flex flex-col ${hasApplyUrl ? 'cursor-pointer' : ''}`}
       style={{
-        border: `1px solid ${colors.border}`,
+        background: 'rgba(255,255,255,0.03)',
+        backgroundImage: `linear-gradient(135deg, ${color}08 0%, transparent 50%)`,
+        border: `1px solid rgba(255,255,255,0.07)`,
+        backdropFilter: 'blur(12px)',
       }}
+      aria-label={displayTitle}
     >
-      {/* Background */}
+      {/* Accent Edge */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{ background: `linear-gradient(135deg, ${colors.hex} 0%, transparent 60%)` }}
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl z-10 pointer-events-none"
+        style={{ background: color }}
         aria-hidden="true"
       />
-      <div className="absolute inset-0 bg-white/4 backdrop-blur-sm" aria-hidden="true" />
+
+      {/* Hover glow */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl z-10"
+        style={{ background: `radial-gradient(ellipse at 30% 50%, ${color}28, transparent 70%)` }}
+        aria-hidden="true"
+      />
 
       {/* Content */}
-      <div className="relative p-5 sm:p-6 space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="text-white/40 text-xs font-medium uppercase tracking-wider">
-                {category === 'corporate' ? 'Företag' : 'Student'}
-              </span>
+      <div className="pl-5 pr-5 pt-5 pb-5 flex gap-5 flex-1 relative z-20">
+        <div className="flex-1 min-w-0">
+          
+          {/* Header row: Company & Type Badge */}
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2 text-sm font-medium hero-text-subtle">
+              <Building2 className="w-4 h-4" style={{ color }} aria-hidden="true" />
+              {job.company}
             </div>
-            <h3 className="text-white font-semibold text-base sm:text-lg leading-snug group-hover:text-white/90 transition-colors line-clamp-2">
-              {title}
-            </h3>
-            <p className="text-white/60 text-sm font-medium mt-0.5">{company}</p>
+            <span
+              className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+              style={{
+                color: '#fff',
+                background: `linear-gradient(135deg, ${color}cc, ${color}88)`,
+                boxShadow: `0 0 12px ${color}40`,
+              }}
+            >
+              {job.type}
+            </span>
           </div>
 
-          <div
-            className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
-            style={{
-              background: colors.bg,
-              border: `1px solid ${colors.border}`,
-            }}
-            aria-hidden="true"
-          >
-            <Briefcase className="w-5 h-5" style={{ color: colors.hex }} />
-          </div>
-        </div>
+          <h3 className="hero-text font-semibold text-xl leading-snug mb-2 line-clamp-2 group-hover:text-white transition-colors">
+            {displayTitle}
+          </h3>
 
-        {/* Meta */}
-        <dl className="space-y-1.5">
-          <div className="flex items-center gap-2 text-white/55 text-sm">
-            <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <dt className="sr-only">Plats</dt>
-            <dd>{location}</dd>
-          </div>
-          <div className="flex items-center gap-4 text-white/55 text-sm">
-            <div className="flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <dt className="sr-only">Typ</dt>
-              <dd>{type}</dd>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1 h-1 rounded-full bg-white/30" aria-hidden="true" />
-              <dt className="sr-only">Deadline</dt>
-              <dd>Deadline: {deadline}</dd>
-            </div>
-          </div>
-        </dl>
+          <p className="hero-text-muted text-sm leading-relaxed line-clamp-2 mb-4">
+            {displayDesc}
+          </p>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-1">
-          <button
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 group-hover:gap-3 active:scale-95"
-            style={{
-              background: colors.gradient,
-              boxShadow: `0 4px 14px ${colors.glow}`,
-            }}
-            aria-label={`Läs mer om ${title}`}
-          >
-            Läs mer
-            <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
-          </button>
-
-          <button
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200 hover:scale-110 active:scale-95"
-            aria-label={`Spara ${title}`}
-          >
-            <Bookmark className="w-4 h-4 text-white/60" aria-hidden="true" />
-          </button>
+          {/* Meta data row */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs hero-text-subtle mt-auto">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+              {job.location}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+              {isEnglish ? 'Start:' : 'Start:'} <span className="text-gray-300">{displayStart}</span>
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Hover glow overlay */}
+      {/* Footer */}
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{ background: `radial-gradient(circle at 50% -10%, ${colors.glow} 0%, transparent 65%)` }}
-        aria-hidden="true"
-      />
+        className="flex items-center justify-between px-5 py-3 mt-1 relative z-30"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        <span className="flex items-center gap-1.5 text-xs hero-text-subtle pointer-events-none">
+          <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+          {isEnglish ? 'Deadline:' : 'Sista dag:'} <span className="text-gray-300">{deadlineDate}</span>
+        </span>
+        
+        {hasApplyUrl ? (
+          <a
+            href={job.applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()} 
+            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
+            style={{ color }}
+          >
+            {isEnglish ? 'Apply Now' : 'Ansök nu'}
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        ) : (
+          <span
+            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 pointer-events-none"
+            style={{ color }}
+            aria-hidden="true"
+          >
+            {isEnglish ? 'Read more' : 'Läs mer'}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        )}
+      </div>
     </motion.article>
   );
 }

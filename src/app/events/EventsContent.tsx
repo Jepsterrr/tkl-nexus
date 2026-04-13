@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, ArrowRight, Loader2 } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, ArrowRight, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
+import { LuddCalendar } from '@/components/ui/LuddCalendar';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
 import { getPublishedEvents } from '@/lib/services/events';
 
@@ -27,11 +28,13 @@ const SECTION_COLORS: Record<Section, string> = {
 };
 
 type FilterKey = Section | 'all';
+type CalendarView = 'nexus' | 'ludd';
+type ExtendedEvent = TKLEvent & { externalUrl?: string };
 
 // Event Card
-function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
-  const { t } = useLanguage();
-  const { events: ev } = t;
+function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
+  const { t, nav } = useLanguage() as any;
+  const ev = t.events;
   const shouldReduceMotion = useReducedMotion();
   const color = SECTION_COLORS[event.section];
   const logo = SECTION_LOGOS[event.section];
@@ -40,6 +43,13 @@ function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
   const day = dateObj.getDate();
   const month = dateObj.toLocaleString('default', { month: 'short' });
 
+  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+
+  const displayTitle = isEnglish && event.titleEn ? event.titleEn : event.title;
+  const displayDesc = isEnglish && event.descriptionEn ? event.descriptionEn : event.description;
+
+  const isExternal = !!event.externalUrl;
+
   return (
     <motion.article
       initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
@@ -47,30 +57,28 @@ function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
       exit={{ opacity: 0, y: -16, scale: 0.97 }}
       transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
       layout
-      className="group relative overflow-hidden rounded-2xl"
+      className="group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
       style={{
         background: 'rgba(255,255,255,0.03)',
         border: `1px solid rgba(255,255,255,0.07)`,
         backdropFilter: 'blur(12px)',
       }}
-      aria-label={event.title}
+      aria-label={displayTitle}
     >
-      {/* Accent edge */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
         style={{ background: color }}
         aria-hidden="true"
       />
 
-      {/* Hover glow */}
+      {/* Hover glow - pointer-events-none ser till att glöden aldrig blockerar klick */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
         style={{ background: `radial-gradient(ellipse at 30% 50%, ${color}18, transparent 70%)` }}
         aria-hidden="true"
       />
 
-      <div className="pl-5 pr-5 pt-5 pb-5 flex gap-5">
-        {/* Date badge */}
+      <div className="pl-5 pr-5 pt-5 pb-5 flex gap-5 flex-1 relative z-10">
         <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-xl text-white font-bold"
           style={{ background: `${color}22`, border: `1px solid ${color}44` }}
         >
@@ -78,9 +86,7 @@ function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
           <span className="text-[10px] uppercase tracking-widest opacity-70">{month}</span>
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Section & logo */}
           <div className="flex items-center gap-2 mb-2">
             {logo && (
               <img
@@ -100,14 +106,13 @@ function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
           </div>
 
           <h3 className="hero-text font-semibold text-base leading-snug mb-1 line-clamp-2 group-hover:text-white transition-colors">
-            {event.title}
+            {displayTitle}
           </h3>
 
           <p className="hero-text-muted text-sm leading-relaxed line-clamp-2 mb-3">
-            {event.description}
+            {displayDesc}
           </p>
 
-          {/* Meta row */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs hero-text-subtle">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
@@ -123,51 +128,58 @@ function EventCard({ event, idx }: { event: TKLEvent; idx: number }) {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* FOOTER - z-20 säkerställer att länken ligger högst upp och alltid kan klickas */}
       <div
-        className="flex items-center justify-between px-5 py-3 mt-1"
+        className="flex items-center justify-between px-5 py-3 mt-1 relative"
         style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
       >
         <span className="flex items-center gap-1.5 text-xs hero-text-subtle">
           <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
           {dateObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long' })}
         </span>
-        <button
-          className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2"
-          style={{ color }}
-          aria-label={`${ev.eventReadMore}: ${event.title}`}
-        >
-          {ev.eventReadMore}
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-        </button>
+
+        {/* Endast texten är klickbar som en helt vanlig länk */}
+        {isExternal ? (
+          <a
+            href={event.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80 cursor-pointer"
+            style={{ color }}
+          >
+            Läs på LUDD
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        ) : (
+          <span
+            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2"
+            style={{ color }}
+            aria-hidden="true"
+          >
+            {ev.eventReadMore}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        )}
       </div>
     </motion.article>
   );
 }
 
-// Filter Tab
-function FilterTab({
-  active,
-  onClick,
-  logo,
-  label,
-  color,
-}: {
-  active: boolean;
-  onClick: () => void;
-  logo: string | null;
-  label: string;
-  color: string;
-}) {
+// Filter Tab - Framer Motion variant med hover/tap-animationer
+function FilterTab({ active, onClick, logo, label, color }: { active: boolean; onClick: () => void; logo: string | null; label: string; color: string; }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
-    <button
+    <motion.button
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap"
+      whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -1 }}
+      whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap"
       style={{
         background: active ? `${color}22` : 'rgba(255,255,255,0.04)',
         border: `1px solid ${active ? color + '55' : 'rgba(255,255,255,0.08)'}`,
         color: active ? color : 'var(--hero-text-muted)',
         boxShadow: active ? `0 0 16px ${color}22` : 'none',
+        transition: 'background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s',
       }}
       aria-pressed={active}
     >
@@ -175,46 +187,94 @@ function FilterTab({
         <img src={logo} alt="" width={16} height={16} className="object-contain" aria-hidden="true" />
       )}
       {label}
-    </button>
+    </motion.button>
   );
 }
 
 export function EventsContent() {
   const { t } = useLanguage();
   const { events: ev } = t;
-  const shouldReduceMotion = useReducedMotion();
 
-  const [allEvents, setAllEvents] = useState<TKLEvent[]>([]);
+  const [allEvents, setAllEvents] = useState<ExtendedEvent[]>([]);
   const [filter, setFilter] = useState<FilterKey>('all');
+
+  // State variables for LUDD Data
+  const [calendarView, setCalendarView] = useState<CalendarView>('nexus');
+  const [luddEvents, setLuddEvents] = useState<ExtendedEvent[]>([]);
+  const [luddLoading, setLuddLoading] = useState(false);
+  const [luddViewMode, setLuddViewMode] = useState<'list' | 'calendar'>('list');
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
+  // Fetch TKL Events
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-
     getPublishedEvents()
       .then((data) => {
-        if (isMounted) {
-          setAllEvents(data);
-          setLoading(false);
-        }
+        if (isMounted) { setAllEvents(data); setLoading(false); }
       })
-      .catch((err) => {
-        if (isMounted) {
-          setError('Kunde inte hämta events.');
-          setLoading(false);
-        }
+      .catch(() => {
+        if (isMounted) { setError('Kunde inte hämta events.'); setLoading(false); }
       });
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
-  const filtered =
-    filter === 'all' ? allEvents : allEvents.filter((e) => e.section === filter);
+  // Fetch LUDD Events as JSON when switching tab
+  useEffect(() => {
+    if (calendarView === 'ludd' && luddEvents.length === 0) {
+      let isMounted = true;
+      setLuddLoading(true);
+
+      fetch('https://events.ludd.ltu.se/api/events?show_recurrent=true')
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isMounted) return;
+          const items = Array.isArray(data) ? data : data.events || [];
+
+          // Mappar LUDD-datan till vårt utökade ExtendedEvent-format
+          const mapped: ExtendedEvent[] = items.map((item: any) => {
+            const timeMs = item.start_datetime > 9999999999 ? item.start_datetime : item.start_datetime * 1000;
+            return {
+              id: `ludd-${item.id || Math.random()}`,
+              title: item.title || 'Campus Event',
+              description: item.description ? item.description.replace(/<[^>]*>?/gm, '').trim() : '',
+              date: new Date(timeMs).toISOString(),
+              location: item.place_name || item.place_address || 'LUDD (Campus)',
+              tags: item.tags || [],
+              section: 'general',
+              published: true,
+              createdAt: new Date().toISOString(),
+              externalUrl: item.url || `https://events.ludd.ltu.se/event/${item.slug || item.id}`,
+            };
+          });
+
+          setLuddEvents(mapped);
+          setLuddLoading(false);
+        })
+        .catch((err) => {
+          if (!isMounted) return;
+          console.error('LUDD API Error:', err);
+          setLuddLoading(false);
+        });
+
+      return () => { isMounted = false; };
+    }
+  }, [calendarView, luddEvents.length]);
+
+  const filtered = filter === 'all' ? allEvents : allEvents.filter((e) => e.section === filter);
+  const isEnglish = t.nav?.langEn === 'English (active)';
+
+  const filteredLuddEvents =
+    calendarSelectedDate !== null
+      ? luddEvents.filter((e) => {
+          const d = new Date(e.date);
+          return d.toDateString() === calendarSelectedDate.toDateString();
+        })
+      : luddEvents;
 
   const FILTERS: { key: FilterKey; label: string; logo: string | null; color: string }[] = [
     { key: 'all', label: ev.filterAll, logo: null, color: '#8B5CF6' },
@@ -226,66 +286,26 @@ export function EventsContent() {
 
   return (
     <>
-      {/* Hero */}
-      <section
-        ref={heroRef}
-        className="relative min-h-[55vh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
-        aria-labelledby="events-hero-heading"
-      >
-        {/* Depth-0: Background atmosphere */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Depth-1: Orbs */}
+      <section ref={heroRef} className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} aria-hidden="true" />
         <GradientOrb color="purple" size={500} top="35%" left="55%" opacity={0.10} animClass="animate-orb-float" />
         <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
 
-        {/* Depth-4: Content */}
         <div className="relative max-w-4xl mx-auto w-full">
           <StaggerReveal className="text-center" delay={0.1}>
             <RevealItem className="flex justify-center mb-6">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
-                style={{
-                  background: 'rgba(139,92,246,0.15)',
-                  border: '1px solid rgba(139,92,246,0.3)',
-                  color: '#8B5CF6',
-                }}
-              >
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
                 <CalendarDays className="w-4 h-4" aria-hidden="true" />
                 {ev.badge}
               </span>
             </RevealItem>
 
             <RevealItem>
-              <h1
-                id="events-hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight"
-              >
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight">
                 {ev.heading}{' '}
-                <span
-                  className="relative inline-block"
-                  style={{
-                    background: 'linear-gradient(135deg, #8B5CF6, #60A5FA)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
+                <span className="relative inline-block" style={{ background: 'linear-gradient(135deg, #8B5CF6, #60A5FA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {ev.headingAccent}
-                  {/* Underline glow */}
-                  <span
-                    className="absolute -bottom-1 left-0 right-0 h-px"
-                    style={{ background: 'linear-gradient(90deg, #8B5CF6, #60A5FA, transparent)' }}
-                    aria-hidden="true"
-                  />
+                  <span className="absolute -bottom-1 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, #8B5CF6, #60A5FA, transparent)' }} aria-hidden="true" />
                 </span>
               </h1>
             </RevealItem>
@@ -297,81 +317,157 @@ export function EventsContent() {
             </RevealItem>
           </StaggerReveal>
         </div>
-
-        {/* Fade-out at bottom */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
-          aria-hidden="true"
-        />
+        <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }} aria-hidden="true" />
       </section>
 
-      {/* Filters + Grid */}
-      <section
-        className="relative px-4 sm:px-6 lg:px-8 pb-24"
-        aria-label="Events"
-      >
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Events">
         <div className="max-w-6xl mx-auto">
-          {/* Filter bar */}
-          <div
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-10"
-            role="group"
-            aria-label="Filtrera events efter sektion"
-          >
-            {FILTERS.map((f) => (
-              <FilterTab
-                key={f.key}
-                active={filter === f.key}
-                onClick={() => setFilter(f.key)}
-                logo={f.logo}
-                label={f.label}
-                color={f.color}
-              />
-            ))}
+
+          {/* Dual Calendar Toggle */}
+          <div className="flex justify-center mb-10">
+            <div className="inline-flex items-center p-1.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+              <button
+                onClick={() => setCalendarView('nexus')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  calendarView === 'nexus' ? 'bg-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_16px_rgba(139,92,246,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                TKL Nexus Events
+              </button>
+              <button
+                onClick={() => setCalendarView('ludd')}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  calendarView === 'ludd' ? 'bg-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_16px_rgba(139,92,246,0.2)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <CalendarDays className="w-4 h-4" />
+                {isEnglish ? 'Campus Events' : 'Campus Events'}
+              </button>
+            </div>
           </div>
 
-          {/* Loading */}
-          {loading && (
-            <div className="flex justify-center py-24" aria-live="polite" aria-busy="true">
-              <Loader2
-                className="w-8 h-8 animate-spin"
-                style={{ color: '#8B5CF6' }}
-                aria-label="Laddar events..."
-              />
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {/* VIEW 1: TKL NEXUS EVENTS */}
+            {calendarView === 'nexus' && (
+              <motion.div key="nexus-view" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-10" role="group">
+                  {FILTERS.map((f) => (
+                    <FilterTab key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)} logo={f.logo} label={f.label} color={f.color} />
+                  ))}
+                </div>
+                {loading && <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} /></div>}
+                {error && !loading && <p className="text-center hero-text-muted py-16">{error}</p>}
+                {!loading && !error && filtered.length === 0 && <motion.p className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
+                {!loading && !error && filtered.length > 0 && (
+                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <AnimatePresence mode="popLayout">
+                      {filtered.map((event, idx) => <EventCard key={event.id} event={event} idx={idx} />)}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
 
-          {/* Error */}
-          {error && !loading && (
-            <p className="text-center hero-text-muted py-16" role="alert">
-              {error}
-            </p>
-          )}
+            {/* VIEW 2: LUDD CAMPUS EVENTS */}
+            {calendarView === 'ludd' && (
+              <motion.div
+                key="ludd-view"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Header: powered-by + list/calendar toggle */}
+                <div className="flex items-center justify-between mb-8 pr-2">
+                  <a
+                    href="https://www.ludd.ltu.se/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium hero-text-subtle hover:text-[#60A5FA] transition-colors flex items-center gap-1.5"
+                  >
+                    Powered by <span className="font-bold text-white tracking-wide">/LUDD/</span>
+                  </a>
 
-          {/* Empty state */}
-          {!loading && !error && filtered.length === 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center hero-text-muted py-16"
-            >
-              {filter === 'all' ? ev.noEvents : ev.noEventsFiltered}
-            </motion.p>
-          )}
+                  {/* Lista / Kalender-toggle */}
+                  <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
+                    <button
+                      onClick={() => setLuddViewMode('list')}
+                      aria-pressed={luddViewMode === 'list'}
+                      aria-label="Listvy"
+                      className="p-2 rounded-lg transition-all duration-200"
+                      style={{
+                        background: luddViewMode === 'list' ? 'rgba(96,165,250,0.15)' : undefined,
+                        color: luddViewMode === 'list' ? '#60A5FA' : 'rgba(255,255,255,0.4)',
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setLuddViewMode('calendar')}
+                      aria-pressed={luddViewMode === 'calendar'}
+                      aria-label="Kalendervy"
+                      className="p-2 rounded-lg transition-all duration-200"
+                      style={{
+                        background: luddViewMode === 'calendar' ? 'rgba(96,165,250,0.15)' : undefined,
+                        color: luddViewMode === 'calendar' ? '#60A5FA' : 'rgba(255,255,255,0.4)',
+                      }}
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
 
-          {/* Grid */}
-          {!loading && !error && filtered.length > 0 && (
-            <motion.div
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-            >
-              <AnimatePresence mode="popLayout">
-                {filtered.map((event, idx) => (
-                  <EventCard key={event.id} event={event} idx={idx} />
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
+                {luddLoading && (
+                  <div className="flex justify-center py-24">
+                    <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#60A5FA' }} />
+                  </div>
+                )}
+
+                {!luddLoading && luddEvents.length === 0 && (
+                  <p className="text-center hero-text-muted py-16">
+                    Kunde inte hämta events från campus just nu.
+                  </p>
+                )}
+
+                {!luddLoading && luddEvents.length > 0 && (
+                  <>
+                    {luddViewMode === 'calendar' && (
+                      <LuddCalendar
+                        events={luddEvents}
+                        selectedDate={calendarSelectedDate}
+                        onDaySelect={setCalendarSelectedDate}
+                      />
+                    )}
+
+                    {calendarSelectedDate !== null && filteredLuddEvents.length === 0 && (
+                      <p className="text-center hero-text-muted py-10">
+                        Inga events den{' '}
+                        {calendarSelectedDate.toLocaleDateString('sv-SE', {
+                          day: 'numeric',
+                          month: 'long',
+                        })}
+                        .
+                      </p>
+                    )}
+
+                    {(luddViewMode === 'list' || filteredLuddEvents.length > 0) && (
+                      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <AnimatePresence mode="popLayout">
+                          {filteredLuddEvents.map((event, idx) => (
+                            <EventCard key={`ludd-${event.id}`} event={event} idx={idx} />
+                          ))}
+                        </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </>

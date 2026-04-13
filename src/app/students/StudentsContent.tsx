@@ -62,14 +62,14 @@ export function StudentsContent() {
       accentColor: '#8B5CF6',
     },
     {
-      href: '/opportunities',
+      href: '/career',
       label: 'Jobb & Exjobb',
       description: 'Exjobb, praktik och traineemöjligheter vid LTU-anslutna företag.',
       Icon: Briefcase,
       accentColor: '#10B981',
     },
     {
-      href: '/deals',
+      href: 'students/deals',
       label: 'Nexus Deals',
       description: 'Exklusiva rabatter och förmåner för kårmedlemmar.',
       Icon: GraduationCap,
