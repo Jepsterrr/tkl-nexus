@@ -186,8 +186,7 @@ export function Navbar() {
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="fixed top-22 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-sm md:hidden"
           >
-            <div className="relative rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-black/30 light:bg-white/80" />
+            <div className="rounded-2xl border border-white/10 dark:border-white/10 light:border-black/10 backdrop-blur-2xl dark:bg-black/85 light:bg-white/92">
               <nav className="relative p-3 space-y-1" aria-label={t.nav.mobileNav}>
                 {NAV_LINKS.map(({ href, label, Icon }) => {
                   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));

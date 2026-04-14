@@ -220,10 +220,10 @@ export function EventsContent() {
         if (isMounted) { setAllEvents(data); setLoading(false); }
       })
       .catch(() => {
-        if (isMounted) { setError('Kunde inte hämta events.'); setLoading(false); }
+        if (isMounted) { setError(ev.nexusFetchError); setLoading(false); }
       });
     return () => { isMounted = false; };
-  }, []);
+  }, [ev]);
 
   // Fetch LUDD Events as JSON when switching tab
   useEffect(() => {

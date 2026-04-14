@@ -1,42 +1,55 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react';
+import { Mail, MapPin, Linkedin, Instagram } from 'lucide-react';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { Timeline } from '@/components/ui/Timeline';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { CONTACT_ITEMS } from '@/lib/types';
 
-const CONTACT_ITEMS_ABOUT = [
-  {
-    icon: '✉',
-    label: CONTACT_ITEMS[0].label,
-    href: CONTACT_ITEMS[0].href,
-    external: CONTACT_ITEMS[0].external,
-  },
-  {
-    icon: '📍',
-    label: 'Tekniktorget 3, 977 54 Luleå',
-    href: 'https://maps.google.com/?q=Tekniktorget+3+Luleå',
-    external: true,
-  },
-  {
-    icon: 'in',
-    label: CONTACT_ITEMS[1].label,
-    href: CONTACT_ITEMS[1].href,
-    external: CONTACT_ITEMS[1].external,
-  },
-  {
-    icon: '🅾',
-    label: CONTACT_ITEMS[2].label,
-    href: CONTACT_ITEMS[2].href,
-    external: CONTACT_ITEMS[2].external,
-  },
-];
-
 export function AboutContent() {
   const { t } = useLanguage();
   const { about } = t;
+
+  const CONTACT_ITEMS_ABOUT: { Icon: LucideIcon; label: string; href: string; external: boolean }[] = [
+    {
+      Icon: Mail,
+      label: CONTACT_ITEMS[0].label,
+      href: CONTACT_ITEMS[0].href,
+      external: CONTACT_ITEMS[0].external,
+    },
+    {
+      Icon: MapPin,
+      label: about.contactAddress,
+      href: 'https://maps.google.com/?q=Tekniktorget+3+Luleå',
+      external: true,
+    },
+    {
+      Icon: Linkedin,
+      label: CONTACT_ITEMS[1].label,
+      href: CONTACT_ITEMS[1].href,
+      external: CONTACT_ITEMS[1].external,
+    },
+    {
+      Icon: Instagram,
+      label: CONTACT_ITEMS[2].label,
+      href: CONTACT_ITEMS[2].href,
+      external: CONTACT_ITEMS[2].external,
+    },
+  ];
+
+  const shouldReduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-25%']);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-8%']);
 
   const TIMELINE_ITEMS = [
     { year: '2019', title: about.timeline.founded.title, description: about.timeline.founded.desc },
@@ -50,13 +63,16 @@ export function AboutContent() {
     <>
       {/* Hero */}
       <section
+        ref={heroRef}
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
         aria-labelledby="hero-heading"
       >
-        <GradientOrb color="red" size={600} top="30%" left="50%" opacity={0.12} animClass="animate-orb-float" />
-        <GradientOrb color="red" size={300} top="70%" left="15%" opacity={0.08} animClass="animate-orb-float-reverse" />
+        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GradientOrb color="red" size={600} top="30%" left="50%" opacity={0.12} animClass="animate-orb-float" />
+          <GradientOrb color="red" size={300} top="70%" left="15%" opacity={0.08} animClass="animate-orb-float-reverse" />
+        </motion.div>
 
-        <div className="relative max-w-4xl mx-auto w-full">
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
           <StaggerReveal className="text-center" delay={0.1}>
             <RevealItem className="flex justify-center mb-6">
               <span
@@ -101,7 +117,7 @@ export function AboutContent() {
               </Link>
             </RevealItem>
           </StaggerReveal>
-        </div>
+        </motion.div>
 
         <div
           className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
@@ -155,8 +171,8 @@ export function AboutContent() {
                 >
                   <h2 className="text-xl sm:text-2xl font-bold hero-text mb-6">{about.contactTitle}</h2>
                   <ul className="space-y-4" role="list">
-                    {CONTACT_ITEMS_ABOUT.map(({ icon, label, href, external }) => (
-                      <li key={icon}>
+                    {CONTACT_ITEMS_ABOUT.map(({ Icon, label, href, external }) => (
+                      <li key={label}>
                         <a
                           href={href}
                           target={external ? '_blank' : undefined}
@@ -172,9 +188,9 @@ export function AboutContent() {
                             }}
                             aria-hidden="true"
                           >
-                            {icon}
+                            <Icon className="w-5 h-5" style={{ color: '#E30613' }} strokeWidth={1.5} />
                           </div>
-                          <span className="hero-text-muted text-sm group-hover:hero-text transition-colors duration-150">
+                          <span className="hero-text-muted text-sm group-hover:text-[var(--hero-text)] transition-colors duration-150">
                             {label}
                           </span>
                         </a>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import Link from 'next/link';
 import { Briefcase, Loader2, Sparkles, Compass } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -71,6 +72,13 @@ export function CareerContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   useEffect(() => {
     let isMounted = true;
@@ -102,12 +110,13 @@ export function CareerContent() {
 
   return (
     <>
-      {/* EPIC HERO SECTION (Depth 0-5) */}
+      {/* EPIC HERO SECTION */}
       <section
         ref={heroRef}
         className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
         aria-labelledby="career-hero-heading"
       >
+        {/* Depth-0: Atmosfär */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -118,14 +127,63 @@ export function CareerContent() {
           aria-hidden="true"
         />
 
-        <GradientOrb color="blue" size={500} top="20%" left="60%" opacity={0.12} animClass="animate-orb-float" />
-        <GradientOrb color="green" size={300} top="70%" left="20%" opacity={0.08} animClass="animate-orb-float-reverse" />
+        {/* Depth-1: Parallax-orbs + circuit-grid */}
+        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GradientOrb color="blue" size={500} top="20%" left="60%" opacity={0.12} animClass="animate-orb-float" />
+          <GradientOrb color="green" size={300} top="70%" left="20%" opacity={0.08} animClass="animate-orb-float-reverse" />
+          {/* Circuit-board grid */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),' +
+                'linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+            }}
+          />
+        </motion.div>
 
-        <div className="relative max-w-4xl mx-auto w-full z-20">
+        {/* Depth-2: Floating kod-symboler */}
+        <motion.div
+          className="absolute top-28 right-[14%] font-mono text-sm font-bold pointer-events-none select-none"
+          style={{ color: '#3B82F6', opacity: 0.18, textShadow: '0 0 12px #3B82F6' }}
+          animate={shouldReduceMotion ? {} : { y: [0, -14, 0], opacity: [0.12, 0.22, 0.12] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          aria-hidden="true"
+        >
+          {'</>'}
+        </motion.div>
+        <motion.div
+          className="absolute bottom-36 left-[10%] font-mono text-sm font-bold pointer-events-none select-none"
+          style={{ color: '#10B981', opacity: 0.15, textShadow: '0 0 10px #10B981' }}
+          animate={shouldReduceMotion ? {} : { y: [0, 10, 0], opacity: [0.10, 0.20, 0.10] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+          aria-hidden="true"
+        >
+          {'{ }'}
+        </motion.div>
+        <motion.div
+          className="absolute top-1/2 left-[6%] font-mono text-xs pointer-events-none select-none"
+          style={{ color: '#3B82F6', opacity: 0.10 }}
+          animate={shouldReduceMotion ? {} : { y: [0, -8, 0], opacity: [0.07, 0.14, 0.07] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          aria-hidden="true"
+        >
+          {'//'}
+        </motion.div>
+
+        {/* Depth-3: Content med parallax */}
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
           <StaggerReveal className="text-center" delay={0.1}>
             <RevealItem className="flex justify-center mb-6">
               <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-blue-500/30 bg-blue-500/10 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+                style={{
+                  background: 'rgba(59,130,246,0.15)',
+                  border: '1px solid rgba(59,130,246,0.3)',
+                  color: '#3B82F6',
+                  boxShadow: '0 0 20px rgba(59,130,246,0.15)',
+                }}
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
                 {opportunity.badge}
@@ -163,8 +221,9 @@ export function CareerContent() {
               </p>
             </RevealItem>
           </StaggerReveal>
-        </div>
+        </motion.div>
 
+        {/* Depth-5: Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-30"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
@@ -197,7 +256,8 @@ export function CareerContent() {
       </div>
 
       {/* INNEHÅLLS-SEKTION */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Opportunities">
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-labelledby="career-listings-heading">
+        <h2 id="career-listings-heading" className="sr-only">{opportunity.listingsHeading}</h2>
         <div className="max-w-6xl mx-auto">
 
           {/* Filtrering */}
@@ -207,7 +267,6 @@ export function CareerContent() {
             transition={{ delay: 0.4 }}
             className="flex flex-wrap justify-center gap-3 mb-12 pt-10"
             role="group"
-            aria-label="Filter opportunities"
           >
             {(Object.keys(FILTER_COLORS) as FilterKey[]).map((key) => (
               <FilterTab

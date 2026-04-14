@@ -6,9 +6,6 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ## Aktuella Buggar & Prioriterade Fixes
 
-- [ ] **Mobilscrollning — adressfältets reflow på alla mobila webbläsare**
-  Specifikt när adressfältet på mobil döljs/visas vid scroll orsakas layout-reflow. Delvis åtgärdat (`svh`-enhet används), men `55vh` i `DealsContent.tsx` och `min-h-screen` i `career/page.tsx` är ännu inte fixade. Åtgärda alla `vh`-förekomster.
-
 - [ ] **OG-image saknas** — Exportera `TKL NEXUS.svg` till `1200×630px` PNG och spara som `/public/og-image.png` för social sharing (LinkedIn, Discord, iMessage).
 
 ---

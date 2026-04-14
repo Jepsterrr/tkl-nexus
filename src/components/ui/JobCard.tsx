@@ -8,6 +8,7 @@ import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity'
 interface JobCardProps {
   job: TKLOpportunity;
   idx?: number;
+  color?: string;
 }
 
 const TYPE_COLORS: Record<OpportunityType, string> = {
@@ -17,10 +18,11 @@ const TYPE_COLORS: Record<OpportunityType, string> = {
   trainee: '#F59E0B',
 };
 
-export function JobCard({ job, idx = 0 }: JobCardProps) {
+export function JobCard({ job, idx = 0, color }: JobCardProps) {
   const { t, nav } = useLanguage() as any;
   const shouldReduceMotion = useReducedMotion();
-  const color = TYPE_COLORS[job.type];
+  const cardColor = color ?? '#3B82F6';
+  const badgeColor = TYPE_COLORS[job.type];
 
   // Fallback-logik för översatta fält
   const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
@@ -66,24 +68,24 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
       className={`group relative overflow-hidden rounded-2xl flex flex-col ${hasApplyUrl ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent' : ''}`}
       style={{
         background: 'var(--about-card-bg)',
-        backgroundImage: `linear-gradient(135deg, ${color}08 0%, transparent 50%)`,
+        backgroundImage: `linear-gradient(135deg, ${cardColor}08 0%, transparent 50%)`,
         border: `1px solid var(--about-card-border)`,
         backdropFilter: 'blur(12px)',
-        '--tw-ring-color': color,
+        '--tw-ring-color': cardColor,
       } as React.CSSProperties}
       aria-label={displayTitle}
     >
       {/* Accent Edge */}
       <div
         className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl z-10 pointer-events-none"
-        style={{ background: color }}
+        style={{ background: cardColor }}
         aria-hidden="true"
       />
 
       {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl z-10"
-        style={{ background: `radial-gradient(ellipse at 30% 50%, ${color}28, transparent 70%)` }}
+        style={{ background: `radial-gradient(ellipse at 30% 50%, ${cardColor}28, transparent 70%)` }}
         aria-hidden="true"
       />
 
@@ -94,15 +96,15 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
           {/* Header row: Company & Type Badge */}
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2 text-sm font-medium hero-text-subtle">
-              <Building2 className="w-4 h-4" style={{ color }} aria-hidden="true" />
+              <Building2 className="w-4 h-4" style={{ color: cardColor }} aria-hidden="true" />
               {job.company}
             </div>
             <span
               className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
               style={{
                 color: '#fff',
-                background: `linear-gradient(135deg, ${color}cc, ${color}88)`,
-                boxShadow: `0 0 12px ${color}40`,
+                background: `linear-gradient(135deg, ${badgeColor}cc, ${badgeColor}88)`,
+                boxShadow: `0 0 12px ${badgeColor}40`,
               }}
             >
               {job.type}
@@ -146,9 +148,9 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
             href={job.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()} 
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
-            style={{ color }}
+            style={{ color: cardColor }}
           >
             {isEnglish ? 'Apply Now' : 'Ansök nu'}
             <ExternalLink className="w-3.5 h-3.5" />
@@ -156,7 +158,7 @@ export function JobCard({ job, idx = 0 }: JobCardProps) {
         ) : (
           <span
             className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 pointer-events-none"
-            style={{ color }}
+            style={{ color: cardColor }}
             aria-hidden="true"
           >
             {isEnglish ? 'Read more' : 'Läs mer'}

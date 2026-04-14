@@ -10,6 +10,7 @@ interface DestinationCardProps {
   description: string;
   Icon: LucideIcon;
   accentColor: string; // hex
+  cta: string;
   index?: number;
 }
 
@@ -19,6 +20,7 @@ export function DestinationCard({
   description,
   Icon,
   accentColor,
+  cta,
   index = 0,
 }: DestinationCardProps) {
 
@@ -80,7 +82,7 @@ export function DestinationCard({
           className="flex items-center gap-1.5 mt-4 text-sm font-semibold transition-all duration-300 group-hover:gap-3"
           style={{ color: accentColor }}
         >
-          <span>Utforska</span>
+          <span>{cta}</span>
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
         </div>
       </Link>

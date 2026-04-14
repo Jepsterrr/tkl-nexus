@@ -60,8 +60,7 @@ function FilterTab({
 // Deals Page Content
 export function DealsContent() {
   const { t } = useLanguage();
-  // Castar till any för att undvika TSD-klagomål om saknad `deals`-nyckel
-  const deals = (t as any).deals as Record<string, any>;
+  const { deals } = t;
 
   const [allDeals, setAllDeals] = useState<TKLDeal[]>([]);
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -106,7 +105,7 @@ export function DealsContent() {
       .filter((k) => k !== 'all' && availableCategories.includes(k as DealCategory))
       .map((k) => ({
         key: k as FilterKey,
-        label: deals?.categories?.[k] ?? k,
+        label: (deals?.categories as Record<string, string>)?.[k] ?? k,
       })),
   ];
 

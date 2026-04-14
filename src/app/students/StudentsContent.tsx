@@ -56,24 +56,27 @@ export function StudentsContent() {
   const DESTINATIONS = [
     {
       href: '/events',
-      label: 'Events',
-      description: 'Arbetsmarknadsdagar, mingel och sektionsaktiviteter.',
+      label: students.destinations.events.label,
+      description: students.destinations.events.description,
       Icon: CalendarDays,
       accentColor: '#8B5CF6',
+      cta: students.destinations.events.cta,
     },
     {
       href: '/career',
-      label: 'Jobb & Exjobb',
-      description: 'Exjobb, praktik och traineemöjligheter vid LTU-anslutna företag.',
+      label: students.destinations.career.label,
+      description: students.destinations.career.description,
       Icon: Briefcase,
-      accentColor: '#60A5FA',
+      accentColor: '#3B82F6',
+      cta: students.destinations.career.cta,
     },
     {
-      href: 'students/deals',
-      label: 'Nexus Deals',
-      description: 'Exklusiva rabatter och förmåner för kårmedlemmar.',
+      href: '/students/deals',
+      label: students.destinations.deals.label,
+      description: students.destinations.deals.description,
       Icon: GraduationCap,
       accentColor: '#F59E0B',
+      cta: students.destinations.deals.cta,
     },
   ];
 
@@ -198,7 +201,7 @@ export function StudentsContent() {
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm sm:text-base hover:hero-text hover:bg-white/8 active:scale-95 w-full sm:w-auto"
                 style={{ border: '1px solid rgba(255,255,255,0.15)' }}
               >
-                Events
+                {students.ctaEvents}
               </Link>
             </RevealItem>
           </StaggerReveal>
@@ -230,7 +233,7 @@ export function StudentsContent() {
           </StaggerReveal>
           <div className="flex gap-5 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory sm:snap-none -mx-4 px-4 sm:mx-0 sm:px-0">
             {BENEFITS.map((b, i) => (
-              <div key={b.title} className="min-w-70 sm:min-w-0 flex-1 snap-center" style={{ marginTop: `${i * 24}px` }}>
+              <div key={b.title} className="min-w-70 sm:min-w-0 flex-1 snap-center">
                 <BenefitCardComponent {...b} index={i} />
               </div>
             ))}
@@ -248,7 +251,7 @@ export function StudentsContent() {
           <RevealItem className="flex items-center gap-4">
             <div className="h-px flex-1 bg-border" aria-hidden="true" />
             <h2 id="destinations-heading" className="hero-text-subtle text-xs font-bold uppercase tracking-[0.2em] whitespace-nowrap">
-              Dina ingångar
+              {students.destinationsTitle}
             </h2>
             <div className="h-px flex-1 bg-border" aria-hidden="true" />
           </RevealItem>

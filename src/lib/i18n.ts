@@ -102,6 +102,25 @@ export const TRANSLATIONS = {
           description: 'Bygg kontakter via arbetsmarknadsdagar, mingel och sektionsevents.',
         },
       },
+      ctaEvents: 'Events',
+      destinationsTitle: 'Dina ingångar',
+      destinations: {
+        events: {
+          label: 'Events',
+          description: 'Arbetsmarknadsdagar, mingel och sektionsaktiviteter.',
+          cta: 'Utforska',
+        },
+        career: {
+          label: 'Jobb & Exjobb',
+          description: 'Exjobb, praktik och traineemöjligheter vid LTU-anslutna företag.',
+          cta: 'Utforska',
+        },
+        deals: {
+          label: 'Nexus Deals',
+          description: 'Exklusiva rabatter och förmåner för kårmedlemmar.',
+          cta: 'Utforska',
+        },
+      },
     },
 
     // --- Events page ---
@@ -125,6 +144,7 @@ export const TRANSLATIONS = {
       readOnLudd: 'Läs på LUDD',
       calendarNoEvents: 'Inga events detta datum.',
       luddFetchError: 'Kunde inte hämta events från campus just nu.',
+      nexusFetchError: 'Kunde inte hämta events.',
       allSections: 'Alla sektioner',
       sections: {
         data: 'Datasektionen',
@@ -190,7 +210,9 @@ export const TRANSLATIONS = {
         exjobb: 'Exjobb',
         praktik: 'Praktik',
         trainee: 'Trainee'
-      }
+      },
+      filterAriaLabel: 'Filtrera annonser',
+      listingsHeading: 'Tillgängliga annonser',
     },
 
     // --- Deals page ---
@@ -227,6 +249,7 @@ export const TRANSLATIONS = {
       whatIsTitle: 'Vad är TKL Nexus?',
       contactTitle: 'Kontakta oss',
       reachOutTitle: 'Hör av dig',
+      contactAddress: 'Tekniktorget 3, 977 54 Luleå',
       timelineTitle: 'Vår resa',
       whatIs: {
         p1: 'Verksamheten omfattar bland annat Fyents & Relations, som stöttar det operativa arbetet kring event och företagsuppföljning, Nexus Portal som i dagsläget fungerar som en portal för exjobb, samt Nexus Deals, där kårmedlemmarnas förmåner samlas på ett och samma ställe.',
@@ -343,6 +366,25 @@ export const TRANSLATIONS = {
           description: 'Build connections through career fairs, networking events and section activities.',
         },
       },
+      ctaEvents: 'Events',
+      destinationsTitle: 'Your entry points',
+      destinations: {
+        events: {
+          label: 'Events',
+          description: 'Career fairs, networking and section activities.',
+          cta: 'Explore',
+        },
+        career: {
+          label: 'Jobs & Thesis',
+          description: 'Thesis projects, internships and trainee opportunities at LTU-connected companies.',
+          cta: 'Explore',
+        },
+        deals: {
+          label: 'Nexus Deals',
+          description: 'Exclusive discounts and benefits for union members.',
+          cta: 'Explore',
+        },
+      },
     },
 
     // --- Events page ---
@@ -366,6 +408,7 @@ export const TRANSLATIONS = {
       readOnLudd: 'Read on LUDD',
       calendarNoEvents: 'No events on this date.',
       luddFetchError: 'Could not fetch campus events right now.',
+      nexusFetchError: 'Could not fetch events.',
       allSections: 'All sections',
       sections: {
         data: 'Data Section',
@@ -428,7 +471,9 @@ export const TRANSLATIONS = {
         exjobb: 'Thesis',
         praktik: 'Internships',
         trainee: 'Trainee'
-      }
+      },
+      filterAriaLabel: 'Filter opportunities',
+      listingsHeading: 'Available listings',
     },
 
     // --- Deals page ---
@@ -465,6 +510,7 @@ export const TRANSLATIONS = {
       whatIsTitle: 'What is TKL Nexus?',
       contactTitle: 'Contact us',
       reachOutTitle: 'Reach out',
+      contactAddress: 'Tekniktorget 3, 977 54 Luleå',
       timelineTitle: 'Our journey',
       whatIs: {
         p1: 'Our work includes Events & Relations, which supports operational work around events and company follow-up, Nexus Portal which today serves as a platform for thesis projects, and Nexus Deals where member benefits are collected in one place.',

@@ -75,6 +75,21 @@ export function BenefitCardComponent({
         style={{ background: `radial-gradient(circle at 30% 0%, ${colors.glow} 0%, transparent 70%)` }}
         aria-hidden="true"
       />
+
+      {/* Bakgrundssiffra */}
+      <span
+        className="absolute bottom-2 right-3 font-bold pointer-events-none select-none leading-none"
+        style={{
+          fontSize: '5rem',
+          color: colors.hex,
+          opacity: 0.06,
+          fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1,
+        }}
+        aria-hidden="true"
+      >
+        {String(index + 1).padStart(2, '0')}
+      </span>
     </motion.div>
   );
 }
