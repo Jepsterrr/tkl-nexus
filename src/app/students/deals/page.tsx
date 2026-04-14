@@ -2,13 +2,17 @@ import type { Metadata } from 'next';
 import { DealsContent } from './DealsContent';
 
 export const metadata: Metadata = {
-  title: 'Nexus Deals – TKL Nexus',
+  title: 'Studentförmåner & Rabatter för LTU-studenter | Nexus Deals',
   description:
-    'Exklusiva rabatter och förmåner för kårmedlemmar i Teknologkåren vid LTU. Se alla Nexus Deals.',
+    'Exklusiva rabatter, erbjudanden och förmåner för kårmedlemmar i Teknologkåren vid Luleå tekniska universitet. Spara pengar som LTU-student med Nexus Deals.',
+  keywords: [
+    'studentförmåner LTU', 'studentrabatt Luleå', 'kårförmåner Teknologkåren',
+    'nexus deals', 'rabatter LTU-studenter', 'erbjudanden kårmedlem LTU',
+  ],
   openGraph: {
-    title: 'Nexus Deals – TKL Nexus',
+    title: 'Studentförmåner & Rabatter för LTU-studenter | Nexus Deals',
     description:
-      'Exklusiva rabatter och förmåner för kårmedlemmar i Teknologkåren vid LTU. Se alla Nexus Deals.',
+      'Exklusiva rabatter och förmåner för kårmedlemmar i Teknologkåren vid Luleå tekniska universitet.',
     url: 'https://tklnexus.se/students/deals',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },

@@ -2,11 +2,18 @@ import { Metadata } from 'next';
 import { CareerContent } from './CareerContent';
 
 export const metadata: Metadata = {
-  title: 'Karriärportalen | TKL Nexus',
-  description: 'Hitta ditt nästa exjobb, praktikplats eller karriärsteg via TKL Nexus.',
+  title: 'Exjobb & Praktik vid LTU | TKL Nexus',
+  description:
+    'Hitta exjobb, praktik, traineeprogram och ingenjörsjobb vid Luleå tekniska universitet. Aktuella annonser från företag som rekryterar LTU-studenter i Luleå och Norrbotten.',
+  keywords: [
+    'exjobb LTU', 'exjobb Luleå', 'examensarbete LTU', 'praktik LTU', 'praktikplats Luleå',
+    'trainee ingenjör', 'ingenjörsjobb Luleå', 'jobb LTU', 'studentjobb Luleå',
+    'rekrytering LTU', 'nyexaminerad ingenjör', 'karriär Luleå tekniska universitet',
+  ],
   openGraph: {
-    title: 'Karriärportalen | TKL Nexus',
-    description: 'Hitta ditt nästa exjobb, praktikplats eller karriärsteg via TKL Nexus.',
+    title: 'Exjobb & Praktik vid LTU | TKL Nexus',
+    description:
+      'Hitta exjobb, praktik, traineeprogram och ingenjörsjobb vid Luleå tekniska universitet. Aktuella annonser från företag som rekryterar LTU-studenter.',
     url: 'https://tklnexus.se/career',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },

@@ -2,16 +2,23 @@ import type { Metadata } from 'next';
 import { CorporateContent } from './CorporateContent';
 
 export const metadata: Metadata = {
-  title: 'För Företag',
+  title: 'Rekrytera LTU-studenter & Annonsera Exjobb | TKL Nexus',
   description:
-    'Nå hela Luleå tekniska universitets studentkår via Teknologkårens arbetsmarknadsportal. Publicera exjobb, boka event och stärk ert employer brand.',
+    'Nå 1 600+ ingenjörsstudenter vid Luleå tekniska universitet. Publicera exjobb och praktikplatser, boka events och stärk ert employer brand via Teknologkårens arbetsmarknadsportal.',
+  keywords: [
+    'rekrytera ingenjörer LTU', 'annonsera exjobb Luleå', 'employer branding LTU',
+    'samarbeta Teknologkåren', 'praktikplatser LTU', 'ingenjörsstudenter Luleå',
+    'event LTU', 'arbetsmarknadsmässa Luleå', 'rekrytering civilingenjör',
+  ],
   openGraph: {
-    title: 'För Företag – TKL Nexus',
-    description: 'Nå 1600+ ingenjörsstudenter i Luleå via Teknologkåren.',
-    url: 'https://tkl-nexus.se/corporate',
+    title: 'Rekrytera LTU-studenter & Annonsera Exjobb | TKL Nexus',
+    description:
+      'Nå 1 600+ ingenjörsstudenter vid LTU. Publicera exjobb, boka event och stärk ert employer brand via Teknologkåren.',
+    url: 'https://tklnexus.se/corporate',
     siteName: 'TKL Nexus',
     locale: 'sv_SE',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };
 

@@ -2,16 +2,22 @@ import type { Metadata } from 'next';
 import { StudentsContent } from './StudentsContent';
 
 export const metadata: Metadata = {
-  title: 'För Studenter',
+  title: 'Exjobb, Praktik & Karriär för LTU-studenter | TKL Nexus',
   description:
-    'Hitta exjobb, praktik och traineeprogram via Teknologkårens arbetsmarknadsportal. Koppla samman din karriär med Norrlands ledande företag.',
+    'Din ingång till exjobb, praktik, traineeprogram och kårförmåner som LTU-student. Koppla samman din karriär med Norrlands ledande teknik- och industriföretag via Teknologkårens arbetsmarknadsportal.',
+  keywords: [
+    'LTU-student', 'exjobb LTU', 'praktik LTU', 'trainee LTU', 'kårförmåner LTU',
+    'karriär Luleå', 'studentjobb LTU', 'ingenjörsstudent', 'Teknologkåren förmåner',
+  ],
   openGraph: {
-    title: 'För Studenter – TKL Nexus',
-    description: 'Exjobb, praktik, förmåner och karriärstart för LTU-studenter.',
-    url: 'https://tkl-nexus.se/students',
+    title: 'Exjobb, Praktik & Karriär för LTU-studenter | TKL Nexus',
+    description:
+      'Din ingång till exjobb, praktik, traineeprogram och kårförmåner som LTU-student. Teknologkårens arbetsmarknadsportal vid Luleå tekniska universitet.',
+    url: 'https://tklnexus.se/students',
     siteName: 'TKL Nexus',
     locale: 'sv_SE',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };
 

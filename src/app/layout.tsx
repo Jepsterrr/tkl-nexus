@@ -24,8 +24,20 @@ export const metadata: Metadata = {
     template: '%s | TKL Nexus',
   },
   description:
-    'TKL Nexus kopplar ihop LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal.',
-  keywords: ['LTU', 'Teknologkåren', 'exjobb', 'praktik', 'ingenjör', 'karriär', 'Luleå'],
+    'TKL Nexus kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',
+  keywords: [
+    'LTU', 'Luleå tekniska universitet', 'Teknologkåren', 'TKL Nexus',
+    'exjobb', 'exjobb LTU', 'exjobb Luleå', 'examensarbete LTU',
+    'praktik', 'praktik LTU', 'praktikplats Luleå',
+    'trainee', 'traineeprogram ingenjör',
+    'ingenjörsjobb', 'ingenjörsjobb Luleå', 'ingenjör', 'civilingenjör', 'högskoleingenjör',
+    'karriär', 'karriärstart', 'studentjobb', 'nyexaminerad ingenjör',
+    'arbetsmarknad', 'arbetsmarknadsportal', 'rekrytering LTU', 'rekrytera ingenjörer',
+    'Luleå', 'Norrbotten', 'norra Sverige',
+    'datateknik', 'maskinteknik', 'elektroteknik', 'industriell ekonomi', 'samhällsbyggnad',
+    'employer branding LTU', 'kårförmåner', 'studentrabatt',
+    'arbetsmarknadsdagar Luleå', 'nätverkande studenter',
+  ],
   metadataBase: new URL('https://tklnexus.se'),
   openGraph: {
     siteName: 'TKL Nexus',
@@ -41,9 +53,47 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'TKL Nexus',
+    alternateName: 'Teknologkårens Arbetsmarknadsportal',
+    url: 'https://tklnexus.se',
+    logo: 'https://tklnexus.se/og-image.png',
+    description: 'TKL Nexus är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Luleå',
+      addressRegion: 'Norrbotten',
+      addressCountry: 'SE',
+    },
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'Teknologkåren vid LTU',
+    },
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'TKL Nexus',
+    url: 'https://tklnexus.se',
+    description: 'Arbetsmarknadsportal för LTU-studenter — exjobb, praktik, trainee och karriärevent.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://tklnexus.se/career',
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="sv" className={`${sora.variable} ${dmSans.variable} dark`}>
       <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any"/>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       <body className="antialiased min-h-svh bg-cosmic-bg overflow-x-hidden">
         <LanguageProvider>
           <HtmlLangSync />
