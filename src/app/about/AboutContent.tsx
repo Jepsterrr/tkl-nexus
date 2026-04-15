@@ -6,6 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Mail, MapPin, Linkedin, Instagram } from 'lucide-react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { Timeline } from '@/components/ui/Timeline';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -44,8 +45,10 @@ export function AboutContent() {
 
   const shouldReduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const scrollContainer = useScrollContainer();
   const { scrollYProgress } = useScroll({
     target: heroRef,
+    container: scrollContainer,
     offset: ['start start', 'end start'],
   });
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-25%']);
@@ -67,6 +70,16 @@ export function AboutContent() {
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
         aria-labelledby="hero-heading"
       >
+        {/* Depth-0: Far atmosphere */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(227,6,19,0.10) 0%, transparent 60%),' +
+              'radial-gradient(ellipse 60% 50% at 85% 75%, rgba(227,6,19,0.06) 0%, transparent 60%)',
+          }}
+          aria-hidden="true"
+        />
         <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <GradientOrb color="red" size={600} top="30%" left="50%" opacity={0.12} animClass="animate-orb-float" />
           <GradientOrb color="red" size={300} top="70%" left="15%" opacity={0.08} animClass="animate-orb-float-reverse" />
