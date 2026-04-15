@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { CalendarDays, LayoutGrid, Handshake, Building2, Users, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { MegaStat } from '@/components/ui/MegaStat';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -22,10 +23,12 @@ export function CorporateContent() {
   const { corporate } = t;
   const shouldReduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const scrollContainer = useScrollContainer();
   const colors = ACCENT_COLOR_MAP['purple'];
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
+    container: scrollContainer,
     offset: ['start start', 'end start'],
   });
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
