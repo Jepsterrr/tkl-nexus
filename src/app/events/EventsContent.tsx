@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { CalendarDays, MapPin, Tag, ArrowRight, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { LuddCalendar } from '@/components/ui/LuddCalendar';
@@ -211,6 +212,19 @@ export function EventsContent() {
   const [error, setError] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
+  const shouldReduceMotion = useReducedMotion();
+  const scrollContainer = useScrollContainer();
+  const { scrollYProgress } = useScroll({
+    target: heroRef as React.RefObject<HTMLElement>,
+    container: scrollContainer,
+    offset: ['start start', 'end start'],
+  });
+  const orbY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ['0%', shouldReduceMotion ? '0%' : '-30%']
+  );
+
   // Fetch TKL Events
   useEffect(() => {
     let isMounted = true;
@@ -290,8 +304,11 @@ export function EventsContent() {
     <>
       <section ref={heroRef} className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} aria-hidden="true" />
-        <GradientOrb color="purple" size={500} top="35%" left="55%" opacity={0.10} animClass="animate-orb-float" />
-        <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
+        {/* Depth-1: Parallax orbs */}
+        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GradientOrb color="purple" size={500} top="35%" left="55%" opacity={0.10} animClass="animate-orb-float" />
+          <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
+        </motion.div>
 
         <div className="relative max-w-4xl mx-auto w-full">
           <StaggerReveal className="text-center" delay={0.1}>
@@ -355,7 +372,11 @@ export function EventsContent() {
             {/* VIEW 1: TKL NEXUS EVENTS */}
             {calendarView === 'nexus' && (
               <motion.div key="nexus-view" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-10" role="group">
+                <div
+                  className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-10"
+                  role="group"
+                  aria-label={ev.filterAriaLabel ?? 'Filtrera events'}
+                >
                   {FILTERS.map((f) => (
                     <FilterTab key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)} logo={f.logo} label={f.label} color={f.color} />
                   ))}
