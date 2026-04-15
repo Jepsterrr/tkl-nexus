@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } fr
 import Link from 'next/link';
 import { Briefcase, Loader2, Sparkles, Compass } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { JobCard } from '@/components/ui/JobCard';
@@ -73,8 +74,10 @@ export function CareerContent() {
   const [error, setError] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const scrollContainer = useScrollContainer();
   const { scrollYProgress } = useScroll({
     target: heroRef,
+    container: scrollContainer,
     offset: ['start start', 'end start'],
   });
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
@@ -267,6 +270,7 @@ export function CareerContent() {
             transition={{ delay: 0.4 }}
             className="flex flex-wrap justify-center gap-3 mb-12 pt-10"
             role="group"
+            aria-label={opportunity.filterAriaLabel}
           >
             {(Object.keys(FILTER_COLORS) as FilterKey[]).map((key) => (
               <FilterTab
