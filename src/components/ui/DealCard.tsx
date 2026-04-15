@@ -43,7 +43,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       transition={{ duration: 0.35, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={shouldReduceMotion ? {} : { y: -3 }}
       layout
-      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
+      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch mt-3"
       style={{
         background: 'var(--about-card-bg)',
         border: '1px solid var(--about-card-border)',
