@@ -12,6 +12,7 @@ import {
   Target,
 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { BenefitCardComponent } from '@/components/ui/BenefitCard';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -23,10 +24,12 @@ export function StudentsContent() {
   const { students } = t;
   const shouldReduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const scrollContainer = useScrollContainer();
 
   // Parallax scroll for hero orb
   const { scrollYProgress } = useScroll({
     target: heroRef,
+    container: scrollContainer,
     offset: ['start start', 'end start'],
   });
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
