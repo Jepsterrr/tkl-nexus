@@ -202,6 +202,8 @@
     font-family: var(--font-dm-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    height: 100svh;
   }
 
   h1, h2, h3 {
@@ -216,6 +218,14 @@
     font-weight: 600;
     line-height: 1.4;
   }
+}
+
+.scroll-container {
+  height: 100svh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--navbar-height, 72px);
 }
 
 /* Cosmic star keyframe (used by StarField canvas fallback) */

@@ -6,6 +6,10 @@ import { Footer } from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { LanguageProvider } from '@/components/providers/LanguageProvider';
 import { HtmlLangSync } from '@/components/providers/HtmlLangSync';
+import { ScrollProvider } from '@/components/providers/ScrollProvider';
+import { ScrollContainer } from '@/components/providers/ScrollContainer';
+import { ScrollResetter } from '@/components/providers/ScrollResetter';
+
 const sora = Sora({
   variable: '--font-sora',
   subsets: ['latin'],
@@ -18,6 +22,7 @@ const dmSans = DM_Sans({
   weight: ['400', '500', '600'],
   display: 'swap',
 });
+
 export const metadata: Metadata = {
   title: {
     default: 'TKL Nexus – Karriärportal för LTU-studenter & Företag',
@@ -50,6 +55,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -92,20 +98,27 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`${sora.variable} ${dmSans.variable} dark`}>
       <head>
-        <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any"/>
+        <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       </head>
-      <body className="antialiased min-h-svh bg-cosmic-bg overflow-x-hidden">
+      <body className="antialiased bg-cosmic-bg overflow-x-hidden">
         <LanguageProvider>
           <HtmlLangSync />
           <ThemeProvider>
-            <a href="#main-content" className="skip-nav">
-              Hoppa till innehåll
-            </a>
-            <Navbar />
-            <main id="main-content" className="relative overflow-x-hidden">{children}</main>
-            <Footer />
+            <ScrollProvider>
+              <ScrollResetter />
+              <a href="#main-content" className="skip-nav">
+                Hoppa till innehåll
+              </a>
+              <Navbar />
+              <ScrollContainer>
+                <main id="main-content" className="relative overflow-x-hidden">
+                  {children}
+                </main>
+                <Footer />
+              </ScrollContainer>
+            </ScrollProvider>
           </ThemeProvider>
         </LanguageProvider>
       </body>
