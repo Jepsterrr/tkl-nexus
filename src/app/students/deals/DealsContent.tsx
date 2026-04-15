@@ -1,61 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Loader2, Sparkles, Tag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Tag } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DealCard } from '@/components/ui/DealCard';
-import type { TKLDeal, DealCategory } from '@/lib/schemas/deal';
+import type { TKLDeal } from '@/lib/schemas/deal';
 import { getPublishedDeals } from '@/lib/services/deals';
-
-// Alla möjliga filtervärden
-type FilterKey = DealCategory | 'all';
-
-// Färgkarta för filter-tabs (matchar DealCard)
-const FILTER_COLORS: Record<FilterKey, string> = {
-  all: '#8B5CF6',
-  rabatt: '#8B5CF6',
-  mat: '#F59E0B',
-  teknik: '#3B82F6',
-  sport: '#10B981',
-  övrigt: '#6B7280',
-};
-
-// Filter Tab - Framer Motion variant för hover/tap
-function FilterTab({
-  active,
-  onClick,
-  label,
-  color,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  color: string;
-}) {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <motion.button
-      onClick={onClick}
-      whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -1 }}
-      whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap"
-      style={{
-        background: active ? `${color}22` : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${active ? color + '55' : 'rgba(255,255,255,0.08)'}`,
-        color: active ? color : 'var(--hero-text-muted)',
-        boxShadow: active ? `0 0 20px ${color}20` : 'none',
-        transition: 'background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s',
-      }}
-      aria-pressed={active}
-    >
-      {active && <Sparkles className="w-4 h-4" style={{ color }} aria-hidden="true" />}
-      {label}
-    </motion.button>
-  );
-}
 
 // Deals Page Content
 export function DealsContent() {
@@ -63,7 +16,6 @@ export function DealsContent() {
   const { deals } = t;
 
   const [allDeals, setAllDeals] = useState<TKLDeal[]>([]);
-  const [filter, setFilter] = useState<FilterKey>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,23 +43,6 @@ export function DealsContent() {
       isMounted = false;
     };
   }, [deals]);
-
-  // Filtrera på kategori
-  const filtered: TKLDeal[] = filter === 'all'
-    ? allDeals
-    : allDeals.filter((d) => d.category === filter);
-
-  // Dynamiska filter-nycklar: visa bara kategorier med innehåll
-  const availableCategories = Array.from(new Set(allDeals.map((d) => d.category)));
-  const FILTERS: { key: FilterKey; label: string }[] = [
-    { key: 'all', label: deals?.filterAll ?? 'Alla' },
-    ...Object.keys(FILTER_COLORS)
-      .filter((k) => k !== 'all' && availableCategories.includes(k as DealCategory))
-      .map((k) => ({
-        key: k as FilterKey,
-        label: (deals?.categories as Record<string, string>)?.[k] ?? k,
-      })),
-  ];
 
   return (
     <>
@@ -193,28 +128,6 @@ export function DealsContent() {
       <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Nexus Deals">
         <div className="max-w-4xl mx-auto">
 
-          {/* Filter-tabs (visas bara om det finns data) */}
-          {!loading && !error && allDeals.length > 1 && FILTERS.length > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-wrap justify-center gap-3 mb-12"
-              role="group"
-              aria-label="Filtrera deals"
-            >
-              {FILTERS.map(({ key, label }) => (
-                <FilterTab
-                  key={key}
-                  active={filter === key}
-                  onClick={() => setFilter(key)}
-                  label={label}
-                  color={FILTER_COLORS[key]}
-                />
-              ))}
-            </motion.div>
-          )}
-
           {/* Laddning */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-4" aria-live="polite" aria-busy="true">
@@ -235,32 +148,29 @@ export function DealsContent() {
           )}
 
           {/* Tomt state */}
-          {!loading && !error && filtered.length === 0 && (
+          {!loading && !error && allDeals.length === 0 && (
             <motion.div
               role="status"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center py-24 text-center bg-white/5 border border-white/10 rounded-3xl"
             >
-              <Tag className="w-12 h-12 mb-4 opacity-30" style={{ color: '#F59E0B' }} />
+              <Tag className="w-12 h-12 mb-4 opacity-30" style={{ color: '#F59E0B' }} aria-hidden="true" />
               <p className="text-lg hero-text-muted">
-                {filter === 'all' ? (deals?.noDeals ?? 'Inga deals tillgängliga.') : (deals?.noDealsFiltered ?? 'Inga deals matchar filtret.')}
+                {deals?.noDeals ?? 'Inga deals tillgängliga.'}
               </p>
             </motion.div>
           )}
 
           {/* Deals-lista */}
-          {!loading && !error && filtered.length > 0 && (
-            <motion.div
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
+          {!loading && !error && allDeals.length > 0 && (
+            <div className="flex flex-col gap-3">
               <AnimatePresence mode="popLayout">
-                {filtered.map((deal, idx) => (
+                {allDeals.map((deal, idx) => (
                   <DealCard key={deal.id} deal={deal} idx={idx} />
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
