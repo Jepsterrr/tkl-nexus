@@ -1,18 +1,12 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { ExternalLink, Tag, Copy, Check } from 'lucide-react';
+import { ExternalLink, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import type { TKLDeal, DealCategory } from '@/lib/schemas/deal';
+import type { TKLDeal } from '@/lib/schemas/deal';
 
-const CATEGORY_COLORS: Record<DealCategory, string> = {
-  rabatt: '#8B5CF6',
-  mat: '#F59E0B',
-  teknik: '#3B82F6',
-  sport: '#10B981',
-  övrigt: '#6B7280',
-};
+const ORANGE = '#F59E0B';
 
 interface DealCardProps {
   deal: TKLDeal;
@@ -23,7 +17,6 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
   const { t, nav } = useLanguage() as any;
   const deals = (t as any).deals;
   const shouldReduceMotion = useReducedMotion();
-  const color = CATEGORY_COLORS[deal.category];
 
   // i18n
   const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
@@ -52,8 +45,8 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       layout
       className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--about-card-bg)',
+        border: '1px solid var(--about-card-border)',
         backdropFilter: 'blur(12px)',
       }}
       aria-label={displayTitle}
@@ -62,7 +55,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       <div
         className="absolute inset-0 pointer-events-none rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `linear-gradient(105deg, transparent 40%, ${color}12 50%, transparent 60%)`,
+          background: `linear-gradient(105deg, transparent 40%, ${ORANGE}12 50%, transparent 60%)`,
           backgroundSize: '200% 100%',
         }}
         aria-hidden="true"
@@ -71,7 +64,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       {/* Avatar / Logotyp - vänster kolumn */}
       <div
         className="shrink-0 w-20 flex items-center justify-center m-4 rounded-xl self-stretch"
-        style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+        style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
         aria-hidden="true"
       >
         {deal.logoUrl ? (
@@ -83,7 +76,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
         ) : (
           <span
             className="text-2xl font-black select-none"
-            style={{ color, textShadow: `0 0 20px ${color}` }}
+            style={{ color: ORANGE, textShadow: `0 0 20px ${ORANGE}` }}
           >
             {avatarLetter}
           </span>
@@ -92,16 +85,9 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
 
       {/* Innehåll - höger kolumn */}
       <div className="flex flex-col justify-between flex-1 py-4 pr-4 min-w-0">
-        {/* Topp: company + kategori-badge */}
-        <div className="flex items-center justify-between gap-2 mb-1.5">
+        {/* Topp: company */}
+        <div className="flex items-center gap-2 mb-1.5">
           <span className="text-xs font-medium hero-text-subtle truncate">{deal.company}</span>
-          <span
-            className="shrink-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-            style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
-          >
-            <Tag className="w-2.5 h-2.5 inline mr-1" aria-hidden="true" />
-            {deals?.categories?.[deal.category] ?? deal.category}
-          </span>
         </div>
 
         {/* Rubrik */}
@@ -120,7 +106,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
           {deal.discount && (
             <span
               className="text-xs font-bold"
-              style={{ color }}
+              style={{ color: ORANGE }}
             >
               {deal.discount}
             </span>
@@ -132,9 +118,9 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
               onClick={handleCopy}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95"
               style={{
-                background: `${color}18`,
-                border: `1px solid ${color}40`,
-                color,
+                background: `${ORANGE}18`,
+                border: `1px solid ${ORANGE}40`,
+                color: ORANGE,
               }}
               aria-label={`Kopiera rabattkod: ${deal.discountCode}`}
             >
@@ -157,7 +143,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
-              style={{ color }}
+              style={{ color: ORANGE }}
               onClick={(e) => e.stopPropagation()}
             >
               {deals?.visit ?? 'Besök'}

@@ -145,6 +145,7 @@ export const TRANSLATIONS = {
       calendarNoEvents: 'Inga events detta datum.',
       luddFetchError: 'Kunde inte hämta events från campus just nu.',
       nexusFetchError: 'Kunde inte hämta events.',
+      filterAriaLabel: 'Filtrera events',
       allSections: 'Alla sektioner',
       sections: {
         data: 'Datasektionen',
@@ -409,6 +410,7 @@ export const TRANSLATIONS = {
       calendarNoEvents: 'No events on this date.',
       luddFetchError: 'Could not fetch campus events right now.',
       nexusFetchError: 'Could not fetch events.',
+      filterAriaLabel: 'Filter events',
       allSections: 'All sections',
       sections: {
         data: 'Data Section',
