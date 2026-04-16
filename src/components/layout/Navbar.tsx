@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor } from 'lucide-react';
+import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import type { Locale } from '@/lib/i18n';
 
 export function Navbar() {
@@ -15,11 +16,13 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useLanguage();
+  const scrollContainer = useScrollContainer();
 
   const NAV_LINKS = [
     { href: '/', label: t.nav.home, Icon: Home },
     { href: '/corporate', label: t.nav.corporate, Icon: Building2 },
     { href: '/students', label: t.nav.students, Icon: GraduationCap },
+    { href: '/events', label: t.nav.events, Icon: CalendarDays },
     { href: '/about', label: t.nav.about, Icon: Info },
   ] as const;
 
@@ -30,10 +33,12 @@ export function Navbar() {
   ];
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    const container = scrollContainer.current;
+    if (!container) return;
+    const onScroll = () => setScrolled(container.scrollTop > 20);
+    container.addEventListener('scroll', onScroll, { passive: true });
+    return () => container.removeEventListener('scroll', onScroll);
+  }, [scrollContainer]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

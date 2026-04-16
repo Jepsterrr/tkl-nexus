@@ -8,6 +8,7 @@ export const TRANSLATIONS = {
       corporate: 'FÖR FÖRETAG',
       students: 'FÖR STUDENTER',
       about: 'OM OSS',
+      events: 'EVENTS',
       contact: 'Kontakt',
       themedark: 'Mörkt',
       themelight: 'Ljust',
@@ -214,6 +215,7 @@ export const TRANSLATIONS = {
       },
       filterAriaLabel: 'Filtrera annonser',
       listingsHeading: 'Tillgängliga annonser',
+      ctaSeeJobs: 'Se alla tjänster',
     },
 
     // --- Deals page ---
@@ -274,6 +276,7 @@ export const TRANSLATIONS = {
       corporate: 'FOR COMPANIES',
       students: 'FOR STUDENTS',
       about: 'ABOUT US',
+      events: 'EVENTS',
       contact: 'Contact',
       themedark: 'Dark',
       themelight: 'Light',
@@ -476,6 +479,7 @@ export const TRANSLATIONS = {
       },
       filterAriaLabel: 'Filter opportunities',
       listingsHeading: 'Available listings',
+      ctaSeeJobs: 'See all listings',
     },
 
     // --- Deals page ---

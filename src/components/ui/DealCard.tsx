@@ -14,12 +14,11 @@ interface DealCardProps {
 }
 
 export function DealCard({ deal, idx = 0 }: DealCardProps) {
-  const { t, nav } = useLanguage() as any;
-  const deals = (t as any).deals;
+  const { t, locale } = useLanguage();
+  const deals = t.deals;
   const shouldReduceMotion = useReducedMotion();
 
-  // i18n
-  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+  const isEnglish = locale === 'en';
   const displayTitle = isEnglish && deal.titleEn ? deal.titleEn : deal.title;
   const displayDesc = isEnglish && deal.descriptionEn ? deal.descriptionEn : deal.description;
 
@@ -43,7 +42,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       transition={{ duration: 0.35, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={shouldReduceMotion ? {} : { y: -3 }}
       layout
-      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch mt-3"
+      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
       style={{
         background: 'var(--about-card-bg)',
         border: '1px solid var(--about-card-border)',

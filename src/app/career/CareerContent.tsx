@@ -23,13 +23,6 @@ const FILTER_COLORS: Record<FilterKey, string> = {
   trainee: '#F59E0B',
 };
 
-const TICKER_LOGOS = [
-  '/Logo/Data.png',
-  '/Logo/Geo.png',
-  '/Logo/I.png',
-  '/Logo/Maskin.png',
-];
-
 // Filter Tab - Framer Motion variant med hover/tap-animationer
 function FilterTab({
   active,
@@ -116,7 +109,7 @@ export function CareerContent() {
       {/* EPIC HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
+        className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
         aria-labelledby="career-hero-heading"
       >
         {/* Depth-0: Atmosfär */}
@@ -223,6 +216,19 @@ export function CareerContent() {
                 {opportunity.description}
               </p>
             </RevealItem>
+
+            <RevealItem className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
+              <a
+                href="#career-listings"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
+                style={{
+                  background: 'linear-gradient(135deg, #3B82F6, #10B981)',
+                  boxShadow: '0 0 28px rgba(59,130,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
+                }}
+              >
+                {opportunity.ctaSeeJobs}
+              </a>
+            </RevealItem>
           </StaggerReveal>
         </motion.div>
 
@@ -234,32 +240,8 @@ export function CareerContent() {
         />
       </section>
 
-      {/* Logo-ticker */}
-      <div
-        className="overflow-hidden py-5"
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
-        }}
-        aria-hidden="true"
-      >
-        <div className="animate-scroll flex gap-20 w-max">
-          {[...TICKER_LOGOS, ...TICKER_LOGOS, ...TICKER_LOGOS, ...TICKER_LOGOS].map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt=""
-              width={32}
-              height={32}
-              className="object-contain grayscale"
-              style={{ opacity: 0.18 }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* INNEHÅLLS-SEKTION */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-labelledby="career-listings-heading">
+{/* INNEHÅLLS-SEKTION */}
+      <section id="career-listings" className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-labelledby="career-listings-heading">
         <h2 id="career-listings-heading" className="sr-only">{opportunity.listingsHeading}</h2>
         <div className="max-w-6xl mx-auto">
 
@@ -308,7 +290,8 @@ export function CareerContent() {
               role="status"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center py-24 text-center bg-white/5 border border-white/10 rounded-3xl"
+              className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
+              style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
             >
               <Briefcase className="w-12 h-12 text-gray-500 mb-4 opacity-50" />
               <p className="text-lg hero-text-muted">
@@ -321,8 +304,8 @@ export function CareerContent() {
           {!loading && !error && filteredOpps.length > 0 && (
             <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
-                {filteredOpps.map((job, idx) => (
-                  <JobCard key={job.id} job={job} idx={idx} />
+                {filteredOpps.map((job) => (
+                  <JobCard key={job.id} job={job} />
                 ))}
               </AnimatePresence>
             </motion.div>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { Loader2, Tag } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -9,11 +9,23 @@ import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DealCard } from '@/components/ui/DealCard';
 import type { TKLDeal } from '@/lib/schemas/deal';
 import { getPublishedDeals } from '@/lib/services/deals';
+import { useScrollContainer } from '@/components/providers/ScrollProvider';
 
 // Deals Page Content
 export function DealsContent() {
   const { t } = useLanguage();
   const { deals } = t;
+
+  const shouldReduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+  const scrollContainer = useScrollContainer();
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    container: scrollContainer,
+    offset: ['start start', 'end start'],
+  });
+  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   const [allDeals, setAllDeals] = useState<TKLDeal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +60,8 @@ export function DealsContent() {
     <>
       {/* HERO SECTION */}
       <section
-        className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
+        ref={heroRef}
+        className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
         aria-labelledby="deals-hero-heading"
       >
         {/* Atmosphere */}
@@ -61,10 +74,12 @@ export function DealsContent() {
           }}
           aria-hidden="true"
         />
-        <GradientOrb color="orange" size={480} top="30%" left="60%" opacity={0.11} animClass="animate-orb-float" />
-        <GradientOrb color="red" size={260} top="65%" left="10%" opacity={0.07} animClass="animate-orb-float-reverse" />
+        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <GradientOrb color="orange" size={480} top="30%" left="60%" opacity={0.11} animClass="animate-orb-float" />
+          <GradientOrb color="red" size={260} top="65%" left="10%" opacity={0.07} animClass="animate-orb-float-reverse" />
+        </motion.div>
 
-        <div className="relative max-w-4xl mx-auto w-full z-20">
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
           <StaggerReveal className="text-center" delay={0.1}>
             {/* Badge */}
             <RevealItem className="flex justify-center mb-6">
@@ -114,7 +129,7 @@ export function DealsContent() {
               </p>
             </RevealItem>
           </StaggerReveal>
-        </div>
+        </motion.div>
 
         {/* Fade-out till bakgrund */}
         <div
@@ -153,7 +168,8 @@ export function DealsContent() {
               role="status"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center py-24 text-center bg-white/5 border border-white/10 rounded-3xl"
+              className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
+              style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
             >
               <Tag className="w-12 h-12 mb-4 opacity-30" style={{ color: '#F59E0B' }} aria-hidden="true" />
               <p className="text-lg hero-text-muted">

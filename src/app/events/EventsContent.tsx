@@ -32,8 +32,8 @@ type FilterKey = Section | 'all';
 type ExtendedEvent = TKLEvent & { externalUrl?: string };
 
 // Event Card
-function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
-  const { t, nav } = useLanguage() as any;
+function EventCard({ event }: { event: ExtendedEvent }) {
+  const { t, locale } = useLanguage();
   const ev = t.events;
   const shouldReduceMotion = useReducedMotion();
   const color = SECTION_COLORS[event.section];
@@ -43,7 +43,7 @@ function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
   const day = dateObj.getDate();
   const month = dateObj.toLocaleString('default', { month: 'short' });
 
-  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+  const isEnglish = locale === 'en';
 
   const displayTitle = isEnglish && event.titleEn ? event.titleEn : event.title;
   const displayDesc = isEnglish && event.descriptionEn ? event.descriptionEn : event.description;
@@ -52,10 +52,10 @@ function EventCard({ event, idx }: { event: ExtendedEvent; idx: number }) {
 
   return (
     <motion.article
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16, scale: 0.97 }}
-      transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       layout
       className="group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
       style={{
@@ -192,7 +192,7 @@ function FilterTab({ active, onClick, logo, label, color }: { active: boolean; o
 }
 
 export function EventsContent() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { events: ev } = t;
 
   const [allEvents, setAllEvents] = useState<ExtendedEvent[]>([]);
@@ -223,6 +223,11 @@ export function EventsContent() {
     scrollYProgress,
     [0, 1],
     ['0%', shouldReduceMotion ? '0%' : '-30%']
+  );
+  const heroTextY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    ['0%', shouldReduceMotion ? '0%' : '-10%']
   );
 
   // Fetch TKL Events
@@ -282,7 +287,7 @@ export function EventsContent() {
   }, [calendarView, luddEvents.length]);
 
   const filtered = filter === 'all' ? allEvents : allEvents.filter((e) => e.section === filter);
-  const isEnglish = t.nav?.langEn === 'English (active)';
+  const isEnglish = locale === 'en';
 
   const filteredLuddEvents =
     calendarSelectedDate !== null
@@ -302,7 +307,7 @@ export function EventsContent() {
 
   return (
     <>
-      <section ref={heroRef} className="relative min-h-[55svh] flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
+      <section ref={heroRef} className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} aria-hidden="true" />
         {/* Depth-1: Parallax orbs */}
         <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -310,7 +315,7 @@ export function EventsContent() {
           <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
         </motion.div>
 
-        <div className="relative max-w-4xl mx-auto w-full">
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
           <StaggerReveal className="text-center" delay={0.1}>
             <RevealItem className="flex justify-center mb-6">
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
@@ -335,7 +340,7 @@ export function EventsContent() {
               </p>
             </RevealItem>
           </StaggerReveal>
-        </div>
+        </motion.div>
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }} aria-hidden="true" />
       </section>
 
@@ -385,18 +390,11 @@ export function EventsContent() {
                 {error && !loading && <p role="alert" className="text-center hero-text-muted py-16">{error}</p>}
                 {!loading && !error && filtered.length === 0 && <motion.p role="status" className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
                 {!loading && !error && filtered.length > 0 && (
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={filter}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-                    >
-                      {filtered.map((event, idx) => <EventCard key={event.id} event={event} idx={idx} />)}
-                    </motion.div>
-                  </AnimatePresence>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <AnimatePresence>
+                      {filtered.map((event) => <EventCard key={event.id} event={event} />)}
+                    </AnimatePresence>
+                  </div>
                 )}
               </motion.div>
             )}
@@ -449,20 +447,13 @@ export function EventsContent() {
                     )}
 
                     {calendarSelectedDate !== null && filteredLuddEvents.length > 0 && (
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={calendarSelectedDate.toDateString()}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6"
-                        >
-                          {filteredLuddEvents.map((event, idx) => (
-                            <EventCard key={`ludd-${event.id}`} event={event} idx={idx} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
+                        <AnimatePresence>
+                          {filteredLuddEvents.map((event) => (
+                            <EventCard key={`ludd-${event.id}`} event={event} />
                           ))}
-                        </motion.div>
-                      </AnimatePresence>
+                        </AnimatePresence>
+                      </div>
                     )}
                   </>
                 )}

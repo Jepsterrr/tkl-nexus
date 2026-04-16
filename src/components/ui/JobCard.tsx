@@ -7,7 +7,6 @@ import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity'
 
 interface JobCardProps {
   job: TKLOpportunity;
-  idx?: number;
   color?: string;
 }
 
@@ -18,14 +17,13 @@ const TYPE_COLORS: Record<OpportunityType, string> = {
   trainee: '#F59E0B',
 };
 
-export function JobCard({ job, idx = 0, color }: JobCardProps) {
-  const { t, nav } = useLanguage() as any;
+export function JobCard({ job, color }: JobCardProps) {
+  const { t, locale } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
   const cardColor = color ?? '#3B82F6';
   const badgeColor = TYPE_COLORS[job.type];
 
-  // Fallback-logik för översatta fält
-  const isEnglish = nav?.langEn === 'English (active)' || t.nav?.langEn === 'English (active)';
+  const isEnglish = locale === 'en';
   const displayTitle = isEnglish && job.titleEn ? job.titleEn : job.title;
   const displayDesc = isEnglish && job.descriptionEn ? job.descriptionEn : job.description;
   const displayStart = isEnglish && job.startDateEn ? job.startDateEn : (job.startDate || '-');
@@ -61,7 +59,7 @@ export function JobCard({ job, idx = 0, color }: JobCardProps) {
       initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16, scale: 0.97 }}
-      transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       whileHover={shouldReduceMotion ? {} : { y: -4 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
       layout
