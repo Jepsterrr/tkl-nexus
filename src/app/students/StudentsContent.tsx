@@ -32,7 +32,6 @@ export function StudentsContent() {
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
-  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   const BENEFITS: BenefitCard[] = [
@@ -85,134 +84,107 @@ export function StudentsContent() {
 
   return (
     <>
-      {/*  Hero (Epic Design: 3-layer parallax) */}
+      {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
+        className="relative min-h-svh flex flex-col items-center justify-center overflow-hidden pt-28 pb-16 px-6 sm:px-8 lg:px-16"
         aria-labelledby="students-hero-heading"
       >
-        {/* Depth-0: Far atmosphere */}
+        {/* Dot grid bg */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse 90% 70% at 5% 10%, rgba(16,185,129,0.10) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 70% 60% at 90% 80%, rgba(16,185,129,0.06) 0%, transparent 60%)',
+            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.07) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
           }}
           aria-hidden="true"
         />
 
-        {/* Depth-1: Parallax orbs */}
-        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GradientOrb color="green" size={600} top="30%" left="60%" opacity={0.12} animClass="animate-orb-float" />
-          <GradientOrb color="purple" size={280} top="70%" left="8%" opacity={0.07} animClass="animate-orb-float-reverse" />
-          {/* Subtle grid texture */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),' +
-                'linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }}
-          />
-        </motion.div>
-
-        {/* Depth-2: Floating accent shapes */}
-        <motion.div
-          className="absolute top-24 right-[12%] w-2 h-2 rounded-full pointer-events-none"
-          style={{ background: '#10B981', boxShadow: '0 0 12px #10B981' }}
-          animate={shouldReduceMotion ? {} : {
-            y: [0, -12, 0],
-            opacity: [0.6, 1, 0.6],
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          aria-hidden="true"
-        />
-        <motion.div
-          className="absolute bottom-32 left-[15%] w-1.5 h-1.5 rounded-full pointer-events-none"
-          style={{ background: '#8B5CF6', boxShadow: '0 0 8px #8B5CF6' }}
-          animate={shouldReduceMotion ? {} : {
-            y: [0, 10, 0],
-            opacity: [0.4, 0.8, 0.4],
-          }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          aria-hidden="true"
-        />
-
-        {/* Depth-4: Content */}
-        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
-          <StaggerReveal className="text-center" delay={0.1}>
-            <RevealItem className="flex justify-center mb-6">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
-                style={{
-                  background: 'rgba(16,185,129,0.15)',
-                  border: '1px solid rgba(16,185,129,0.3)',
-                  color: '#10B981',
-                }}
-              >
-                <GraduationCap className="w-4 h-4" aria-hidden="true" />
-                {students.badge}
-              </span>
-            </RevealItem>
-
-            <RevealItem>
-              <h1
-                id="students-hero-heading"
-                className="text-4xl sm:text-5xl md:text-7xl font-bold hero-text leading-[1.05] tracking-tight"
-              >
-                {students.heading}{' '}
-                <span
-                  className="relative inline-block"
-                  style={{
-                    background: 'linear-gradient(135deg, #10B981, #34D399)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  {students.headingAccent}
-                  <span
-                    className="absolute -bottom-1 left-0 right-0 h-px"
-                    style={{ background: 'linear-gradient(90deg, #10B981, #34D399, transparent)' }}
-                    aria-hidden="true"
-                  />
-                </span>
-              </h1>
-            </RevealItem>
-
-            <RevealItem>
-              <p className="mt-6 text-base sm:text-lg md:text-xl hero-text-muted max-w-2xl mx-auto leading-relaxed">
-                {students.description}
-              </p>
-            </RevealItem>
-
-            <RevealItem className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
-              <Link
-                href="#mojligheter"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
-                style={{
-                  background: 'linear-gradient(135deg, #10B981, #059669)',
-                  boxShadow: '0 0 28px rgba(16,185,129,0.4), 0 8px 32px rgba(0,0,0,0.3)',
-                }}
-              >
-                {students.ctaExplore}
-              </Link>
-              <Link
-                href="/events"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm sm:text-base hover:hero-text hover:bg-white/8 active:scale-95 w-full sm:w-auto"
-                style={{ border: '1px solid rgba(255,255,255,0.15)' }}
-              >
-                {students.ctaEvents}
-              </Link>
-            </RevealItem>
-          </StaggerReveal>
-        </motion.div>
-
-        {/* Depth-5: Foreground fade-out */}
+        {/* Ghost "S" watermark */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+          className="absolute top-1/2 right-0 pointer-events-none select-none overflow-hidden"
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 900,
+            fontSize: 'clamp(16rem, 35vw, 28rem)',
+            lineHeight: 1,
+            color: '#10B981',
+            opacity: 0.025,
+            transform: 'translate(20%, -50%)',
+            letterSpacing: '-0.06em',
+          }}
+          aria-hidden="true"
+        >
+          S
+        </div>
+
+        {/* Split-screen content */}
+        <div className="relative w-full z-20 flex flex-col lg:grid lg:grid-cols-[3fr_2fr] lg:gap-16 max-w-7xl mx-auto">
+          {/* Left: heading */}
+          <motion.div style={{ y: heroTextY }} className="flex items-center lg:items-end pb-0 lg:pb-12">
+            <StaggerReveal delay={0.05}>
+              <RevealItem>
+                <h1
+                  id="students-hero-heading"
+                  className="hero-text hero-heading text-left"
+                  style={{ fontSize: 'clamp(2.75rem, 6vw + 1rem, 6.5rem)' }}
+                >
+                  {students.heading}{' '}
+                  <span className="relative inline-block text-accent-green">
+                    {students.headingAccent}
+                    <span
+                      className="absolute -bottom-1 left-0 right-0 h-px pointer-events-none"
+                      style={{ background: 'linear-gradient(90deg, #10B981, transparent)' }}
+                      aria-hidden="true"
+                    />
+                  </span>
+                </h1>
+              </RevealItem>
+            </StaggerReveal>
+          </motion.div>
+
+          {/* Right: description + chips + CTAs */}
+          <motion.div style={{ y: heroTextY }} className="flex flex-col justify-center lg:pt-28">
+            <StaggerReveal delay={0.2}>
+              <RevealItem>
+                <p className="text-base sm:text-lg hero-text-muted max-w-[48ch] leading-relaxed mb-6">
+                  {students.description}
+                </p>
+              </RevealItem>
+
+              {/* Trust chips — all sizes */}
+              <RevealItem className="flex flex-wrap gap-2 mb-8">
+                {[students.pills.jobs, students.pills.events, students.pills.deals].map((label) => (
+                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.22)', color: '#10B981' }}>
+                    <span className="w-1 h-1 rounded-full bg-[#10B981] shrink-0" />
+                    {label}
+                  </span>
+                ))}
+              </RevealItem>
+
+              <RevealItem className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="#mojligheter"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg, #10B981, #059669)', boxShadow: '0 0 28px rgba(16,185,129,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}
+                >
+                  {students.ctaExplore}
+                </Link>
+                <Link
+                  href="/events"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm hover:hero-text hover:bg-white/8 active:scale-95"
+                  style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+                >
+                  {students.ctaEvents}
+                </Link>
+              </RevealItem>
+            </StaggerReveal>
+          </motion.div>
+        </div>
+
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-30"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
           aria-hidden="true"
         />
