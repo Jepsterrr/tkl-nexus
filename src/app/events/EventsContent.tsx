@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, ArrowRight, Loader2, Sparkles, ExternalLink } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
-import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { LuddCalendar } from '@/components/ui/LuddCalendar';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
 import { getPublishedEvents } from '@/lib/services/events';
+import { EASE_OUT_EXPO } from '@/lib/motion';
 
 // Section logo map
 const SECTION_LOGOS: Record<Section, string | null> = {
@@ -55,21 +55,11 @@ function EventCard({ event }: { event: ExtendedEvent }) {
       initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
       layout
-      className="group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
-      style={{
-        background: 'var(--about-card-bg)',
-        border: `1px solid var(--about-card-border)`,
-        backdropFilter: 'blur(12px)',
-      }}
+      className="glass-card group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
       aria-label={displayTitle}
     >
-      <div
-        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-        style={{ background: color }}
-        aria-hidden="true"
-      />
 
       {/* Hover glow - pointer-events-none ser till att glöden aldrig blockerar klick */}
       <div
@@ -139,7 +129,7 @@ function EventCard({ event }: { event: ExtendedEvent }) {
         </span>
 
         {/* Endast texten är klickbar som en helt vanlig länk */}
-        {isExternal ? (
+        {isExternal && (
           <a
             href={event.externalUrl}
             target="_blank"
@@ -150,15 +140,6 @@ function EventCard({ event }: { event: ExtendedEvent }) {
             {ev.readOnLudd}
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
-        ) : (
-          <span
-            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2"
-            style={{ color }}
-            aria-hidden="true"
-          >
-            {ev.eventReadMore}
-            <ArrowRight className="w-3.5 h-3.5" />
-          </span>
         )}
       </div>
     </motion.article>
@@ -210,6 +191,8 @@ export function EventsContent() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
+  const [luddError, setLuddError] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const shouldReduceMotion = useReducedMotion();
@@ -219,11 +202,6 @@ export function EventsContent() {
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
-  const orbY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    ['0%', shouldReduceMotion ? '0%' : '-30%']
-  );
   const heroTextY = useTransform(
     scrollYProgress,
     [0, 1],
@@ -234,6 +212,7 @@ export function EventsContent() {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
+    setError(null);
     getPublishedEvents()
       .then((data) => {
         if (isMounted) { setAllEvents(data); setLoading(false); }
@@ -242,7 +221,7 @@ export function EventsContent() {
         if (isMounted) { setError(ev.nexusFetchError); setLoading(false); }
       });
     return () => { isMounted = false; };
-  }, [ev]);
+  }, [ev, fetchKey]);
 
   // Fetch LUDD Events as JSON when switching tab
   useEffect(() => {
@@ -279,6 +258,7 @@ export function EventsContent() {
         .catch((err) => {
           if (!isMounted) return;
           console.error('LUDD API Error:', err);
+          setLuddError(true);
           setLuddLoading(false);
         });
 
@@ -307,44 +287,113 @@ export function EventsContent() {
 
   return (
     <>
-      <section ref={heroRef} className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 85% 75%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} aria-hidden="true" />
-        {/* Depth-1: Parallax orbs */}
-        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GradientOrb color="purple" size={500} top="35%" left="55%" opacity={0.10} animClass="animate-orb-float" />
-          <GradientOrb color="green" size={280} top="65%" left="10%" opacity={0.06} animClass="animate-orb-float-reverse" />
-        </motion.div>
+      <section ref={heroRef} className="relative min-h-[60svh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-12 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
+        {/* Concentric circles bg */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+          <svg
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%]"
+            viewBox="0 0 800 800"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {[80, 180, 280, 380, 480].map((r, i) => (
+              <circle
+                key={r}
+                cx="400"
+                cy="400"
+                r={r}
+                stroke="rgba(139,92,246,0.07)"
+                strokeWidth="1"
+                style={{ opacity: 1 - i * 0.15 }}
+              />
+            ))}
+          </svg>
+        </div>
 
-        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
-          <StaggerReveal className="text-center" delay={0.1}>
-            <RevealItem className="flex justify-center mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
-                <CalendarDays className="w-4 h-4" aria-hidden="true" />
-                {ev.badge}
-              </span>
-            </RevealItem>
+        <div className="relative w-full max-w-7xl mx-auto z-20">
+          {/* Desktop: poster split — heading words stacked left, content right */}
+          <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-20 lg:items-center">
+            <motion.div style={{ y: heroTextY }}>
+              <StaggerReveal delay={0.05}>
+                <h1
+                  id="events-hero-heading"
+                  className="hero-text"
+                  style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 0.95, fontSize: 'clamp(4rem, 7vw, 7rem)' }}
+                >
+                  {ev.heading.split(' ').map((word, i) => (
+                    <RevealItem key={i} className="block">{word}</RevealItem>
+                  ))}
+                  <RevealItem className="block">
+                    <span className="text-accent-purple">{ev.headingAccent}</span>
+                  </RevealItem>
+                </h1>
+              </StaggerReveal>
+            </motion.div>
 
-            <RevealItem>
-              <h1 id="events-hero-heading" className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight">
-                {ev.heading}{' '}
-                <span className="relative inline-block" style={{ background: 'linear-gradient(135deg, #8B5CF6, #60A5FA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  {ev.headingAccent}
-                  <span className="absolute -bottom-1 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, #8B5CF6, #60A5FA, transparent)' }} aria-hidden="true" />
+            <motion.div style={{ y: heroTextY }} className="flex flex-col justify-center">
+              <StaggerReveal delay={0.25}>
+                <RevealItem className="mb-6">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
+                    <CalendarDays className="w-4 h-4" aria-hidden="true" />
+                    {ev.badge}
+                  </span>
+                </RevealItem>
+                <RevealItem>
+                  <p className="text-lg hero-text-muted max-w-[46ch] leading-relaxed mb-6">{ev.description}</p>
+                </RevealItem>
+                <RevealItem className="flex flex-wrap gap-2 mb-8">
+                  {[ev.pills.nexus, ev.pills.campus, ev.pills.sections].map((label) => (
+                    <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                      <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />{label}
+                    </span>
+                  ))}
+                </RevealItem>
+                <RevealItem>
+                  <a href="#events-list" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}>
+                    {ev.ctaSeeEvents}
+                  </a>
+                </RevealItem>
+              </StaggerReveal>
+            </motion.div>
+          </div>
+
+          {/* Mobile: centred layout */}
+          <motion.div style={{ y: heroTextY }} className="lg:hidden">
+            <StaggerReveal className="text-center" delay={0.1}>
+              <RevealItem className="flex justify-center mb-6">
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
+                  <CalendarDays className="w-4 h-4" aria-hidden="true" />
+                  {ev.badge}
                 </span>
-              </h1>
-            </RevealItem>
+              </RevealItem>
+              <RevealItem>
+                <h1 className="text-4xl sm:text-5xl hero-text hero-heading">
+                  {ev.heading}{' '}<span className="text-accent-purple">{ev.headingAccent}</span>
+                </h1>
+              </RevealItem>
+              <RevealItem>
+                <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">{ev.description}</p>
+              </RevealItem>
+              <RevealItem className="flex flex-wrap justify-center gap-2 mt-4">
+                {[ev.pills.nexus, ev.pills.campus, ev.pills.sections].map((label) => (
+                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                    <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />{label}
+                  </span>
+                ))}
+              </RevealItem>
+              <RevealItem>
+                <a href="#events-list" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 mt-8 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}>
+                  {ev.ctaSeeEvents}
+                </a>
+              </RevealItem>
+            </StaggerReveal>
+          </motion.div>
+        </div>
 
-            <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
-                {ev.description}
-              </p>
-            </RevealItem>
-          </StaggerReveal>
-        </motion.div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }} aria-hidden="true" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-30" style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }} aria-hidden="true" />
       </section>
 
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Events">
+      <section id="events-list" className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Events">
         <div className="max-w-6xl mx-auto">
 
           {/* Dual Calendar Toggle */}
@@ -387,7 +436,20 @@ export function EventsContent() {
                   ))}
                 </div>
                 {loading && <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} /></div>}
-                {error && !loading && <p role="alert" className="text-center hero-text-muted py-16">{error}</p>}
+                {error && !loading && (
+                  <div className="flex justify-center py-16" role="alert">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
+                      <p className="text-red-400 font-medium">{error}</p>
+                      <button
+                        onClick={() => setFetchKey((k) => k + 1)}
+                        className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}
+                      >
+                        {ev.retry}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {!loading && !error && filtered.length === 0 && <motion.p role="status" className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
                 {!loading && !error && filtered.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -426,8 +488,22 @@ export function EventsContent() {
                   </div>
                 )}
 
-                {!luddLoading && luddEvents.length === 0 && (
-                  <p role="alert" className="text-center hero-text-muted py-16">
+                {!luddLoading && luddError && (
+                  <div className="flex justify-center py-16" role="alert">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
+                      <p className="text-red-400 font-medium">{ev.luddFetchError}</p>
+                      <button
+                        onClick={() => { setLuddError(false); setLuddEvents([]); }}
+                        className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}
+                      >
+                        {ev.retry}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {!luddLoading && !luddError && luddEvents.length === 0 && (
+                  <p role="status" className="text-center hero-text-muted py-16">
                     {ev.luddFetchError}
                   </p>
                 )}
