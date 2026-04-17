@@ -31,7 +31,6 @@ export function CorporateContent() {
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
-  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   const STATS: StatItem[] = [
@@ -48,63 +47,68 @@ export function CorporateContent() {
 
   return (
     <>
-      {/* Hero (Epic Design: 3-layer parallax) */}
+      {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
+        className="relative flex flex-col lg:grid lg:grid-cols-2 min-h-svh overflow-hidden"
         aria-labelledby="corporate-hero-heading"
       >
-        {/* Depth-0: Far atmosphere */}
+        {/* Background: diagonal cross-hatch (both panels) */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse 90% 70% at 5% 10%, rgba(139,92,246,0.12) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 70% 60% at 90% 80%, rgba(139,92,246,0.07) 0%, transparent 60%)',
+            backgroundImage:
+              'repeating-linear-gradient(135deg, rgba(139,92,246,0.04) 0px, rgba(139,92,246,0.04) 1px, transparent 1px, transparent 40px),' +
+              'repeating-linear-gradient(45deg, rgba(139,92,246,0.025) 0px, rgba(139,92,246,0.025) 1px, transparent 1px, transparent 40px)',
           }}
           aria-hidden="true"
         />
 
-        {/* Depth-1: Parallax orbs + grid */}
-        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GradientOrb color="purple" size={600} top="30%" left="60%" opacity={0.12} animClass="animate-orb-float" />
-          <GradientOrb color="red" size={280} top="70%" left="8%" opacity={0.07} animClass="animate-orb-float-reverse" />
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),' +
-                'linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }}
-          />
+        {/* LEFT PANEL — heading only */}
+        <motion.div
+          style={{ y: heroTextY }}
+          className="relative flex items-end lg:items-center px-8 sm:px-12 lg:px-16 pt-32 pb-8 lg:py-24 z-10"
+        >
+          <StaggerReveal delay={0.05}>
+            <RevealItem>
+              <h1
+                id="corporate-hero-heading"
+                className="hero-text"
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: 900,
+                  lineHeight: 0.92,
+                  letterSpacing: '-0.05em',
+                  fontSize: 'clamp(3rem, 7vw + 1rem, 8rem)',
+                }}
+              >
+                {corporate.heading}
+                <br />
+                <span className="text-accent-purple">{corporate.headingAccent}</span>
+              </h1>
+            </RevealItem>
+          </StaggerReveal>
         </motion.div>
 
-        {/* Depth-2: Floating accent dots */}
-        <motion.div
-          className="absolute top-28 right-[14%] w-2 h-2 rounded-full pointer-events-none"
-          style={{ background: '#8B5CF6', boxShadow: '0 0 12px #8B5CF6' }}
-          animate={shouldReduceMotion ? {} : { y: [0, -14, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          aria-hidden="true"
-        />
-        <motion.div
-          className="absolute bottom-36 left-[12%] w-1.5 h-1.5 rounded-full pointer-events-none"
-          style={{ background: '#E30613', boxShadow: '0 0 8px #E30613' }}
-          animate={shouldReduceMotion ? {} : { y: [0, 10, 0], opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        {/* Divider line — desktop only */}
+        <div
+          className="hidden lg:block absolute left-1/2 -translate-x-px top-24 bottom-0 w-px pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent, rgba(139,92,246,0.25) 20%, rgba(139,92,246,0.25) 80%, transparent)' }}
           aria-hidden="true"
         />
 
-        {/* Depth-4: Content */}
-        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
-          <StaggerReveal className="text-center" delay={0.1}>
-            <RevealItem className="flex justify-center mb-6">
+        {/* RIGHT PANEL — badge, description, trust chips, CTAs */}
+        <motion.div
+          style={{ y: heroTextY, background: 'rgba(139,92,246,0.03)' }}
+          className="relative flex flex-col justify-center px-8 sm:px-12 lg:px-16 pb-16 lg:py-24 z-10"
+        >
+          <StaggerReveal delay={0.2}>
+            <RevealItem className="mb-8">
               <span
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
                 style={{
                   background: 'rgba(139,92,246,0.15)',
-                  border: '1px solid rgba(139,92,246,0.3)',
+                  border: '1px solid rgba(139,92,246,0.35)',
                   color: '#8B5CF6',
                 }}
               >
@@ -114,40 +118,29 @@ export function CorporateContent() {
             </RevealItem>
 
             <RevealItem>
-              <h1
-                id="corporate-hero-heading"
-                className="text-4xl sm:text-5xl md:text-7xl font-bold hero-text leading-[1.05] tracking-tight"
-              >
-                {corporate.heading}{' '}
-                <span
-                  className="relative inline-block"
-                  style={{
-                    background: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  {corporate.headingAccent}
-                  <span
-                    className="absolute -bottom-1 left-0 right-0 h-px"
-                    style={{ background: 'linear-gradient(90deg, #8B5CF6, #a78bfa, transparent)' }}
-                    aria-hidden="true"
-                  />
-                </span>
-              </h1>
-            </RevealItem>
-
-            <RevealItem>
-              <p className="mt-6 text-base sm:text-lg md:text-xl hero-text-muted max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg hero-text-muted leading-relaxed max-w-[52ch] mb-8">
                 {corporate.description}
               </p>
             </RevealItem>
 
-            <RevealItem className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
+            {/* Trust chips — visible on all sizes */}
+            <RevealItem className="flex flex-wrap gap-2 mb-10">
+              {[corporate.pills.members, corporate.pills.programs, corporate.pills.location].map((label) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}
+                >
+                  <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />
+                  {label}
+                </span>
+              ))}
+            </RevealItem>
+
+            <RevealItem className="flex flex-col sm:flex-row gap-3">
               <Link
                 href="/about#kontakt"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95"
                 style={{
                   background: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
                   boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
@@ -157,7 +150,7 @@ export function CorporateContent() {
               </Link>
               <Link
                 href="#tjanster"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm sm:text-base hover:hero-text hover:bg-white/8 active:scale-95 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm sm:text-base hover:hero-text active:scale-95"
                 style={{ border: '1px solid rgba(255,255,255,0.15)' }}
               >
                 {corporate.ctaServices}
@@ -166,9 +159,9 @@ export function CorporateContent() {
           </StaggerReveal>
         </motion.div>
 
-        {/* Depth-5: Bottom fade */}
+        {/* Bottom fade */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-30"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
           aria-hidden="true"
         />
