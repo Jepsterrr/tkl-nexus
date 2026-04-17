@@ -2,25 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import Link from 'next/link';
-import { Briefcase, Loader2, Sparkles, Compass } from 'lucide-react';
+import { Briefcase, Sparkles, Compass } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
-import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { JobCard } from '@/components/ui/JobCard';
+import { JobCardSkeleton } from '@/components/ui/JobCardSkeleton';
 import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity';
 import { getPublishedOpportunities } from '@/lib/services/opportunities';
 
 type FilterKey = OpportunityType | 'all';
 
-// Filter Färger
+// Filter Färger — blåspektrum (indigo → blå → himmelblå → cyan)
 const FILTER_COLORS: Record<FilterKey, string> = {
-  all: '#8B5CF6',
+  all: '#3B82F6',
+  exjobb: '#6366F1',
   jobb: '#3B82F6',
-  exjobb: '#8B5CF6',
-  praktik: '#10B981',
-  trainee: '#F59E0B',
+  praktik: '#0EA5E9',
+  trainee: '#06B6D4',
 };
 
 // Filter Tab - Framer Motion variant med hover/tap-animationer
@@ -65,6 +64,7 @@ export function CareerContent() {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const scrollContainer = useScrollContainer();
@@ -73,7 +73,6 @@ export function CareerContent() {
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
-  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-30%']);
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   useEffect(() => {
@@ -98,7 +97,7 @@ export function CareerContent() {
     return () => {
       isMounted = false;
     };
-  }, [opportunity.error]);
+  }, [opportunity.error, fetchKey]);
 
   const filteredOpps = filter === 'all'
     ? opportunities
@@ -106,79 +105,33 @@ export function CareerContent() {
 
   return (
     <>
-      {/* EPIC HERO SECTION */}
+      {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-16 px-4 sm:px-6 lg:px-8"
+        className="relative min-h-[45svh] flex flex-col justify-center overflow-hidden pt-28 pb-8 px-4 sm:px-6 lg:px-8"
         aria-labelledby="career-hero-heading"
       >
-        {/* Depth-0: Atmosfär */}
+        {/* Blueprint grid (reinforced) */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 85% 20%, rgba(59,130,246,0.12) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 60% 50% at 15% 75%, rgba(16,185,129,0.08) 0%, transparent 60%)',
+            backgroundImage:
+              'linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px),' +
+              'linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
           }}
           aria-hidden="true"
         />
 
-        {/* Depth-1: Parallax-orbs + circuit-grid */}
-        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GradientOrb color="blue" size={500} top="20%" left="60%" opacity={0.12} animClass="animate-orb-float" />
-          <GradientOrb color="green" size={300} top="70%" left="20%" opacity={0.08} animClass="animate-orb-float-reverse" />
-          {/* Circuit-board grid */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),' +
-                'linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
-            }}
-          />
-        </motion.div>
-
-        {/* Depth-2: Floating kod-symboler */}
-        <motion.div
-          className="absolute top-28 right-[14%] font-mono text-sm font-bold pointer-events-none select-none"
-          style={{ color: '#3B82F6', opacity: 0.18, textShadow: '0 0 12px #3B82F6' }}
-          animate={shouldReduceMotion ? {} : { y: [0, -14, 0], opacity: [0.12, 0.22, 0.12] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          aria-hidden="true"
-        >
-          {'</>'}
-        </motion.div>
-        <motion.div
-          className="absolute bottom-36 left-[10%] font-mono text-sm font-bold pointer-events-none select-none"
-          style={{ color: '#10B981', opacity: 0.15, textShadow: '0 0 10px #10B981' }}
-          animate={shouldReduceMotion ? {} : { y: [0, 10, 0], opacity: [0.10, 0.20, 0.10] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-          aria-hidden="true"
-        >
-          {'{ }'}
-        </motion.div>
-        <motion.div
-          className="absolute top-1/2 left-[6%] font-mono text-xs pointer-events-none select-none"
-          style={{ color: '#3B82F6', opacity: 0.10 }}
-          animate={shouldReduceMotion ? {} : { y: [0, -8, 0], opacity: [0.07, 0.14, 0.07] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          aria-hidden="true"
-        >
-          {'//'}
-        </motion.div>
-
-        {/* Depth-3: Content med parallax */}
         <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
-          <StaggerReveal className="text-center" delay={0.1}>
-            <RevealItem className="flex justify-center mb-6">
+          <StaggerReveal className="text-left" delay={0.1}>
+            <RevealItem className="flex justify-start mb-6">
               <span
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
                 style={{
                   background: 'rgba(59,130,246,0.15)',
                   border: '1px solid rgba(59,130,246,0.3)',
                   color: '#3B82F6',
-                  boxShadow: '0 0 20px rgba(59,130,246,0.15)',
                 }}
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
@@ -189,18 +142,11 @@ export function CareerContent() {
             <RevealItem>
               <h1
                 id="career-hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl font-bold hero-text leading-[1.1] tracking-tight"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl hero-text hero-heading"
+                style={{ fontWeight: 800 }}
               >
                 {opportunity.heading}{' '}
-                <span
-                  className="relative inline-block"
-                  style={{
-                    background: 'linear-gradient(135deg, #3B82F6, #10B981)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
+                <span className="relative inline-block text-accent-blue">
                   {opportunity.headingAccent}
                   <span
                     className="absolute -bottom-1 left-0 right-0 h-px pointer-events-none"
@@ -212,15 +158,25 @@ export function CareerContent() {
             </RevealItem>
 
             <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
+              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
                 {opportunity.description}
               </p>
             </RevealItem>
 
-            <RevealItem className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
+            {/* Trust chips — visible on all sizes */}
+            <RevealItem className="flex flex-wrap justify-start gap-2 mt-4">
+              {[opportunity.pills.types, opportunity.pills.ltu].map((label) => (
+                <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)', color: '#3B82F6' }}>
+                  <span className="w-1 h-1 rounded-full bg-[#3B82F6] shrink-0" />
+                  {label}
+                </span>
+              ))}
+            </RevealItem>
+
+            <RevealItem className="flex flex-col sm:flex-row items-start gap-3 mt-8">
               <a
                 href="#career-listings"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95"
                 style={{
                   background: 'linear-gradient(135deg, #3B82F6, #10B981)',
                   boxShadow: '0 0 28px rgba(59,130,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
@@ -232,7 +188,6 @@ export function CareerContent() {
           </StaggerReveal>
         </motion.div>
 
-        {/* Depth-5: Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none z-30"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
@@ -267,19 +222,23 @@ export function CareerContent() {
 
           {/* Laddar-state */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-24 gap-4" aria-live="polite" aria-busy="true">
-              <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-              <p className="text-sm hero-text-subtle font-medium tracking-wide animate-pulse">
-                {opportunity.loading}
-              </p>
+            <div aria-live="polite" aria-busy="true" aria-label={opportunity.loading} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <JobCardSkeleton count={6} accentColor="blue" />
             </div>
           )}
 
           {/* Error-state */}
           {error && !loading && (
             <div className="flex justify-center py-16" role="alert">
-              <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
                 <p className="text-red-400 font-medium">{error}</p>
+                <button
+                  onClick={() => { setError(null); setLoading(true); setFetchKey((k) => k + 1); }}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}
+                >
+                  {opportunity.retry}
+                </button>
               </div>
             </div>
           )}
@@ -300,12 +259,19 @@ export function CareerContent() {
             </motion.div>
           )}
 
+          {/* Aria-live region för filterresultat */}
+          {!loading && !error && (
+            <p className="sr-only" aria-live="polite" aria-atomic="true">
+              {opportunity.resultsCount.replace('{count}', String(filteredOpps.length))}
+            </p>
+          )}
+
           {/* Jobb Grid */}
           {!loading && !error && filteredOpps.length > 0 && (
             <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
                 {filteredOpps.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} />
                 ))}
               </AnimatePresence>
             </motion.div>
