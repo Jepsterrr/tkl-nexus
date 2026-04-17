@@ -51,7 +51,6 @@ export function AboutContent() {
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
-  const orbY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-25%']);
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-8%']);
 
   const TIMELINE_ITEMS = [
@@ -68,26 +67,38 @@ export function AboutContent() {
       <section
         ref={heroRef}
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
-        aria-labelledby="hero-heading"
+        aria-labelledby="about-hero-heading"
       >
-        {/* Depth-0: Far atmosphere */}
+        {/* Horizontal ruled lines bg */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 15% 20%, rgba(227,6,19,0.10) 0%, transparent 60%),' +
-              'radial-gradient(ellipse 60% 50% at 85% 75%, rgba(227,6,19,0.06) 0%, transparent 60%)',
+            backgroundImage: 'repeating-linear-gradient(0deg, rgba(227,6,19,0.04) 0px, rgba(227,6,19,0.04) 1px, transparent 1px, transparent 48px)',
           }}
           aria-hidden="true"
         />
-        <motion.div style={{ y: orbY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <GradientOrb color="red" size={600} top="30%" left="50%" opacity={0.12} animClass="animate-orb-float" />
-          <GradientOrb color="red" size={300} top="70%" left="15%" opacity={0.08} animClass="animate-orb-float-reverse" />
-        </motion.div>
 
-        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full">
-          <StaggerReveal className="text-center" delay={0.1}>
-            <RevealItem className="flex justify-center mb-6">
+        {/* Giant "01" watermark */}
+        <div
+          className="absolute bottom-0 right-0 pointer-events-none select-none overflow-hidden"
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 900,
+            fontSize: 'clamp(12rem, 22vw, 20rem)',
+            lineHeight: 1,
+            letterSpacing: '-0.06em',
+            color: '#E30613',
+            opacity: 0.035,
+            transform: 'translate(8%, 15%)',
+          }}
+          aria-hidden="true"
+        >
+          01
+        </div>
+
+        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
+          <StaggerReveal className="text-left" delay={0.1}>
+            <RevealItem className="flex justify-start mb-6">
               <span
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
                 style={{
@@ -103,21 +114,31 @@ export function AboutContent() {
 
             <RevealItem>
               <h1
-                id="hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold hero-text leading-[1.1] tracking-tight"
+                id="about-hero-heading"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl hero-text hero-heading"
               >
                 {about.heading}{' '}
-                <span className="text-gradient-red">{about.headingAccent}</span>
+                <span className="text-accent-red">{about.headingAccent}</span>
               </h1>
             </RevealItem>
 
             <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
+              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
                 {about.description}
               </p>
             </RevealItem>
 
-            <RevealItem className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
+            {/* Mobile trust chips */}
+            <RevealItem className="flex flex-wrap justify-start gap-2 mt-4 lg:hidden">
+              {[about.pills.founded, about.pills.org, about.pills.sections].map((label) => (
+                <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(227,6,19,0.10)', border: '1px solid rgba(227,6,19,0.22)', color: '#E30613' }}>
+                  <span className="w-1 h-1 rounded-full bg-[#E30613] shrink-0" />
+                  {label}
+                </span>
+              ))}
+            </RevealItem>
+
+            <RevealItem className="flex mt-10">
               <Link
                 href="#kontakt"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto"
@@ -133,10 +154,18 @@ export function AboutContent() {
         </motion.div>
 
         <div
-          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-30"
           style={{ background: 'linear-gradient(to bottom, transparent, var(--cosmic-bg))' }}
           aria-hidden="true"
         />
+        <motion.div
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 pointer-events-none"
+          animate={shouldReduceMotion ? {} : { y: [0, 7, 0], opacity: [0.25, 0.55, 0.25] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          aria-hidden="true"
+        >
+          <div className="w-px h-10 mx-auto rounded-full" style={{ background: 'linear-gradient(to bottom, transparent, rgba(227,6,19,0.5))' }} />
+        </motion.div>
       </section>
 
       {/* About + Contact cards */}
