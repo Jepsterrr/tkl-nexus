@@ -58,8 +58,8 @@ export function CorporateContent() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(135deg, rgba(139,92,246,0.06) 0px, rgba(139,92,246,0.06) 1px, transparent 1px, transparent 40px),' +
-              'repeating-linear-gradient(45deg, rgba(139,92,246,0.04) 0px, rgba(139,92,246,0.04) 1px, transparent 1px, transparent 40px)',
+              'repeating-linear-gradient(135deg, rgba(139,92,246,0.12) 0px, rgba(139,92,246,0.12) 1px, transparent 1px, transparent 40px),' +
+              'repeating-linear-gradient(45deg, rgba(139,92,246,0.07) 0px, rgba(139,92,246,0.07) 1px, transparent 1px, transparent 40px)',
           }}
           aria-hidden="true"
         />

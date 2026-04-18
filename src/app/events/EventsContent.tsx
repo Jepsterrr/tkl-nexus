@@ -302,7 +302,7 @@ export function EventsContent() {
                 cx="400"
                 cy="400"
                 r={r}
-                stroke="rgba(139,92,246,0.09)"
+                stroke="rgba(139,92,246,0.13)"
                 strokeWidth="1"
                 style={{ opacity: 1 - i * 0.15 }}
               />
