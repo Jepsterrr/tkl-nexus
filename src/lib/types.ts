@@ -71,6 +71,7 @@ export const BenefitCardSchema = z.object({
   accentColor: AccentColorSchema,
   linkLabel: z.string().optional(),
   linkHref: z.string().optional(),
+  featured: z.boolean().optional(),
 });
 
 export type BenefitCard = z.infer<typeof BenefitCardSchema>;
@@ -119,7 +120,7 @@ export const ACCENT_COLOR_MAP = {
     bg: 'rgba(227, 6, 19, 0.1)',
     bgStrong: 'rgba(227, 6, 19, 0.2)',
     gradient: 'linear-gradient(135deg, #E30613, #ff4d5a)',
-    textClass: 'text-gradient-red',
+    textClass: 'text-accent-red',
     glowClass: 'glow-red',
   },
   purple: {
@@ -129,7 +130,7 @@ export const ACCENT_COLOR_MAP = {
     bg: 'rgba(139, 92, 246, 0.1)',
     bgStrong: 'rgba(139, 92, 246, 0.2)',
     gradient: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
-    textClass: 'text-gradient-purple',
+    textClass: 'text-accent-purple',
     glowClass: 'glow-purple',
   },
   green: {
@@ -139,7 +140,7 @@ export const ACCENT_COLOR_MAP = {
     bg: 'rgba(16, 185, 129, 0.1)',
     bgStrong: 'rgba(16, 185, 129, 0.2)',
     gradient: 'linear-gradient(135deg, #10B981, #34d399)',
-    textClass: 'text-gradient-green',
+    textClass: 'text-accent-green',
     glowClass: 'glow-green',
   },
   blue: {
@@ -149,7 +150,7 @@ export const ACCENT_COLOR_MAP = {
     bg: 'rgba(59, 130, 246, 0.1)',
     bgStrong: 'rgba(59, 130, 246, 0.2)',
     gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
-    textClass: 'text-gradient-blue',
+    textClass: 'text-accent-blue',
     glowClass: 'glow-blue',
   },
   orange: {
@@ -159,7 +160,7 @@ export const ACCENT_COLOR_MAP = {
     bg: 'rgba(245, 158, 11, 0.1)',
     bgStrong: 'rgba(245, 158, 11, 0.2)',
     gradient: 'linear-gradient(135deg, #F59E0B, #fbbf24)',
-    textClass: 'text-gradient-orange',
+    textClass: 'text-accent-orange',
     glowClass: 'glow-orange',
   },
 } as const satisfies Record<AccentColor, {

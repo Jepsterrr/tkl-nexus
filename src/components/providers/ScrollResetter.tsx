@@ -9,7 +9,16 @@ export function ScrollResetter() {
   const scrollRef = useScrollContainer();
 
   useEffect(() => {
-    if (scrollRef.current) {
+    if (!scrollRef.current) return;
+    const hash = window.location.hash;
+    if (hash) {
+      // Scroll to hash target after content renders; accounts for custom scroll container
+      const timer = setTimeout(() => {
+        const target = document.getElementById(hash.slice(1));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+      return () => clearTimeout(timer);
+    } else {
       scrollRef.current.scrollTop = 0;
     }
   }, [pathname, scrollRef]);

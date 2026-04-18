@@ -90,15 +90,31 @@ export function StudentsContent() {
         className="relative min-h-svh flex flex-col items-center justify-center overflow-hidden pt-28 pb-16 px-6 sm:px-8 lg:px-16"
         aria-labelledby="students-hero-heading"
       >
-        {/* Dot grid bg */}
+        {/* Depth-0: atmospheric radials */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.09) 1px, transparent 1px)',
+            background:
+              'radial-gradient(ellipse 70% 60% at 75% 20%, rgba(16,185,129,0.10) 0%, transparent 55%),' +
+              'radial-gradient(ellipse 50% 45% at 10% 75%, rgba(139,92,246,0.07) 0%, transparent 55%)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Depth-1: dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.07) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
           aria-hidden="true"
         />
+
+        {/* Depth-2: parallax orbs */}
+        <GradientOrb color="green" size={680} top="15%" left="58%" opacity={0.10} animClass="animate-orb-float" />
+        <GradientOrb color="purple" size={320} top="60%" left="2%" opacity={0.08} animClass="animate-orb-float-reverse" />
+        <GradientOrb color="green" size={240} top="75%" left="85%" opacity={0.06} animClass="animate-orb-float" />
 
         {/* Ghost "S" watermark */}
         <div
@@ -192,6 +208,7 @@ export function StudentsContent() {
 
       {/* Benefits */}
       <section
+        id="mojligheter"
         className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
         aria-labelledby="benefits-heading"
       >

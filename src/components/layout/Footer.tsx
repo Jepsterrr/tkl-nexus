@@ -35,7 +35,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="relative border-t border-white/8 bg-black/30 backdrop-blur-md footer-theme">
+    <footer className="relative border-t border-border bg-[#0a0118]/30 backdrop-blur-md footer-theme">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
@@ -56,7 +56,7 @@ export function Footer() {
 
           {/* Quick links */}
           <nav aria-label={t.footer.quickLinks}>
-            <h3 className="footer-text text-xs font-semibold uppercase tracking-widest mb-4">
+            <h3 className="footer-text text-sm font-bold tracking-tight mb-4">
               {t.footer.quickLinks}
             </h3>
             <ul className="space-y-2.5">
@@ -64,7 +64,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="footer-text-muted text-sm hover:text-white transition-colors duration-150"
+                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
                   >
                     {label}
                   </Link>
@@ -75,7 +75,7 @@ export function Footer() {
 
           {/* Our pages */}
           <nav aria-label={t.footer.ourPages}>
-            <h3 className="footer-text text-xs font-semibold uppercase tracking-widest mb-4">
+            <h3 className="footer-text text-sm font-bold tracking-tight mb-4">
               {t.footer.ourPages}
             </h3>
             <ul className="space-y-2.5">
@@ -85,7 +85,7 @@ export function Footer() {
                     href={href}
                     target={external ? '_blank' : undefined}
                     rel={external ? 'noopener noreferrer' : undefined}
-                    className="footer-text-muted text-sm hover:text-white transition-colors duration-150"
+                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
                   >
                     {label}
                   </a>
@@ -98,9 +98,14 @@ export function Footer() {
             <ul className="space-y-2.5">
               {SECTION_PAGES.map(({ href }, i) => (
                 <li key={href}>
-                  <Link href={href} className="footer-text-muted text-sm hover:text-white transition-colors duration-150">
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
+                  >
                     {SECTION_LABELS[i]}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -108,7 +113,7 @@ export function Footer() {
 
           {/* Contact */}
           <nav aria-label={t.footer.contactLabel}>
-            <h3 className="footer-text text-xs font-semibold uppercase tracking-widest mb-4">
+            <h3 className="footer-text text-sm font-bold tracking-tight mb-4">
               {t.footer.contactLabel}
             </h3>
             <ul className="space-y-2.5">
@@ -118,7 +123,7 @@ export function Footer() {
                     href={href}
                     target={external ? '_blank' : undefined}
                     rel={external ? 'noopener noreferrer' : undefined}
-                    className="footer-text-muted text-sm hover:text-white transition-colors duration-150 break-all"
+                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150 break-all"
                   >
                     {label}
                   </a>
@@ -129,7 +134,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="footer-text-subtle text-xs">
             © {new Date().getFullYear()} TKL Nexus. {t.footer.copyright}
           </p>

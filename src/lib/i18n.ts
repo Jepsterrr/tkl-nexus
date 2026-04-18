@@ -46,30 +46,38 @@ export const TRANSLATIONS = {
       heading: 'Bygger broar till',
       headingAccent: 'framtidens karriärer',
       description:
-        'TKL Nexus förenar LTU-studenter och framgångsrika företag via exjobb, events, förmåner och direktkontakt — allt samlat på ett ställe.',
+        'Hitta exjobb, events och kårförmåner — eller nå LTU:s 1 600+ studenter via Teknologkårens arbetsmarknadsportal.',
       ctaStudents: 'För studenter',
+      ctaStudentsSub: 'Exjobb, events & förmåner',
       ctaCorporate: 'För företag',
+      ctaCorporateSub: 'Rekrytera & samarbeta',
+      ctaLabel: 'Välj din väg',
       featuresTitle: 'Vad vi erbjuder',
-      featuresSubtitle: 'Tre ingångar — en portal. Välj din väg.',
+      featuresSubtitle: 'Karriär, events och förmåner — samlat på ett ställe.',
       ctaBannerTitle: 'Redo att komma igång?',
       ctaBannerSubtitle: 'Kontakta oss så berättar vi hur ett samarbete kan se ut.',
       ctaBannerBtn: 'Kontakta oss',
       features: {
-        students: {
-          title: 'För Studenter',
-          description: 'Hitta exjobb, praktik och karriärmöjligheter som passar din utbildning.',
+        career: {
+          title: 'Karriär & Exjobb',
+          description: 'Bläddra bland exjobb, praktikplatser och trainee-uppdrag från LTU:s partnerföretag. Hitta rätt match för din utbildning.',
           linkLabel: 'Utforska möjligheter',
         },
-        corporate: {
-          title: 'För Företag',
-          description: 'Nå framtidens ingenjörer vid LTU och bygg långsiktiga relationer.',
-          linkLabel: 'Samarbeta med oss',
+        events: {
+          title: 'Events & Mingel',
+          description: 'Arbetsmarknadsdagar, sektionsmingel och karriärevent på och runt campus. Bygg kontakter och få insyn i branschen.',
+          linkLabel: 'Se kommande events',
         },
-        about: {
-          title: 'Om TKL Nexus',
-          description: 'Lär dig mer om Teknologkårens arbetsmarknadsgrupp och vår mission.',
-          linkLabel: 'Läs vår historia',
+        deals: {
+          title: 'Nexus Deals',
+          description: 'Exklusiva rabatter och förmåner för dig som är kårmedlem i Teknologkåren. Spar pengar som student.',
+          linkLabel: 'Utforska förmåner',
         },
+      },
+      pills: {
+        students: '1 600+ studenter',
+        companies: 'Partnerföretag',
+        types: 'Exjobb · Praktik · Trainee',
       },
     },
 
@@ -122,6 +130,11 @@ export const TRANSLATIONS = {
           cta: 'Utforska',
         },
       },
+      pills: {
+        jobs: 'Exjobb & Praktik',
+        events: 'Campus Events',
+        deals: 'Nexus Deals',
+      },
     },
 
     // --- Events page ---
@@ -145,7 +158,9 @@ export const TRANSLATIONS = {
       readOnLudd: 'Läs på LUDD',
       calendarNoEvents: 'Inga events detta datum.',
       luddFetchError: 'Kunde inte hämta events från campus just nu.',
+      ctaSeeEvents: 'Se alla events',
       nexusFetchError: 'Kunde inte hämta events.',
+      retry: 'Försök igen',
       filterAriaLabel: 'Filtrera events',
       allSections: 'Alla sektioner',
       sections: {
@@ -154,6 +169,11 @@ export const TRANSLATIONS = {
         i: 'I-sektionen',
         maskin: 'Maskinsektionen',
         general: 'Allmänt',
+      },
+      pills: {
+        nexus: 'TKL Nexus Events',
+        campus: 'Campus Events (LUDD)',
+        sections: 'Data · Geo · I · Maskin',
       },
     },
 
@@ -195,6 +215,11 @@ export const TRANSLATIONS = {
           linkLabel: 'Läs om samarbete',
         },
       },
+      pills: {
+        members: '1 600+ studenter',
+        programs: '4 sektioner · 30 program',
+        location: 'LTU · Luleå',
+      },
     },
 
     opportunities: {
@@ -216,6 +241,17 @@ export const TRANSLATIONS = {
       filterAriaLabel: 'Filtrera annonser',
       listingsHeading: 'Tillgängliga annonser',
       ctaSeeJobs: 'Se alla tjänster',
+      startLabel: 'Start:',
+      deadlineLabel: 'Sista dag:',
+      applyNow: 'Ansök nu',
+      readMore: 'Läs mer',
+      ongoing: 'Löpande',
+      retry: 'Försök igen',
+      resultsCount: '{count} annonser',
+      pills: {
+        types: 'Exjobb · Jobb · Praktik · Trainee',
+        ltu: 'LTU-anpassade möjligheter',
+      },
     },
 
     // --- Deals page ---
@@ -229,6 +265,7 @@ export const TRANSLATIONS = {
       noDealsFiltered: 'Inga deals matchar filtret.',
       loading: 'Hämtar deals...',
       error: 'Kunde inte hämta deals.',
+      retry: 'Försök igen',
       codeCopied: 'Kopierat!',
       visit: 'Besök',
       showMembership: 'Visa kårlegitimation',
@@ -238,6 +275,11 @@ export const TRANSLATIONS = {
         teknik: 'Teknik',
         sport: 'Sport',
         övrigt: 'Övrigt',
+      },
+      pills: {
+        exclusive: 'Exklusivt för kårmedlemmar',
+        offers: 'Rabatter & Erbjudanden',
+        name: 'Nexus Deals',
       },
     },
 
@@ -265,6 +307,11 @@ export const TRANSLATIONS = {
         portal: { title: 'Nexus Portal lanseras', desc: 'En digital plattform för exjobb och praktikplatser görs tillgänglig för kårmedlemmar.' },
         deals: { title: 'Nexus Deals introduceras', desc: 'Exklusiva förmåner och rabatter samlas för alla kårmedlemmar.' },
         growth: { title: 'Plattformen växer', desc: 'Utökad funktionalitet, fler samarbetspartners och en ny digital närvaro.' },
+      },
+      pills: {
+        founded: 'Grundad 2019',
+        org: 'Teknologkåren · LTU',
+        sections: '4 sektioner · Luleå',
       },
     },
   },
@@ -314,30 +361,38 @@ export const TRANSLATIONS = {
       heading: 'Building bridges to',
       headingAccent: 'future careers',
       description:
-        'TKL Nexus connects LTU students and industry-leading companies through thesis projects, events, benefits and direct contacts — all in one place.',
+        "Find thesis projects, events and student benefits — or connect with LTU's 1,600+ students through Teknologkåren's career portal.",
       ctaStudents: 'For students',
+      ctaStudentsSub: 'Thesis, events & benefits',
       ctaCorporate: 'For companies',
+      ctaCorporateSub: 'Recruit & collaborate',
+      ctaLabel: 'Choose your path',
       featuresTitle: 'What we offer',
-      featuresSubtitle: 'Three entry points — one portal. Choose your path.',
+      featuresSubtitle: 'Career opportunities, events and benefits — all in one place.',
       ctaBannerTitle: 'Ready to get started?',
       ctaBannerSubtitle: 'Contact us and we will explain how a collaboration could look.',
       ctaBannerBtn: 'Contact us',
       features: {
-        students: {
-          title: 'For Students',
-          description: 'Find thesis projects, internships and career opportunities matching your degree.',
+        career: {
+          title: 'Career & Thesis',
+          description: 'Browse thesis projects, internships and trainee positions from LTU-connected companies. Find the right match for your degree.',
           linkLabel: 'Explore opportunities',
         },
-        corporate: {
-          title: 'For Companies',
-          description: "Reach LTU's future engineers and build long-term relationships.",
-          linkLabel: 'Collaborate with us',
+        events: {
+          title: 'Events & Networking',
+          description: 'Career fairs, section networking events and industry meetups on and around campus. Build contacts and gain industry insight.',
+          linkLabel: 'See upcoming events',
         },
-        about: {
-          title: 'About TKL Nexus',
-          description: "Learn more about Teknologkåren's career group and our mission.",
-          linkLabel: 'Read our story',
+        deals: {
+          title: 'Nexus Deals',
+          description: 'Exclusive discounts and benefits for Teknologkåren members. Save money as a student.',
+          linkLabel: 'Explore benefits',
         },
+      },
+      pills: {
+        students: '1 600+ students',
+        companies: 'Partner companies',
+        types: 'Thesis · Internship · Trainee',
       },
     },
 
@@ -389,6 +444,11 @@ export const TRANSLATIONS = {
           cta: 'Explore',
         },
       },
+      pills: {
+        jobs: 'Thesis & Internship',
+        events: 'Campus Events',
+        deals: 'Nexus Deals',
+      },
     },
 
     // --- Events page ---
@@ -412,7 +472,9 @@ export const TRANSLATIONS = {
       readOnLudd: 'Read on LUDD',
       calendarNoEvents: 'No events on this date.',
       luddFetchError: 'Could not fetch campus events right now.',
+      ctaSeeEvents: 'See all events',
       nexusFetchError: 'Could not fetch events.',
+      retry: 'Try again',
       filterAriaLabel: 'Filter events',
       allSections: 'All sections',
       sections: {
@@ -421,6 +483,11 @@ export const TRANSLATIONS = {
         i: 'I Section',
         maskin: 'Machine Section',
         general: 'General',
+      },
+      pills: {
+        nexus: 'TKL Nexus Events',
+        campus: 'Campus Events (LUDD)',
+        sections: 'Data · Geo · I · Maskin',
       },
     },
 
@@ -459,6 +526,11 @@ export const TRANSLATIONS = {
           linkLabel: 'Read about partnership',
         },
       },
+      pills: {
+        members: '1,600+ students',
+        programs: '4 sections · 30 programmes',
+        location: 'LTU · Luleå',
+      },
     },
 
     opportunities: {
@@ -480,6 +552,17 @@ export const TRANSLATIONS = {
       filterAriaLabel: 'Filter opportunities',
       listingsHeading: 'Available listings',
       ctaSeeJobs: 'See all listings',
+      startLabel: 'Start:',
+      deadlineLabel: 'Deadline:',
+      applyNow: 'Apply Now',
+      readMore: 'Read more',
+      ongoing: 'Ongoing',
+      retry: 'Try again',
+      resultsCount: '{count} listings',
+      pills: {
+        types: 'Thesis · Jobs · Internship · Trainee',
+        ltu: 'LTU-tailored opportunities',
+      },
     },
 
     // --- Deals page ---
@@ -493,6 +576,7 @@ export const TRANSLATIONS = {
       noDealsFiltered: 'No deals match the filter.',
       loading: 'Fetching deals...',
       error: 'Could not fetch deals.',
+      retry: 'Try again',
       codeCopied: 'Copied!',
       visit: 'Visit',
       showMembership: 'Show membership card',
@@ -502,6 +586,11 @@ export const TRANSLATIONS = {
         teknik: 'Tech',
         sport: 'Sports',
         övrigt: 'Other',
+      },
+      pills: {
+        exclusive: 'Exclusive to union members',
+        offers: 'Discounts & Offers',
+        name: 'Nexus Deals',
       },
     },
 
@@ -529,6 +618,11 @@ export const TRANSLATIONS = {
         portal: { title: 'Nexus Portal launched', desc: 'A digital platform for thesis projects and internships is made available to union members.' },
         deals: { title: 'Nexus Deals introduced', desc: 'Exclusive benefits and discounts collected for all union members.' },
         growth: { title: 'Platform grows', desc: 'Expanded features, more partners and a new digital presence.' },
+      },
+      pills: {
+        founded: 'Founded 2019',
+        org: 'Teknologkåren · LTU',
+        sections: '4 sections · Luleå',
       },
     },
   },

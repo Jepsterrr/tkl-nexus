@@ -348,11 +348,6 @@ export function EventsContent() {
                     </span>
                   ))}
                 </RevealItem>
-                <RevealItem>
-                  <a href="#events-list" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}>
-                    {ev.ctaSeeEvents}
-                  </a>
-                </RevealItem>
               </StaggerReveal>
             </motion.div>
           </div>
@@ -380,11 +375,6 @@ export function EventsContent() {
                     <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />{label}
                   </span>
                 ))}
-              </RevealItem>
-              <RevealItem>
-                <a href="#events-list" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 mt-8 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 w-full sm:w-auto" style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)', boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}>
-                  {ev.ctaSeeEvents}
-                </a>
               </RevealItem>
             </StaggerReveal>
           </motion.div>

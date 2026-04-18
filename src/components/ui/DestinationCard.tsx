@@ -44,6 +44,9 @@ export function DestinationCard({
         }}
         aria-label={label}
       >
+        {/* Light mode: white glass overlay for visual substance */}
+        <div className="absolute inset-0 light:bg-white/50 pointer-events-none rounded-2xl" aria-hidden="true" />
+
         {/* Hover glow overlay */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -71,7 +74,7 @@ export function DestinationCard({
 
         {/* Text */}
         <h3
-          className="font-semibold text-base mb-1.5 hero-text transition-colors group-hover:text-white"
+          className="font-semibold text-base mb-1.5 hero-text"
         >
           {label}
         </h3>

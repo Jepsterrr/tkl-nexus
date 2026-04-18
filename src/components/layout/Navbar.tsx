@@ -57,7 +57,7 @@ export function Navbar() {
       >
         <div className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/30' : ''}`}>
           {/* Glassmorphism background */}
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-black/30 light:bg-white/80" />
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-[#0a0118]/30 light:bg-white/80" />
 
           <div className="relative px-5 py-3.5 flex items-center justify-between gap-4">
             {/* Logo */}
@@ -67,10 +67,10 @@ export function Navbar() {
               aria-label="TKL Nexus"
             >
               <img src="/Logo/TKL NEXUS.svg" alt="TKL Nexus" width={32} height={32} />
-              <span className="nav-text font-black text-lg tracking-tight select-none">
+              <span className="nav-text font-bold text-base select-none" style={{ letterSpacing: '-0.03em' }}>
                 TKL
               </span>
-              <span className="font-bold text-lg tracking-wide text-red-500">
+              <span className="font-semibold text-base tracking-wide text-red-500">
                 Nexus
               </span>
             </Link>
@@ -83,7 +83,7 @@ export function Navbar() {
                   <Link
                     key={href}
                     href={href}
-                    className={`relative px-4 py-2 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
+                    className={`relative px-4 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
                       isActive
                         ? 'nav-text'
                         : 'nav-text-muted hover:nav-text hover:bg-white/5'
@@ -117,7 +117,7 @@ export function Navbar() {
                     onClick={() => setTheme(value)}
                     aria-label={label}
                     aria-pressed={theme === value}
-                    className={`p-1.5 rounded-lg transition-all duration-200 ${
+                    className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-200 ${
                       theme === value
                         ? 'nav-control-active'
                         : 'nav-text-subtle hover:nav-text-muted'
@@ -134,9 +134,9 @@ export function Navbar() {
                   <button
                     key={lang}
                     onClick={() => setLocale(lang)}
-                    aria-current={locale === lang ? 'true' : undefined}
+                    aria-pressed={locale === lang}
                     aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
-                    className={`px-3 py-1.5 transition-all duration-200 ${
+                    className={`px-3 min-h-[44px] flex items-center justify-center transition-all duration-200 ${
                       locale === lang
                         ? 'nav-control-active'
                         : 'nav-text-subtle hover:nav-text-muted'
@@ -191,7 +191,7 @@ export function Navbar() {
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="fixed top-22 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-sm md:hidden"
           >
-            <div className="rounded-2xl border border-white/10 dark:border-white/10 light:border-black/10 backdrop-blur-2xl dark:bg-black/85 light:bg-white/92">
+            <div className="rounded-2xl border border-white/10 dark:border-white/10 light:border-black/10 backdrop-blur-2xl dark:bg-[#0a0118]/85 light:bg-white/92">
               <nav className="relative p-3 space-y-1" aria-label={t.nav.mobileNav}>
                 {NAV_LINKS.map(({ href, label, Icon }) => {
                   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
@@ -221,7 +221,7 @@ export function Navbar() {
                         onClick={() => setTheme(value)}
                         aria-label={label}
                         aria-pressed={theme === value}
-                        className={`p-2 rounded-lg text-xs font-medium transition-all ${
+                        className={`p-2.5 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-medium transition-all ${
                           theme === value ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
                         }`}
                       >
@@ -235,9 +235,9 @@ export function Navbar() {
                       <button
                         key={lang}
                         onClick={() => setLocale(lang)}
-                        aria-current={locale === lang ? 'true' : undefined}
+                        aria-pressed={locale === lang}
                         aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                        className={`px-3 min-h-[44px] flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
                           locale === lang ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
                         }`}
                       >

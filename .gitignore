@@ -28,6 +28,7 @@ claude.md
 .DS_Store
 *.pem
 docs/
+.impeccable.md
 
 # debug
 npm-debug.log*

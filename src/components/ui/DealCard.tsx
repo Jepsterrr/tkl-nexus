@@ -5,6 +5,7 @@ import { ExternalLink, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
+import { EASE_OUT_EXPO } from '@/lib/motion';
 
 const ORANGE = '#F59E0B';
 
@@ -39,15 +40,10 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
       initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12, scale: 0.97 }}
-      transition={{ duration: 0.35, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.35, delay: idx * 0.05, ease: EASE_OUT_EXPO }}
       whileHover={shouldReduceMotion ? {} : { y: -3 }}
       layout
-      className="group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
-      style={{
-        background: 'var(--about-card-bg)',
-        border: '1px solid var(--about-card-border)',
-        backdropFilter: 'blur(12px)',
-      }}
+      className="glass-card group relative overflow-hidden rounded-2xl flex flex-row items-stretch"
       aria-label={displayTitle}
     >
       {/* Shimmer-animation vid hover */}
@@ -69,7 +65,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
         {deal.logoUrl ? (
           <img
             src={deal.logoUrl}
-            alt={deal.company}
+            alt=""
             className="w-12 h-12 object-contain rounded-lg"
           />
         ) : (

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Sora, DM_Sans } from 'next/font/google';
+import { Unbounded, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -10,14 +10,14 @@ import { ScrollProvider } from '@/components/providers/ScrollProvider';
 import { ScrollContainer } from '@/components/providers/ScrollContainer';
 import { ScrollResetter } from '@/components/providers/ScrollResetter';
 
-const sora = Sora({
-  variable: '--font-sora',
+const unbounded = Unbounded({
+  variable: '--font-heading',
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+  weight: ['400', '600', '700', '800', '900'],
   display: 'swap',
 });
-const dmSans = DM_Sans({
-  variable: '--font-dm-sans',
+const hankenGrotesk = Hanken_Grotesk({
+  variable: '--font-body',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   display: 'swap',
@@ -96,7 +96,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="sv" className={`${sora.variable} ${dmSans.variable} dark`}>
+    <html lang="sv" className={`${unbounded.variable} ${hankenGrotesk.variable} dark`}>
       <head>
         <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />

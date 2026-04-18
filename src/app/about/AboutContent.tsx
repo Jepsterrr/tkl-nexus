@@ -69,14 +69,30 @@ export function AboutContent() {
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
         aria-labelledby="about-hero-heading"
       >
-        {/* Horizontal ruled lines bg */}
+        {/* Depth-0: atmospheric radials */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, rgba(227,6,19,0.06) 0px, rgba(227,6,19,0.06) 1px, transparent 1px, transparent 48px)',
+            background:
+              'radial-gradient(ellipse 65% 55% at 80% 15%, rgba(227,6,19,0.10) 0%, transparent 55%),' +
+              'radial-gradient(ellipse 45% 40% at 5% 80%, rgba(139,92,246,0.06) 0%, transparent 55%)',
           }}
           aria-hidden="true"
         />
+
+        {/* Depth-1: horizontal ruled lines */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, rgba(227,6,19,0.05) 0px, rgba(227,6,19,0.05) 1px, transparent 1px, transparent 48px)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Depth-2: parallax orbs */}
+        <GradientOrb color="red" size={620} top="10%" left="65%" opacity={0.10} animClass="animate-orb-float" />
+        <GradientOrb color="purple" size={280} top="65%" left="80%" opacity={0.07} animClass="animate-orb-float-reverse" />
+        <GradientOrb color="red" size={200} top="40%" left="0%" opacity={0.06} animClass="animate-orb-float" />
 
         {/* Giant "01" watermark */}
         <div

@@ -4,12 +4,6 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ---
 
-## Aktuella Buggar & Prioriterade Fixes
-
-- [ ] **OG-image saknas** — Exportera `TKL NEXUS.svg` till `1200×630px` PNG och spara som `/public/og-image.png` för social sharing (LinkedIn, Discord, iMessage).
-
----
-
 ## Epic 1: Navigation & Landningssidor
 
 - [ ] **`/corporate/post` saknas** — Länken "Annonsera hos oss" i `CorporateContent.tsx` (services-sektion) pekar på en sida som inte finns. Bygg sidan eller byt länk.
@@ -24,13 +18,7 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ## Epic 3: Karriärportalen
 
-Alla kärnfunktioner klara. Inga öppna punkter.
-
----
-
-## Epic 4: Nexus Deals
-
-Alla kärnfunktioner klara. Inga öppna punkter.
+- [ ] _(Framtid)_ Admin-dashboard för att lägga till, redigera och avpublicera jobbannonser utan att gå via Firestore-konsolen.
 
 ---
 
@@ -39,9 +27,5 @@ Alla kärnfunktioner klara. Inga öppna punkter.
 - [ ] **SEO: `robots.txt` och `sitemap.xml`** — Statiska filer saknas i `/public/`. Crawlers har ingen guide och indexering tar längre tid.
 
 - [ ] **CSP: Ta bort `unsafe-eval`** — `script-src` i `next.config.ts` innehåller `'unsafe-eval'` som inte behövs i produktionsbygge. Bör tas bort för skärpt säkerhetspolicy.
-
-- [ ] **Tillgänglighet: `role="status"` på tomma states** — `EventsContent`, `CareerContent` och `DealsContent` saknar `role="status"` på sina "inga resultat"-meddelanden. Skärmläsare informeras inte om tillståndsändringar.
-
-- [ ] **Tillgänglighet: `aria-label` på mobil språkväxlare** — Knapparna "SV"/"EN" i mobilmenyn (Navbar) saknar `aria-label`. Desktop-versionen är korrekt implementerad.
 
 - [ ] _(Framtid)_ Validera rendering genom prestandatester och säkerställ tillgänglighets-score >90 med `.agents/skills/design-auditor.md`.

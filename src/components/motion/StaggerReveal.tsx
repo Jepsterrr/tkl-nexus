@@ -1,7 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { EASE_STANDARD } from '@/lib/motion';
 
 const containerVariants = {
   hidden: {},
@@ -18,10 +19,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.46, 0.45, 0.94] as const,
-    },
+    transition: { duration: 0.6, ease: EASE_STANDARD },
   },
 };
 
@@ -33,24 +31,26 @@ interface StaggerRevealProps {
 
 export function StaggerReveal({ children, className, delay = 0 }: StaggerRevealProps) {
   return (
-    <motion.div
-      className={className}
-      variants={{
-        ...containerVariants,
-        visible: {
-          ...containerVariants.visible,
-          transition: {
-            ...containerVariants.visible.transition,
-            delayChildren: delay,
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        className={className}
+        variants={{
+          ...containerVariants,
+          visible: {
+            ...containerVariants.visible,
+            transition: {
+              ...containerVariants.visible.transition,
+              delayChildren: delay,
+            },
           },
-        },
-      }}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
-    >
-      {children}
-    </motion.div>
+        }}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-60px' }}
+      >
+        {children}
+      </motion.div>
+    </MotionConfig>
   );
 }
 
