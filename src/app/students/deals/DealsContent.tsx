@@ -71,7 +71,7 @@ export function DealsContent() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(135deg, rgba(245,158,11,0.035) 0px, rgba(245,158,11,0.035) 1px, transparent 1px, transparent 28px)',
+              'repeating-linear-gradient(135deg, rgba(245,158,11,0.055) 0px, rgba(245,158,11,0.055) 1px, transparent 1px, transparent 28px)',
           }}
           aria-hidden="true"
         />
@@ -83,9 +83,9 @@ export function DealsContent() {
             style={{
               width: 'clamp(280px, 45vw, 520px)',
               height: 'clamp(175px, 28vw, 325px)',
-              border: '1px solid rgba(245,158,11,0.14)',
+              border: '1px solid rgba(245,158,11,0.20)',
               borderRadius: '28px',
-              background: 'rgba(245,158,11,0.04)',
+              background: 'rgba(245,158,11,0.06)',
               transform: 'translate(-50%, -50%) rotate(-12deg)',
             }}
             aria-hidden="true"

@@ -73,7 +73,7 @@ export function AboutContent() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, rgba(227,6,19,0.04) 0px, rgba(227,6,19,0.04) 1px, transparent 1px, transparent 48px)',
+            backgroundImage: 'repeating-linear-gradient(0deg, rgba(227,6,19,0.06) 0px, rgba(227,6,19,0.06) 1px, transparent 1px, transparent 48px)',
           }}
           aria-hidden="true"
         />
@@ -88,7 +88,7 @@ export function AboutContent() {
             lineHeight: 1,
             letterSpacing: '-0.06em',
             color: '#E30613',
-            opacity: 0.035,
+            opacity: 0.05,
             transform: 'translate(8%, 15%)',
           }}
           aria-hidden="true"

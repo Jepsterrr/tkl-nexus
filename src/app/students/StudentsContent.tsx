@@ -94,7 +94,7 @@ export function StudentsContent() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.07) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(16,185,129,0.09) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
           aria-hidden="true"
@@ -109,7 +109,7 @@ export function StudentsContent() {
             fontSize: 'clamp(16rem, 35vw, 28rem)',
             lineHeight: 1,
             color: '#10B981',
-            opacity: 0.025,
+            opacity: 0.04,
             transform: 'translate(20%, -50%)',
             letterSpacing: '-0.06em',
           }}

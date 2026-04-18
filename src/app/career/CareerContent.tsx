@@ -116,8 +116,8 @@ export function CareerContent() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px),' +
-              'linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)',
+              'linear-gradient(rgba(59,130,246,0.07) 1px, transparent 1px),' +
+              'linear-gradient(90deg, rgba(59,130,246,0.07) 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }}
           aria-hidden="true"
