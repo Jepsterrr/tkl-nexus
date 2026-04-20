@@ -726,7 +726,7 @@ export function PostContent() {
                     isValid
                       ? {
                           background: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
-                          boxShadow: '0 0 28px rgba(59,130,246,0.4), 0 8px 32px rgba(0,0,0,0.25)',
+                          boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
                         }
                       : {
                           background: 'var(--glass-bg-subtle)',
