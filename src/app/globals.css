@@ -233,6 +233,44 @@
     box-sizing: border-box;
   }
 
+  /* Native select — solid bg matching glass-bg-subtle on glass-bg-strong on cosmic-bg.
+    Dark:  rgba(255,255,255,0.04) on rgba(255,255,255,0.06) on #0a0118 ≈ #221a2f
+    Light: rgba(255,255,255,0.55) on rgba(255,255,255,0.75) on #f0eefb ≈ #f7f6fd   */
+  .dark select {
+    background-color: #221a2f !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    color-scheme: dark;
+    outline: none !important;
+  }
+  .dark select:focus { outline: none !important; }
+  .dark select option {
+    background-color: #221a2f;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .light select {
+    background-color: #f7f6fd !important;
+    color: #0d0b1a !important;
+    color-scheme: light;
+    outline: none !important;
+  }
+  .light select:focus { outline: none !important; }
+  .light select option {
+    background-color: #f7f6fd;
+    color: #0d0b1a;
+  }
+
+  /* Date/time pickers — color-scheme makes browser calendar/clock follow theme */
+  .dark input[type="date"],
+  .dark input[type="datetime-local"],
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+  .light input[type="date"],
+  .light input[type="datetime-local"],
+  .light input[type="time"] {
+    color-scheme: light;
+  }
+
   html {
     font-size: var(--font-size);
     scroll-behavior: smooth;

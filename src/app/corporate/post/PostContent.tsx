@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowLeft, Briefcase, CalendarDays, Gift } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -195,7 +195,7 @@ const inputCls =
   'w-full rounded-xl px-4 py-3 text-sm transition-all duration-150 outline-none ' +
   'bg-[var(--glass-bg-subtle)] border border-[var(--glass-border-subtle)] ' +
   'text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] ' +
-  'focus:border-[#3B82F6] focus:ring-1 focus:ring-[rgba(59,130,246,0.4)]';
+  'focus:ring-1 focus:ring-[rgba(59,130,246,0.4)]';
 
 const labelCls = 'block text-xs font-semibold tracking-wide text-[var(--hero-text-muted)] mb-1.5';
 
@@ -204,7 +204,6 @@ const labelCls = 'block text-xs font-semibold tracking-wide text-[var(--hero-tex
 export function PostContent() {
   const { t } = useLanguage();
   const cp = t.corporatePost;
-  const shouldReduceMotion = useReducedMotion();
   const colors = ACCENT_COLOR_MAP['blue'];
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('opportunity');
@@ -369,7 +368,7 @@ export function PostContent() {
         <div className="max-w-3xl mx-auto">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             role="tabpanel"
