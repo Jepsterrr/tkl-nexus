@@ -4,7 +4,7 @@ import { PostContent } from './PostContent';
 export const metadata: Metadata = {
   title: 'Annonsera hos TKL Nexus — Publicera Jobb, Event & Deals | TKL Nexus',
   description:
-    'Skicka in er jobbannons, event eller deal till Teknologkårens arbetsmarknadsportal. Vi publicerar manuellt och återkommer inom 2–3 arbetsdagar.',
+    'Skicka in er jobbannons, event eller deal till Teknologkårens arbetsmarknadsportal. Vi publicerar manuellt och återkommer så snart vi kan.',
   keywords: [
     'annonsera exjobb LTU', 'publicera event LTU', 'nexus deals företag',
     'samarbeta Teknologkåren', 'rekrytera studenter Luleå',
