@@ -9,7 +9,7 @@ import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 type ActiveTab = 'opportunity' | 'event' | 'deal';
 
@@ -58,7 +58,7 @@ interface DealForm {
   logoUrl: string;
 }
 
-// ─── Initial state ────────────────────────────────────────────────────────────
+// Initial state
 
 const EMPTY_OPPORTUNITY: OpportunityForm = {
   contactName: '', contactEmail: '', title: '', titleEn: '',
@@ -78,7 +78,7 @@ const EMPTY_DEAL: DealForm = {
   discountCode: '', discount: '', link: '', logoUrl: '',
 };
 
-// ─── Mailto builders ──────────────────────────────────────────────────────────
+// Mailto builders
 
 function field(label: string, value: string): string {
   return `${label}: ${value || '(ej angivet)'}`;
@@ -175,7 +175,7 @@ function buildDealMailto(f: DealForm): string {
   return `mailto:ao@teknologkaren.se?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-// ─── Validation ───────────────────────────────────────────────────────────────
+// Validation
 
 function isOpportunityValid(f: OpportunityForm): boolean {
   return !!(f.contactName && f.contactEmail && f.title && f.company && f.type && f.location);
@@ -189,7 +189,7 @@ function isDealValid(f: DealForm): boolean {
   return !!(f.contactName && f.contactEmail && f.company && f.title && f.category && f.description);
 }
 
-// ─── Shared styles ────────────────────────────────────────────────────────────
+// Shared styles
 
 const inputCls =
   'w-full rounded-xl px-4 py-3 text-sm transition-all duration-150 outline-none ' +
@@ -199,7 +199,7 @@ const inputCls =
 
 const labelCls = 'block text-xs font-semibold tracking-wide text-[var(--hero-text-muted)] mb-1.5';
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// Component
 
 export function PostContent() {
   const { t } = useLanguage();
@@ -211,19 +211,21 @@ export function PostContent() {
   const [opp, setOpp] = useState<OpportunityForm>(EMPTY_OPPORTUNITY);
   const [evt, setEvt] = useState<EventForm>(EMPTY_EVENT);
   const [deal, setDeal] = useState<DealForm>(EMPTY_DEAL);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
 
   function handleSubmit() {
     let url = '';
-    if (activeTab === 'opportunity') url = buildOpportunityMailto(opp);
-    else if (activeTab === 'event') url = buildEventMailto(evt);
-    else url = buildDealMailto(deal);
+    if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail });
+    else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail });
+    else url = buildDealMailto({ ...deal, contactName, contactEmail });
     window.location.href = url;
   }
 
   const isValid =
-    activeTab === 'opportunity' ? isOpportunityValid(opp) :
-    activeTab === 'event' ? isEventValid(evt) :
-    isDealValid(deal);
+    activeTab === 'opportunity' ? isOpportunityValid({ ...opp, contactName, contactEmail }) :
+    activeTab === 'event' ? isEventValid({ ...evt, contactName, contactEmail }) :
+    isDealValid({ ...deal, contactName, contactEmail });
 
   const TABS: { id: ActiveTab; label: string; Icon: typeof Briefcase }[] = [
     { id: 'opportunity', label: cp.tabs.opportunity, Icon: Briefcase },
@@ -235,7 +237,7 @@ export function PostContent() {
 
   return (
     <>
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      {/* HERO */}
       <section
         className="relative pt-32 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden"
         aria-labelledby="post-hero-heading"
@@ -309,7 +311,7 @@ export function PostContent() {
         </div>
       </section>
 
-      {/* ── TAB NAVIGATION ────────────────────────────────────────────────── */}
+      {/* TAB NAVIGATION */}
       <div
         className="sticky top-[var(--navbar-height)] z-20 py-4 px-4 sm:px-6 lg:px-8"
         style={{
@@ -362,7 +364,7 @@ export function PostContent() {
         </div>
       </div>
 
-      {/* ── FORM CARD ─────────────────────────────────────────────────────── */}
+      {/* FORM CARD */}
       <section className="px-4 sm:px-6 lg:px-8 py-8 pb-24">
         <div className="max-w-3xl mx-auto">
           <motion.div
@@ -382,7 +384,7 @@ export function PostContent() {
                 backdropFilter: 'blur(16px)',
               }}
             >
-              {/* ── Contact fields (shared across all tabs) ── */}
+              {/* Contact fields (shared across all tabs) */}
               <fieldset>
                 <legend
                   className="text-base font-bold hero-text mb-5"
@@ -401,17 +403,8 @@ export function PostContent() {
                       autoComplete="name"
                       placeholder={cp.contact.namePlaceholder}
                       className={inputCls}
-                      value={
-                        activeTab === 'opportunity' ? opp.contactName :
-                        activeTab === 'event' ? evt.contactName :
-                        deal.contactName
-                      }
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (activeTab === 'opportunity') setOpp(p => ({ ...p, contactName: v }));
-                        else if (activeTab === 'event') setEvt(p => ({ ...p, contactName: v }));
-                        else setDeal(p => ({ ...p, contactName: v }));
-                      }}
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
                     />
                   </div>
                   <div>
@@ -424,26 +417,17 @@ export function PostContent() {
                       autoComplete="email"
                       placeholder={cp.contact.emailPlaceholder}
                       className={inputCls}
-                      value={
-                        activeTab === 'opportunity' ? opp.contactEmail :
-                        activeTab === 'event' ? evt.contactEmail :
-                        deal.contactEmail
-                      }
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        if (activeTab === 'opportunity') setOpp(p => ({ ...p, contactEmail: v }));
-                        else if (activeTab === 'event') setEvt(p => ({ ...p, contactEmail: v }));
-                        else setDeal(p => ({ ...p, contactEmail: v }));
-                      }}
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
                     />
                   </div>
                 </div>
               </fieldset>
 
-              {/* ── Divider ── */}
+              {/* Divider */}
               <div style={{ borderTop: '1px solid var(--glass-border-subtle)' }} aria-hidden="true" />
 
-              {/* ── Opportunity form ── */}
+              {/* Opportunity form */}
               {activeTab === 'opportunity' && (
                 <fieldset>
                   <legend
@@ -536,7 +520,7 @@ export function PostContent() {
                 </fieldset>
               )}
 
-              {/* ── Event form ── */}
+              {/* Event form */}
               {activeTab === 'event' && (
                 <fieldset>
                   <legend
@@ -632,7 +616,7 @@ export function PostContent() {
                 </fieldset>
               )}
 
-              {/* ── Deal form ── */}
+              {/* Deal form */}
               {activeTab === 'deal' && (
                 <fieldset>
                   <legend
@@ -728,7 +712,7 @@ export function PostContent() {
                 </fieldset>
               )}
 
-              {/* ── Required note + Submit ── */}
+              {/* Required note + Submit */}
               <div style={{ borderTop: '1px solid var(--glass-border-subtle)', paddingTop: '1.5rem' }}>
                 <p className="text-xs hero-text-muted mb-4">{cp.requiredNote}</p>
 
@@ -758,11 +742,8 @@ export function PostContent() {
 
             </div>
 
-            {/* ── Info banner ── */}
-            <p
-              className="mt-4 text-center text-xs hero-text-muted"
-              aria-live="polite"
-            >
+            {/* Info banner */}
+            <p className="mt-4 text-center text-xs hero-text-muted">
               {cp.infoBanner}
             </p>
 
