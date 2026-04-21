@@ -65,7 +65,12 @@ export default function RootLayout({
     name: 'TKL Nexus',
     alternateName: 'Teknologkårens Arbetsmarknadsportal',
     url: 'https://tklnexus.se',
-    logo: 'https://tklnexus.se/og-image.png',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://tklnexus.se/og-image.png',
+      width: 1200,
+      height: 630,
+    },
     description: 'TKL Nexus är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
     address: {
       '@type': 'PostalAddress',
@@ -76,6 +81,7 @@ export default function RootLayout({
     parentOrganization: {
       '@type': 'Organization',
       name: 'Teknologkåren vid LTU',
+      url: 'https://www.teknologkaren.se',
     },
   };
 
@@ -85,14 +91,6 @@ export default function RootLayout({
     name: 'TKL Nexus',
     url: 'https://tklnexus.se',
     description: 'Arbetsmarknadsportal för LTU-studenter — exjobb, praktik, trainee och karriärevent.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: 'https://tklnexus.se/career',
-      },
-      'query-input': 'required name=search_term_string',
-    },
   };
 
   return (
