@@ -285,8 +285,49 @@ export function EventsContent() {
     { key: 'maskin', label: ev.filterMaskin, logo: '/Logo/Maskin.png', color: SECTION_COLORS.maskin },
   ];
 
+  const eventSchemaList = allEvents.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Kommande events – TKL Nexus',
+    url: 'https://tklnexus.se/events',
+    itemListElement: allEvents.map((event, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Event',
+        name: event.title,
+        startDate: event.date,
+        ...(event.endDate ? { endDate: event.endDate } : {}),
+        description: event.description,
+        eventStatus: 'https://schema.org/EventScheduled',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        location: {
+          '@type': 'Place',
+          name: event.location,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Luleå',
+            addressRegion: 'Norrbotten',
+            addressCountry: 'SE',
+          },
+        },
+        organizer: {
+          '@type': 'Organization',
+          name: 'TKL Nexus',
+          url: 'https://tklnexus.se',
+        },
+      },
+    })),
+  } : null;
+
   return (
     <>
+      {eventSchemaList && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchemaList) }}
+        />
+      )}
       <section ref={heroRef} className="relative min-h-[60svh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-12 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
         {/* Concentric circles bg */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
