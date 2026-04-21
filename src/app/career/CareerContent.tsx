@@ -103,8 +103,54 @@ export function CareerContent() {
     ? opportunities
     : opportunities.filter((o) => o.type === filter);
 
+  const jobSchemaList = opportunities.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Lediga tjänster & exjobb via TKL Nexus',
+    url: 'https://tklnexus.se/career',
+    itemListElement: opportunities.map((opp, index) => {
+      const employmentTypeMap: Record<string, string> = {
+        jobb: 'FULL_TIME',
+        exjobb: 'INTERN',
+        praktik: 'INTERN',
+        trainee: 'FULL_TIME',
+      };
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'JobPosting',
+          title: opp.title,
+          description: opp.description ?? `${opp.type} hos ${opp.company} i ${opp.location}`,
+          datePosted: opp.createdAt,
+          ...(opp.deadline ? { validThrough: opp.deadline } : {}),
+          employmentType: employmentTypeMap[opp.type] ?? 'FULL_TIME',
+          hiringOrganization: {
+            '@type': 'Organization',
+            name: opp.company,
+          },
+          jobLocation: {
+            '@type': 'Place',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: opp.location || 'Luleå',
+              addressCountry: 'SE',
+            },
+          },
+          ...(opp.applyUrl ? { url: opp.applyUrl } : {}),
+        },
+      };
+    }),
+  } : null;
+
   return (
     <>
+      {jobSchemaList && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchemaList) }}
+        />
+      )}
       {/* HERO SECTION */}
       <section
         ref={heroRef}
