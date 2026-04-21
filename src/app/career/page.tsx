@@ -31,6 +31,9 @@ export default function CareerPage() {
   return (
     <main className="min-h-svh bg-cosmic-bg selection:bg-[#8B5CF6]/30">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <p className="sr-only">
+        Hitta exjobb, praktikplatser, traineeprogram och ingenjörsjobb hos företag som samarbetar med Teknologkåren vid Luleå tekniska universitet. Sök bland aktuella annonser från teknik- och industriföretag i Luleå, Norrbotten och resten av Sverige. Passa på att bygga kontakter och starta din ingenjörskarriär redan under studietiden.
+      </p>
       <CareerContent />
     </main>
   );

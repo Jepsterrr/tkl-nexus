@@ -31,6 +31,9 @@ export default function DealsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <p className="sr-only">
+        Nexus Deals samlar exklusiva rabatter, erbjudanden och förmåner för dig som är kårmedlem vid Luleå tekniska universitet. Spara pengar på programvara, utrustning, mat och tjänster under din studietid. Förmånerna uppdateras löpande av TKL Nexus arbetsmarknadsgrupp.
+      </p>
       <DealsContent />
     </>
   );
