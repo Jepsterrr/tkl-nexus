@@ -1,0 +1,20 @@
+# TKL Nexus
+
+> TKL Nexus är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet (LTU). Plattformen kopplar samman LTU:s 1 600+ ingenjörsstudenter med teknik- och industriföretag via exjobb, praktik, traineeprogram, karriärevent och kårförmåner.
+
+## Plattformen
+
+- [Startsida](https://tklnexus.se/): Översikt och ingångspunkter för studenter och företag.
+- [För studenter](https://tklnexus.se/students): Exjobb, praktik, traineeprogram och kårförmåner för LTU-studenter.
+- [Karriär & Exjobb](https://tklnexus.se/career): Aktuella jobbannonser från företag som rekryterar LTU-studenter.
+- [Events](https://tklnexus.se/events): Karriärevent, arbetsmarknadsdagar och sektionsaktiviteter vid LTU.
+- [Nexus Deals](https://tklnexus.se/students/deals): Exklusiva rabatter och förmåner för kårmedlemmar i Teknologkåren.
+- [För företag](https://tklnexus.se/corporate): Information om hur företag kan samarbeta med Teknologkåren via TKL Nexus.
+- [Annonsera](https://tklnexus.se/corporate/post): Formulär för att publicera exjobb, event eller deals via TKL Nexus.
+- [Om oss](https://tklnexus.se/about): Om TKL Nexus arbetsmarknadsgrupp och Teknologkåren vid LTU.
+
+## Organisation
+
+Teknologkåren vid Luleå tekniska universitet
+Kontakt: ao@teknologkaren.se
+LinkedIn: https://linkedin.com/in/tkl-nexus/
