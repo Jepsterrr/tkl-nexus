@@ -3,7 +3,7 @@ import { EventsContent } from './EventsContent';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/events' },
-  title: 'Karriärevent & Arbetsmarknadsdagar vid LTU | TKL Nexus',
+  title: 'Karriärevent & Arbetsmarknadsdagar vid LTU',
   description:
     'Kommande karriärevent, arbetsmarknadsdagar, företagsmingel och sektionsaktiviteter vid Luleå tekniska universitet. Nätverka med teknik- och industriföretag i Norrbotten.',
   keywords: [
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     'sektionsaktiviteter LTU', 'campus events Luleå tekniska',
   ],
   openGraph: {
-    title: 'Karriärevent & Arbetsmarknadsdagar vid LTU | TKL Nexus',
+    title: 'Karriärevent & Arbetsmarknadsdagar vid LTU',
     description:
       'Kommande karriärevent, arbetsmarknadsdagar och företagsmingel vid Luleå tekniska universitet. Nätverka med teknik- och industriföretag i Norrbotten.',
     url: 'https://tklnexus.se/events',

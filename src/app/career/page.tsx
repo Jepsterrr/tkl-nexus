@@ -3,7 +3,7 @@ import { CareerContent } from './CareerContent';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/career' },
-  title: 'Exjobb & Praktik vid LTU | TKL Nexus',
+  title: 'Exjobb & Praktik vid LTU',
   description:
     'Hitta exjobb, praktik, traineeprogram och ingenjörsjobb vid Luleå tekniska universitet. Aktuella annonser från företag som rekryterar LTU-studenter i Luleå och Norrbotten.',
   keywords: [
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     'rekrytering LTU', 'nyexaminerad ingenjör', 'karriär Luleå tekniska universitet',
   ],
   openGraph: {
-    title: 'Exjobb & Praktik vid LTU | TKL Nexus',
+    title: 'Exjobb & Praktik vid LTU',
     description:
       'Hitta exjobb, praktik, traineeprogram och ingenjörsjobb vid Luleå tekniska universitet. Aktuella annonser från företag som rekryterar LTU-studenter.',
     url: 'https://tklnexus.se/career',

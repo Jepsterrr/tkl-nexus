@@ -3,7 +3,7 @@ import { PostContent } from './PostContent';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/corporate/post' },
-  title: 'Annonsera hos TKL Nexus — Publicera Jobb, Event & Deals | TKL Nexus',
+  title: 'Annonsera hos TKL Nexus — Publicera Jobb, Event & Deals',
   description:
     'Skicka in er jobbannons, event eller deal till Teknologkårens arbetsmarknadsportal. Vi publicerar manuellt och återkommer så snart vi kan.',
   keywords: [
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     'samarbeta Teknologkåren', 'rekrytera studenter Luleå',
   ],
   openGraph: {
-    title: 'Annonsera hos TKL Nexus | TKL Nexus',
+    title: 'Annonsera hos TKL Nexus — Publicera Jobb, Event & Deals',
     description: 'Publicera jobb, event och deals till LTU:s 1 600+ studenter.',
     url: 'https://tklnexus.se/corporate/post',
     siteName: 'TKL Nexus',
