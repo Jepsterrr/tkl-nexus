@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { PostContent } from './PostContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/corporate/post' },
   title: 'Annonsera hos TKL Nexus — Publicera Jobb, Event & Deals | TKL Nexus',
   description:
     'Skicka in er jobbannons, event eller deal till Teknologkårens arbetsmarknadsportal. Vi publicerar manuellt och återkommer så snart vi kan.',

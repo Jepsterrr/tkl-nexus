@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AboutContent } from './AboutContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/about' },
   title: 'Om TKL Nexus – Teknologkårens Arbetsmarknadsportal | LTU',
   description:
     'TKL Nexus är Teknologkårens arbetsmarknadsgrupp vid Luleå tekniska universitet. Vi kopplar samman LTU-studenter med näringsliv och skapar möjligheter till exjobb, praktik och karriärstart i Norrbotten.',

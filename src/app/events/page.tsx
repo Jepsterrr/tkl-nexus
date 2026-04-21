@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { EventsContent } from './EventsContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/events' },
   title: 'Karriärevent & Arbetsmarknadsdagar vid LTU | TKL Nexus',
   description:
     'Kommande karriärevent, arbetsmarknadsdagar, företagsmingel och sektionsaktiviteter vid Luleå tekniska universitet. Nätverka med teknik- och industriföretag i Norrbotten.',

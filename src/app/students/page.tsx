@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { StudentsContent } from './StudentsContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/students' },
   title: 'Exjobb, Praktik & Karriär för LTU-studenter | TKL Nexus',
   description:
     'Din ingång till exjobb, praktik, traineeprogram och kårförmåner som LTU-student. Koppla samman din karriär med Norrlands ledande teknik- och industriföretag via Teknologkårens arbetsmarknadsportal.',

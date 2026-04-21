@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CorporateContent } from './CorporateContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/corporate' },
   title: 'Rekrytera LTU-studenter & Annonsera Exjobb | TKL Nexus',
   description:
     'Nå 1 600+ ingenjörsstudenter vid Luleå tekniska universitet. Publicera exjobb och praktikplatser, boka events och stärk ert employer brand via Teknologkårens arbetsmarknadsportal.',

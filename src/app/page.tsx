@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { HomeContent } from './HomeContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/' },
   title: 'TKL Nexus – Karriärportal för LTU-studenter & Företag',
   description:
     'TKL Nexus kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',

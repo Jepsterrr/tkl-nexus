@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { DealsContent } from './DealsContent';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/students/deals' },
   title: 'Studentförmåner & Rabatter för LTU-studenter | Nexus Deals',
   description:
     'Exklusiva rabatter, erbjudanden och förmåner för kårmedlemmar i Teknologkåren vid Luleå tekniska universitet. Spara pengar som LTU-student med Nexus Deals.',
