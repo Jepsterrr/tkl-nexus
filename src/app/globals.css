@@ -424,6 +424,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
+  text-wrap: balance;
 }
 
 /* Glass card utility — base surface for cards: themed bg, border, blur */

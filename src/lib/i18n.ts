@@ -43,7 +43,7 @@ export const TRANSLATIONS = {
     // --- Home page ---
     home: {
       badge: 'Teknologkårens Arbetsmarknadsportal',
-      heading: 'Bygger broar till',
+      heading: 'Bygger broar\u00a0till',
       headingAccent: 'framtidens karriärer',
       description:
         'Hitta exjobb, events och kårförmåner — eller nå LTU:s 1 600+ studenter via Teknologkårens arbetsmarknadsportal.',
