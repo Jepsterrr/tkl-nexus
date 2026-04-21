@@ -362,9 +362,9 @@ export function EventsContent() {
                 </span>
               </RevealItem>
               <RevealItem>
-                <h1 className="text-4xl sm:text-5xl hero-text hero-heading">
+                <h2 className="text-4xl sm:text-5xl hero-text hero-heading">
                   {ev.heading}{' '}<span className="text-accent-purple">{ev.headingAccent}</span>
-                </h1>
+                </h2>
               </RevealItem>
               <RevealItem>
                 <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">{ev.description}</p>
