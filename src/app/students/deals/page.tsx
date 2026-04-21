@@ -20,5 +20,18 @@ export const metadata: Metadata = {
 };
 
 export default function DealsPage() {
-  return <DealsContent />;
+  const breadcrumb = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
+      { '@type': 'ListItem', position: 2, name: 'För studenter', item: 'https://tklnexus.se/students' },
+      { '@type': 'ListItem', position: 3, name: 'Nexus Deals', item: 'https://tklnexus.se/students/deals' },
+    ],
+  };
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <DealsContent />
+    </>
+  );
 }

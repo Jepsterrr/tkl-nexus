@@ -21,5 +21,17 @@ export const metadata: Metadata = {
 };
 
 export default function EventsPage() {
-  return <EventsContent />;
+  const breadcrumb = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
+      { '@type': 'ListItem', position: 2, name: 'Events', item: 'https://tklnexus.se/events' },
+    ],
+  };
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <EventsContent />
+    </>
+  );
 }

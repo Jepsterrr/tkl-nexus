@@ -21,8 +21,16 @@ export const metadata: Metadata = {
 };
 
 export default function CareerPage() {
+  const breadcrumb = {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
+      { '@type': 'ListItem', position: 2, name: 'Karriär & Exjobb', item: 'https://tklnexus.se/career' },
+    ],
+  };
   return (
     <main className="min-h-svh bg-cosmic-bg selection:bg-[#8B5CF6]/30">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
       <CareerContent />
     </main>
   );
