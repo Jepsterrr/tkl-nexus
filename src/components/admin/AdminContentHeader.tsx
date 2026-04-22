@@ -26,8 +26,9 @@ export function AdminContentHeader({ user }: AdminContentHeaderProps) {
     <header className="admin-content-header">
       <span className="admin-content-header-title">{title}</span>
       <div className="admin-content-header-right">
-        <span>{user.email}</span>
+        <span>{user.email ?? ''}</span>
         <button
+          type="button"
           className="admin-signout"
           onClick={() => { signOutAdmin(); }}
         >
