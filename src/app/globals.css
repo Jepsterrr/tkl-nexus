@@ -456,3 +456,497 @@
   z-index: 9999;
   font-weight: 600;
 }
+
+/* Admin Panel */
+
+.admin-login-wrap {
+  min-height: calc(100svh - var(--navbar-height, 72px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(12% 0.01 265);
+  padding: var(--space-6);
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 22rem;
+  background: oklch(16% 0.012 265);
+  border: 1px solid oklch(28% 0.015 265);
+  border-radius: 6px;
+  padding: var(--space-8);
+  box-shadow:
+    0 0 0 1px oklch(28% 0.015 265),
+    0 8px 32px oklch(8% 0.01 265 / 0.8);
+}
+
+.admin-login-header {
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+.admin-login-logo {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: oklch(72% 0.12 265);
+}
+
+.admin-login-sub {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: oklch(55% 0.02 265);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: var(--space-1);
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.admin-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: oklch(65% 0.02 265);
+  letter-spacing: 0.05em;
+}
+
+.admin-input {
+  background: oklch(19% 0.012 265);
+  border: 1px solid oklch(28% 0.015 265);
+  border-radius: 4px;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: oklch(90% 0.01 265);
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+
+.admin-input::placeholder {
+  color: oklch(40% 0.01 265);
+}
+
+.admin-input:focus {
+  border-color: oklch(55% 0.12 265);
+}
+
+.admin-error {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: oklch(65% 0.18 25);
+  margin-bottom: var(--space-4);
+}
+
+.admin-submit {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: oklch(55% 0.12 265);
+  color: oklch(95% 0.01 265);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.admin-submit:hover:not(:disabled) {
+  background: oklch(60% 0.12 265);
+}
+
+.admin-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === Admin Shell === */
+.admin-shell {
+  display: flex;
+  height: calc(100svh - var(--navbar-height, 72px));
+  background: oklch(12% 0.01 265);
+  color: oklch(88% 0.01 265);
+  font-family: var(--font-body);
+}
+
+.admin-sidebar {
+  width: 14rem;
+  flex-shrink: 0;
+  background: oklch(10% 0.01 265);
+  border-right: 1px solid oklch(22% 0.015 265);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.admin-sidebar-logo {
+  padding: var(--space-6) var(--space-5);
+  border-bottom: 1px solid oklch(22% 0.015 265);
+}
+
+.admin-sidebar-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: oklch(72% 0.12 265);
+}
+
+.admin-sidebar-logo-sub {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: oklch(45% 0.02 265);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: var(--space-1);
+}
+
+.admin-nav {
+  flex: 1;
+  padding: var(--space-3) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: oklch(55% 0.02 265);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.admin-nav-item:hover {
+  background: oklch(20% 0.012 265);
+  color: oklch(80% 0.01 265);
+}
+
+.admin-nav-item-active {
+  background: oklch(55% 0.12 265 / 0.15);
+  color: oklch(80% 0.08 265);
+  border-left-color: oklch(55% 0.12 265);
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-content-header {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-8);
+  background: oklch(14% 0.012 265);
+  border-bottom: 1px solid oklch(22% 0.015 265);
+}
+
+.admin-content-header-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: oklch(65% 0.02 265);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-content-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 0.8125rem;
+  color: oklch(45% 0.02 265);
+}
+
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-8);
+}
+
+.admin-signout {
+  background: none;
+  border: 1px solid oklch(28% 0.015 265);
+  border-radius: 4px;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+  color: oklch(55% 0.02 265);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-signout:hover {
+  border-color: oklch(55% 0.12 265);
+  color: oklch(80% 0.02 265);
+}
+
+/* Mobile bottom nav */
+@media (max-width: 767px) {
+  .admin-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100svh - var(--navbar-height, 72px));
+  }
+  .admin-sidebar {
+    display: none;
+  }
+  .admin-main {
+    padding-bottom: 60px;
+  }
+  .admin-bottom-nav {
+    display: flex !important;
+  }
+}
+
+.admin-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: oklch(10% 0.01 265);
+  border-top: 1px solid oklch(22% 0.015 265);
+  z-index: 50;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.admin-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  color: oklch(45% 0.02 265);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.admin-bottom-nav-item-active {
+  color: oklch(72% 0.12 265);
+}
+
+/* === Dashboard === */
+.dash-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: oklch(55% 0.02 265);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-4);
+}
+
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.dash-stat-card {
+  background: oklch(15% 0.012 265);
+  border: 1px solid oklch(22% 0.015 265);
+  border-radius: 6px;
+  padding: var(--space-5);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.dash-stat-card:hover {
+  background: oklch(20% 0.012 265);
+  transform: translateY(-1px);
+}
+
+.dash-stat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  color: oklch(55% 0.02 265);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dash-stat-number {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: oklch(88% 0.01 265);
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+
+.dash-stat-label {
+  font-size: 0.75rem;
+  color: oklch(55% 0.02 265);
+}
+
+.dash-stat-total {
+  font-size: 0.6875rem;
+  color: oklch(40% 0.01 265);
+  margin-top: 2px;
+}
+
+.admin-skeleton {
+  border-radius: 3px;
+  background: oklch(22% 0.012 265);
+  animation: admin-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes admin-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+
+.dash-links-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .dash-links-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.dash-link-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: oklch(15% 0.012 265);
+  border: 1px solid oklch(22% 0.015 265);
+  border-radius: 6px;
+  padding: var(--space-4) var(--space-5);
+  text-decoration: none;
+  color: oklch(72% 0.02 265);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.dash-link-card:hover {
+  background: oklch(20% 0.012 265);
+  color: oklch(88% 0.01 265);
+  transform: translateY(-1px);
+}
+
+.dash-link-arrow {
+  margin-left: auto;
+  color: oklch(45% 0.02 265);
+}
+
+.dash-recent {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .dash-recent {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dash-recent-col {
+  background: oklch(15% 0.012 265);
+  border: 1px solid oklch(22% 0.015 265);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dash-recent-col-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid oklch(22% 0.015 265);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: oklch(65% 0.02 265);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dash-recent-empty {
+  padding: var(--space-5);
+  font-size: 0.8125rem;
+  color: oklch(40% 0.01 265);
+}
+
+.dash-recent-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid oklch(18% 0.01 265);
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+
+.dash-recent-row:last-child {
+  border-bottom: none;
+}
+
+.dash-recent-title {
+  flex: 1;
+  color: oklch(75% 0.01 265);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.dash-recent-date {
+  font-size: 0.6875rem;
+  color: oklch(40% 0.01 265);
+  flex-shrink: 0;
+}
+
+.dash-badge {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dash-badge-published {
+  background: oklch(55% 0.15 145 / 0.2);
+  color: oklch(70% 0.15 145);
+}
+
+.dash-badge-draft {
+  background: oklch(22% 0.012 265);
+  color: oklch(50% 0.02 265);
+}
