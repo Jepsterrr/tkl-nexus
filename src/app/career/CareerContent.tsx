@@ -218,19 +218,6 @@ export function CareerContent() {
                 </span>
               ))}
             </RevealItem>
-
-            <RevealItem className="flex flex-col sm:flex-row items-start gap-3 mt-8">
-              <a
-                href="#career-listings"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, #3B82F6, #10B981)',
-                  boxShadow: '0 0 28px rgba(59,130,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
-                }}
-              >
-                {opportunity.ctaSeeJobs}
-              </a>
-            </RevealItem>
           </StaggerReveal>
         </motion.div>
 

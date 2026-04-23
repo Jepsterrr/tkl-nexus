@@ -13,10 +13,10 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ### Dashboard (`/admin/dashboard`)
 
-- [ ] Översiktspanel med räknare: antal publicerade events, deals, jobbannonser och partners.
-- [ ] Snabblänkar till respektive panel.
-- [ ] Visa senast skapade/ändrade poster per typ (events, deals, jobb).
-- [ ] Designförbättring av admin-shell: topbaren är för smal och konkurrerar visuellt med public navbar — den behöver mer luftrum, tydligare hierarki och ett mer polerat helhetsuttryck. Använd `impeccable`-skillet (inkl. underskills: `colorize`, `typeset`, `bolder`, `shape`, `layout`, `animate`, `polish`) för att ta fram en distinkt admin-estetik.
+- [x] Översiktspanel med räknare: antal publicerade events, deals, jobbannonser och partners.
+- [x] Snabblänkar till respektive panel.
+- [x] Visa senast skapade/ändrade poster per typ (events, deals, jobb).
+- [x] Designförbättring av admin-shell: sidebar-layout med oklch-palett, distinkt admin-estetik, mobil bottom nav.
 
 ### Events-panel (`/admin/events`)
 

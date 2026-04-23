@@ -58,6 +58,15 @@ const INITIAL: DashData = {
 
 // Helpers
 
+const FETCH_TIMEOUT_MS = 6000;
+
+function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), FETCH_TIMEOUT_MS)),
+  ]);
+}
+
 function formatDate(ts: unknown): string {
   if (ts instanceof Timestamp) {
     return ts.toDate().toISOString().slice(0, 10);
@@ -222,21 +231,21 @@ export function DashboardContent() {
     let cancelled = false;
 
     async function load() {
+      const errStat: StatData = { published: null, total: null, error: true };
       const results = await Promise.allSettled([
-        fetchStat('events', true),
-        fetchStat('deals', true),
-        fetchStat('opportunities', true),
-        fetchStat('admins', false),
-        fetchRecent('events', 'title'),
-        fetchRecent('deals', 'title'),
-        fetchRecent('opportunities', 'title'),
+        withTimeout(fetchStat('events', true), errStat),
+        withTimeout(fetchStat('deals', true), errStat),
+        withTimeout(fetchStat('opportunities', true), errStat),
+        withTimeout(fetchStat('admins', false), errStat),
+        withTimeout(fetchRecent('events', 'title'), []),
+        withTimeout(fetchRecent('deals', 'title'), []),
+        withTimeout(fetchRecent('opportunities', 'title'), []),
       ]);
 
       const [events, deals, opportunities, admins, recentEvents, recentDeals, recentOpportunities] =
         results;
 
       if (cancelled) return;
-      const errStat: StatData = { published: null, total: null, error: true };
 
       setData({
         events: events.status === 'fulfilled' ? events.value : errStat,
