@@ -23,6 +23,10 @@ export const EventSchema = z.object({
 
 export type TKLEvent = z.infer<typeof EventSchema>;
 
+// Admin form schema — samma som EventSchema men utan id och createdAt
+export const EventFormSchema = EventSchema.omit({ id: true, createdAt: true });
+export type EventFormData = z.infer<typeof EventFormSchema>;
+
 // Raw Firestore document shape (before parsing)
 export const FirestoreEventDocSchema = z.object({
   id: z.string(),
