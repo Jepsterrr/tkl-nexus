@@ -6,16 +6,17 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ### Auth & Åtkomstkontroll
 
-- [ ] Implementera inloggningssida på `/admin` med Firebase Auth (email + lösenord).
-- [ ] Skydda alla `/admin/**`-rutter — omdirigera till `/admin` om ej inloggad, till `/admin/dashboard` om inloggad.
-- [ ] Verifiera behörighet mot `admins`-kollektionen i Firestore (e-post som nyckel) — nekas åtkomst om dokument saknas, även om Firebase Auth godkänner.
-- [ ] Implementera utloggning med `signOut()` från Firebase Auth.
+- [x] Implementera inloggningssida på `/admin` med Firebase Auth (email + lösenord).
+- [x] Skydda alla `/admin/**`-rutter — omdirigera till `/admin` om ej inloggad, till `/admin/dashboard` om inloggad.
+- [x] Verifiera behörighet mot `admins`-kollektionen i Firestore (e-post som nyckel) — nekas åtkomst om dokument saknas, även om Firebase Auth godkänner.
+- [x] Implementera utloggning med `signOut()` från Firebase Auth.
 
 ### Dashboard (`/admin/dashboard`)
 
 - [ ] Översiktspanel med räknare: antal publicerade events, deals, jobbannonser och partners.
 - [ ] Snabblänkar till respektive panel.
 - [ ] Visa senast skapade/ändrade poster per typ (events, deals, jobb).
+- [ ] Designförbättring av admin-shell: topbaren är för smal och konkurrerar visuellt med public navbar — den behöver mer luftrum, tydligare hierarki och ett mer polerat helhetsuttryck. Använd `impeccable`-skillet (inkl. underskills: `colorize`, `typeset`, `bolder`, `shape`, `layout`, `animate`, `polish`) för att ta fram en distinkt admin-estetik.
 
 ### Events-panel (`/admin/events`)
 
@@ -123,3 +124,7 @@ Footern har externa länkar hårdkodade i `Footer.tsx:7–19` som kan behöva up
 ---
 
 ## Tekniska & Arkitektoniska Förbättringar
+
+### Admin-panel — Framtida förbättringar
+
+- [ ] **Collapsible sidebar (approach C):** Sidebaren kan fällas ihop till ikonläge för mer desktop-yta. Kräver collapse-state (localStorage), animerad breddtransition och tooltip-labels på ikonerna i hopfällt läge.
