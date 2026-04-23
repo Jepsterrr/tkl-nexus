@@ -572,7 +572,7 @@
 /* === Admin Shell === */
 .admin-shell {
   display: flex;
-  height: calc(100svh - var(--navbar-height, 72px));
+  height: 100svh;
   background: oklch(12% 0.01 265);
   color: oklch(88% 0.01 265);
   font-family: var(--font-body);
@@ -640,6 +640,30 @@
   background: oklch(55% 0.12 265 / 0.15);
   color: oklch(80% 0.08 265);
   border-left-color: oklch(55% 0.12 265);
+}
+
+.admin-sidebar-footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid oklch(22% 0.015 265);
+  margin-top: auto;
+}
+
+.admin-back-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: oklch(45% 0.02 265);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-back-link:hover {
+  background: oklch(20% 0.012 265);
+  color: oklch(72% 0.08 265);
 }
 
 .admin-main {
@@ -718,7 +742,7 @@
   .admin-shell {
     flex-direction: column;
     height: auto;
-    min-height: calc(100svh - var(--navbar-height, 72px));
+    min-height: 100svh;
   }
   .admin-sidebar {
     display: none;
