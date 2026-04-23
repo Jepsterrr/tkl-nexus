@@ -61,7 +61,7 @@ export function AdminSidebar() {
 
       {/* Mobile bottom nav — visas via CSS endast på < 768px */}
       <nav className="admin-bottom-nav" aria-label="Admin-navigation (mobil)">
-        {NAV_ITEMS.slice(0, 4).map(({ label, icon: Icon, href }) => {
+        {NAV_ITEMS.map(({ label, icon: Icon, href }) => {
           const isActive =
             pathname === href || pathname.startsWith(href + '/');
           return (
