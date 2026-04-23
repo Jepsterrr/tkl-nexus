@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { Briefcase, Sparkles, Compass } from 'lucide-react';
+import { Briefcase, Compass, Search, X, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
+import { FilterTab } from '@/components/ui/FilterTab';
 import { JobCard } from '@/components/ui/JobCard';
 import { JobCardSkeleton } from '@/components/ui/JobCardSkeleton';
 import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity';
@@ -22,50 +24,17 @@ const FILTER_COLORS: Record<FilterKey, string> = {
   trainee: '#06B6D4',
 };
 
-// Filter Tab - Framer Motion variant med hover/tap-animationer
-function FilterTab({
-  active,
-  onClick,
-  label,
-  color,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  color: string;
-}) {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <motion.button
-      onClick={onClick}
-      whileHover={shouldReduceMotion ? {} : { scale: 1.05, y: -1 }}
-      whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap"
-      style={{
-        background: active ? `${color}22` : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${active ? color + '55' : 'rgba(255,255,255,0.08)'}`,
-        color: active ? color : 'var(--hero-text-muted)',
-        boxShadow: active ? `0 0 20px ${color}15` : 'none',
-        transition: 'background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s',
-      }}
-      aria-pressed={active}
-    >
-      {active && <Sparkles className="w-4 h-4" style={{ color }} />}
-      {label}
-    </motion.button>
-  );
-}
-
 export function CareerContent() {
   const { t } = useLanguage();
   const opportunity = t.opportunities;
 
   const [opportunities, setOpportunities] = useState<TKLOpportunity[]>([]);
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
-  const heroRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const scrollContainer = useScrollContainer();
   const { scrollYProgress } = useScroll({
@@ -99,9 +68,17 @@ export function CareerContent() {
     };
   }, [opportunity.error, fetchKey]);
 
-  const filteredOpps = filter === 'all'
-    ? opportunities
-    : opportunities.filter((o) => o.type === filter);
+  const filteredOpps = opportunities
+    .filter((o) => filter === 'all' || o.type === filter)
+    .filter((o) => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        o.title.toLowerCase().includes(q) ||
+        o.company.toLowerCase().includes(q) ||
+        (o.location ?? '').toLowerCase().includes(q)
+      );
+    });
 
   const jobSchemaList = opportunities.length > 0 ? {
     '@context': 'https://schema.org',
@@ -233,24 +210,61 @@ export function CareerContent() {
         <h2 id="career-listings-heading" className="sr-only">{opportunity.listingsHeading}</h2>
         <div className="max-w-6xl mx-auto">
 
-          {/* Filtrering */}
+          {/* Sök + Filtrering */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-3 mb-12 pt-10"
-            role="group"
-            aria-label={opportunity.filterAriaLabel}
+            className="mb-10 pt-10 space-y-4"
           >
-            {(Object.keys(FILTER_COLORS) as FilterKey[]).map((key) => (
-              <FilterTab
-                key={key}
-                active={filter === key}
-                onClick={() => setFilter(key)}
-                label={opportunity.filters[key]}
-                color={FILTER_COLORS[key]}
+            {/* Sökfält */}
+            <div className="relative max-w-md">
+              <Search
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                style={{ color: 'var(--hero-text-subtle)' }}
+                aria-hidden="true"
               />
-            ))}
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={opportunity.searchPlaceholder}
+                className="w-full rounded-xl pl-10 pr-10 py-2.5 text-sm outline-none transition-all duration-150"
+                style={{
+                  background: 'var(--glass-bg-subtle)',
+                  border: '1px solid var(--glass-border-subtle)',
+                  color: 'var(--hero-text)',
+                }}
+                aria-label={opportunity.searchPlaceholder}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-opacity hover:opacity-70"
+                  aria-label="Rensa sökning"
+                >
+                  <X className="w-3.5 h-3.5" style={{ color: 'var(--hero-text-subtle)' }} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter-flikar */}
+            <div
+              className="flex gap-3 overflow-x-auto pb-1 scrollbar-none"
+              role="group"
+              aria-label={opportunity.filterAriaLabel}
+            >
+              {(Object.keys(FILTER_COLORS) as FilterKey[]).map((key) => (
+                <FilterTab
+                  key={key}
+                  active={filter === key}
+                  onClick={() => setFilter(key)}
+                  label={opportunity.filters[key]}
+                  color={FILTER_COLORS[key]}
+                  showActiveIcon
+                />
+              ))}
+            </div>
           </motion.div>
 
           {/* Laddar-state */}
@@ -285,10 +299,24 @@ export function CareerContent() {
               className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
               style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
             >
-              <Briefcase className="w-12 h-12 text-gray-500 mb-4 opacity-50" />
+              <Briefcase className="w-12 h-12 mb-4 opacity-40" style={{ color: '#3B82F6' }} aria-hidden="true" />
               <p className="text-lg hero-text-muted">
-                {filter === 'all' ? opportunity.noOpps : opportunity.noOppsFiltered}
+                {search.trim()
+                  ? opportunity.searchNoResults.replace('{query}', search)
+                  : filter === 'all'
+                    ? opportunity.noOpps
+                    : opportunity.noOppsFiltered}
               </p>
+              {filter === 'all' && !search.trim() && (
+                <Link
+                  href="/corporate/post"
+                  className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#3B82F6' }}
+                >
+                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  {opportunity.emptyStateCta}
+                </Link>
+              )}
             </motion.div>
           )}
 
@@ -301,13 +329,19 @@ export function CareerContent() {
 
           {/* Jobb Grid */}
           {!loading && !error && filteredOpps.length > 0 && (
-            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence mode="popLayout">
-                {filteredOpps.map((job) => (
-                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={filter}
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.08 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {filteredOpps.map((job, idx) => (
+                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} entryDelay={idx * 0.03} />
                 ))}
-              </AnimatePresence>
-            </motion.div>
+              </motion.div>
+            </AnimatePresence>
           )}
 
         </div>

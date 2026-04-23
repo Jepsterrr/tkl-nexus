@@ -86,7 +86,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
         </div>
 
         {/* Rubrik */}
-        <h3 className="hero-text font-semibold text-sm leading-snug mb-1 line-clamp-2 group-hover:text-white transition-colors">
+        <h3 className="hero-text font-semibold text-sm leading-snug mb-1 line-clamp-2 group-hover:text-[var(--foreground)] transition-colors">
           {displayTitle}
         </h3>
 

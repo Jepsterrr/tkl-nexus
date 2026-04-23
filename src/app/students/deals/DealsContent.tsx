@@ -112,78 +112,65 @@ export function DealsContent() {
             animate={shouldReduceMotion ? {} : { y: [0, -8, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
           >%</motion.span>
-
-          <motion.div
-            className="absolute top-[27%] left-[4%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.22)', color: '#F59E0B', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
-            animate={shouldReduceMotion ? {} : { y: [0, -7, 0] }}
-            transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shrink-0" />
-            {deals?.pills?.exclusive}
-          </motion.div>
-          <motion.div
-            className="absolute top-[17%] right-[19%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
-            animate={shouldReduceMotion ? {} : { y: [0, -9, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6] shrink-0" />
-            {deals?.pills?.offers}
-          </motion.div>
-          <motion.div
-            className="absolute bottom-[30%] right-[7%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.18)', color: '#F59E0B', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
-            animate={shouldReduceMotion ? {} : { y: [0, 8, 0] }}
-            transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shrink-0" />
-            {deals?.pills?.name}
-          </motion.div>
         </motion.div>
 
-        <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
-          <StaggerReveal className="text-center" delay={0.1}>
-            {/* Badge */}
-            <RevealItem className="flex justify-center mb-6">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
-                style={{
-                  background: 'rgba(245,158,11,0.15)',
-                  border: '1px solid rgba(245,158,11,0.35)',
-                  color: '#F59E0B',
-                }}
-              >
-                <span aria-hidden="true">★</span>
-                {deals?.badge ?? 'Nexus Deals'}
-              </span>
-            </RevealItem>
+        {/* Desktop: split — heading left, detail right. Mobile: stacked. */}
+        <motion.div style={{ y: heroTextY }} className="relative w-full max-w-7xl mx-auto z-20">
+          <div className="flex flex-col lg:grid lg:grid-cols-[3fr_2fr] lg:gap-16 lg:items-end">
 
-            {/* Rubrik */}
-            <RevealItem>
-              <h1
-                id="deals-hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl hero-text hero-heading"
-              >
-                {deals?.heading ?? 'Exklusiva'}{' '}
-                <span className="relative inline-block text-accent-orange">
-                  {deals?.headingAccent ?? 'kårförmåner'}
+            {/* Vänster: rubrik */}
+            <StaggerReveal delay={0.05}>
+              <RevealItem>
+                <p
+                  className="text-xs font-mono uppercase tracking-[0.2em] mb-5 opacity-50"
+                  style={{ color: '#F59E0B' }}
+                  aria-hidden="true"
+                >
+                  {deals?.badge ?? 'Nexus Deals'}
+                </p>
+              </RevealItem>
+              <RevealItem>
+                <h1
+                  id="deals-hero-heading"
+                  className="hero-text hero-heading"
+                  style={{ fontSize: 'clamp(3rem, 8vw + 0.5rem, 8rem)', lineHeight: 0.92 }}
+                >
+                  {deals?.heading ?? 'Exklusiva'}
+                  <br />
+                  <span className="text-accent-orange">{deals?.headingAccent ?? 'kårförmåner'}</span>
+                </h1>
+              </RevealItem>
+              {/* Separator */}
+              <RevealItem>
+                <div
+                  className="mt-8 h-px w-24"
+                  style={{ background: 'linear-gradient(90deg, #F59E0B, transparent)' }}
+                  aria-hidden="true"
+                />
+              </RevealItem>
+            </StaggerReveal>
+
+            {/* Höger: beskrivning + kontextchips */}
+            <StaggerReveal delay={0.25} className="mt-8 lg:mt-0 lg:pb-4">
+              <RevealItem>
+                <p className="text-base sm:text-lg hero-text-muted leading-relaxed max-w-[42ch]">
+                  {deals?.description ?? 'Exklusiva rabatter och förmåner för dig som är kårmedlem i Teknologkåren.'}
+                </p>
+              </RevealItem>
+              <RevealItem className="flex flex-wrap gap-2 mt-6">
+                {[deals?.pills?.exclusive, deals?.pills?.name].filter(Boolean).map((label) => (
                   <span
-                    className="absolute -bottom-1 left-0 right-0 h-px pointer-events-none"
-                    style={{ background: 'linear-gradient(90deg, #F59E0B, #8B5CF6, transparent)' }}
-                    aria-hidden="true"
-                  />
-                </span>
-              </h1>
-            </RevealItem>
-
-            {/* Underrubrik */}
-            <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
-                {deals?.description ?? 'Exklusiva rabatter och förmåner för dig som är kårmedlem i Teknologkåren.'}
-              </p>
-            </RevealItem>
-          </StaggerReveal>
+                    key={label}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.22)', color: '#F59E0B' }}
+                  >
+                    <span className="w-1 h-1 rounded-full bg-[#F59E0B] shrink-0" aria-hidden="true" />
+                    {label}
+                  </span>
+                ))}
+              </RevealItem>
+            </StaggerReveal>
+          </div>
         </motion.div>
 
         {/* Fade-out + scroll cue */}
@@ -241,9 +228,18 @@ export function DealsContent() {
               className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
               style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
             >
-              <Tag className="w-12 h-12 mb-4 opacity-30" style={{ color: '#F59E0B' }} aria-hidden="true" />
+              <motion.div
+                animate={shouldReduceMotion ? {} : { rotate: [0, 6, -6, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                aria-hidden="true"
+              >
+                <Tag className="w-12 h-12 mb-4 opacity-35" style={{ color: '#F59E0B' }} />
+              </motion.div>
               <p className="text-lg hero-text-muted">
                 {deals?.noDeals ?? 'Inga deals tillgängliga.'}
+              </p>
+              <p className="text-sm hero-text-subtle mt-2">
+                {deals?.noDealsHint ?? 'Fler förmåner är på väg!'}
               </p>
             </motion.div>
           )}

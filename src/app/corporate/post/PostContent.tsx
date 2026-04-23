@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Briefcase, CalendarDays, Gift } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -212,6 +212,7 @@ export function PostContent() {
   const [deal, setDeal] = useState<DealForm>(EMPTY_DEAL);
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   function handleSubmit() {
     let url = '';
@@ -219,12 +220,26 @@ export function PostContent() {
     else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail });
     else url = buildDealMailto({ ...deal, contactName, contactEmail });
     window.location.href = url;
+    setSubmitted(true);
   }
 
   const isValid =
     activeTab === 'opportunity' ? isOpportunityValid({ ...opp, contactName, contactEmail }) :
     activeTab === 'event' ? isEventValid({ ...evt, contactName, contactEmail }) :
     isDealValid({ ...deal, contactName, contactEmail });
+
+  function handleTabKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, currentId: ActiveTab) {
+    const tabs: ActiveTab[] = ['opportunity', 'event', 'deal'];
+    const idx = tabs.indexOf(currentId);
+    let nextIdx = idx;
+    if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+    else return;
+    e.preventDefault();
+    const nextId = tabs[nextIdx];
+    setActiveTab(nextId);
+    document.getElementById(`tab-${nextId}`)?.focus();
+  }
 
   const TABS: { id: ActiveTab; label: string; Icon: typeof Briefcase }[] = [
     { id: 'opportunity', label: cp.tabs.opportunity, Icon: Briefcase },
@@ -338,6 +353,7 @@ export function PostContent() {
                   aria-controls={`panel-${id}`}
                   id={`tab-${id}`}
                   onClick={() => setActiveTab(id)}
+                  onKeyDown={(e) => handleTabKeyDown(e, id)}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
                   style={
                     isActive
@@ -378,9 +394,8 @@ export function PostContent() {
             <div
               className="rounded-3xl p-6 sm:p-8 space-y-8"
               style={{
-                background: 'var(--glass-bg-strong)',
-                border: '1px solid var(--glass-border-strong)',
-                backdropFilter: 'blur(16px)',
+                background: 'var(--about-card-bg)',
+                border: '1px solid var(--about-card-border)',
               }}
             >
               {/* Contact fields (shared across all tabs) */}
@@ -400,6 +415,7 @@ export function PostContent() {
                       id="contactName"
                       type="text"
                       autoComplete="name"
+                      aria-required="true"
                       placeholder={cp.contact.namePlaceholder}
                       className={inputCls}
                       value={contactName}
@@ -414,6 +430,7 @@ export function PostContent() {
                       id="contactEmail"
                       type="email"
                       autoComplete="email"
+                      aria-required="true"
                       placeholder={cp.contact.emailPlaceholder}
                       className={inputCls}
                       value={contactEmail}
@@ -439,7 +456,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="opp-title" className={labelCls}>{cp.opportunity.title}{requiredDot}</label>
-                        <input id="opp-title" type="text" placeholder={cp.opportunity.titlePlaceholder} className={inputCls}
+                        <input id="opp-title" type="text" aria-required="true" placeholder={cp.opportunity.titlePlaceholder} className={inputCls}
                           value={opp.title} onChange={e => setOpp(p => ({ ...p, title: e.target.value }))} />
                       </div>
                       <div>
@@ -452,12 +469,12 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="opp-company" className={labelCls}>{cp.opportunity.company}{requiredDot}</label>
-                        <input id="opp-company" type="text" placeholder={cp.opportunity.companyPlaceholder} className={inputCls}
+                        <input id="opp-company" type="text" aria-required="true" placeholder={cp.opportunity.companyPlaceholder} className={inputCls}
                           value={opp.company} onChange={e => setOpp(p => ({ ...p, company: e.target.value }))} />
                       </div>
                       <div>
                         <label htmlFor="opp-type" className={labelCls}>{cp.opportunity.type}{requiredDot}</label>
-                        <select id="opp-type" className={inputCls}
+                        <select id="opp-type" aria-required="true" className={inputCls}
                           value={opp.type} onChange={e => setOpp(p => ({ ...p, type: e.target.value as OpportunityForm['type'] }))}>
                           <option value="" disabled>{cp.opportunity.typePlaceholder}</option>
                           <option value="exjobb">{cp.opportunity.types.exjobb}</option>
@@ -471,7 +488,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div>
                         <label htmlFor="opp-location" className={labelCls}>{cp.opportunity.location}{requiredDot}</label>
-                        <input id="opp-location" type="text" placeholder={cp.opportunity.locationPlaceholder} className={inputCls}
+                        <input id="opp-location" type="text" aria-required="true" placeholder={cp.opportunity.locationPlaceholder} className={inputCls}
                           value={opp.location} onChange={e => setOpp(p => ({ ...p, location: e.target.value }))} />
                       </div>
                       <div>
@@ -532,7 +549,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
-                        <input id="evt-title" type="text" placeholder={cp.event.titlePlaceholder} className={inputCls}
+                        <input id="evt-title" type="text" aria-required="true" placeholder={cp.event.titlePlaceholder} className={inputCls}
                           value={evt.title} onChange={e => setEvt(p => ({ ...p, title: e.target.value }))} />
                       </div>
                       <div>
@@ -545,7 +562,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-date" className={labelCls}>{cp.event.date}{requiredDot}</label>
-                        <input id="evt-date" type="datetime-local" className={inputCls}
+                        <input id="evt-date" type="datetime-local" aria-required="true" className={inputCls}
                           value={evt.date} onChange={e => setEvt(p => ({ ...p, date: e.target.value }))} />
                       </div>
                       <div>
@@ -558,12 +575,12 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-location" className={labelCls}>{cp.event.location}{requiredDot}</label>
-                        <input id="evt-location" type="text" placeholder={cp.event.locationPlaceholder} className={inputCls}
+                        <input id="evt-location" type="text" aria-required="true" placeholder={cp.event.locationPlaceholder} className={inputCls}
                           value={evt.location} onChange={e => setEvt(p => ({ ...p, location: e.target.value }))} />
                       </div>
                       <div>
                         <label htmlFor="evt-section" className={labelCls}>{cp.event.section}{requiredDot}</label>
-                        <select id="evt-section" className={inputCls}
+                        <select id="evt-section" aria-required="true" className={inputCls}
                           value={evt.section} onChange={e => setEvt(p => ({ ...p, section: e.target.value as EventForm['section'] }))}>
                           <option value="" disabled>{cp.event.sectionPlaceholder}</option>
                           <option value="data">{cp.event.sections.data}</option>
@@ -595,7 +612,7 @@ export function PostContent() {
                           {cp.charCount.replace('{count}', String(evt.description.length))}
                         </span>
                       </label>
-                      <textarea id="evt-desc" rows={5} maxLength={2000} placeholder={cp.event.descriptionPlaceholder}
+                      <textarea id="evt-desc" rows={5} maxLength={2000} aria-required="true" placeholder={cp.event.descriptionPlaceholder}
                         className={`${inputCls} resize-y min-h-[120px]`}
                         value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))} />
                     </div>
@@ -628,12 +645,12 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="deal-company" className={labelCls}>{cp.deal.company}{requiredDot}</label>
-                        <input id="deal-company" type="text" placeholder={cp.deal.companyPlaceholder} className={inputCls}
+                        <input id="deal-company" type="text" aria-required="true" placeholder={cp.deal.companyPlaceholder} className={inputCls}
                           value={deal.company} onChange={e => setDeal(p => ({ ...p, company: e.target.value }))} />
                       </div>
                       <div>
                         <label htmlFor="deal-category" className={labelCls}>{cp.deal.category}{requiredDot}</label>
-                        <select id="deal-category" className={inputCls}
+                        <select id="deal-category" aria-required="true" className={inputCls}
                           value={deal.category} onChange={e => setDeal(p => ({ ...p, category: e.target.value as DealForm['category'] }))}>
                           <option value="" disabled>{cp.deal.categoryPlaceholder}</option>
                           <option value="rabatt">{cp.deal.categories.rabatt}</option>
@@ -648,7 +665,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="deal-title" className={labelCls}>{cp.deal.title}{requiredDot}</label>
-                        <input id="deal-title" type="text" placeholder={cp.deal.titlePlaceholder} className={inputCls}
+                        <input id="deal-title" type="text" aria-required="true" placeholder={cp.deal.titlePlaceholder} className={inputCls}
                           value={deal.title} onChange={e => setDeal(p => ({ ...p, title: e.target.value }))} />
                       </div>
                       <div>
@@ -665,7 +682,7 @@ export function PostContent() {
                           {cp.charCount.replace('{count}', String(deal.description.length))}
                         </span>
                       </label>
-                      <textarea id="deal-desc" rows={4} maxLength={2000} placeholder={cp.deal.descriptionPlaceholder}
+                      <textarea id="deal-desc" rows={4} maxLength={2000} aria-required="true" placeholder={cp.deal.descriptionPlaceholder}
                         className={`${inputCls} resize-y min-h-[100px]`}
                         value={deal.description} onChange={e => setDeal(p => ({ ...p, description: e.target.value }))} />
                     </div>
@@ -715,28 +732,57 @@ export function PostContent() {
               <div style={{ borderTop: '1px solid var(--glass-border-subtle)', paddingTop: '1.5rem' }}>
                 <p className="text-xs hero-text-muted mb-4">{cp.requiredNote}</p>
 
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!isValid}
-                  aria-label={cp.submitAriaLabel}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
-                  style={
-                    isValid
-                      ? {
-                          background: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
-                          boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
+                <AnimatePresence mode="wait">
+                  {submitted ? (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl"
+                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)' }}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#10B981' }} aria-hidden="true" />
+                      <p className="text-sm font-medium" style={{ color: '#10B981' }}>{cp.submitSuccess}</p>
+                      <button
+                        onClick={() => setSubmitted(false)}
+                        className="sm:ml-auto text-xs underline transition-opacity hover:opacity-70 shrink-0"
+                        style={{ color: '#10B981' }}
+                      >
+                        {cp.sendAnother}
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="form-actions" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <p className="text-xs hero-text-subtle mb-3">{cp.submitHint}</p>
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={!isValid}
+                        aria-label={cp.submitAriaLabel}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
+                        style={
+                          isValid
+                            ? {
+                                background: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                                boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
+                              }
+                            : {
+                                background: 'var(--glass-bg-subtle)',
+                                border: '1px solid var(--glass-border-subtle)',
+                                color: 'var(--hero-text-muted)',
+                              }
                         }
-                      : {
-                          background: 'var(--glass-bg-subtle)',
-                          border: '1px solid var(--glass-border-subtle)',
-                          color: 'var(--hero-text-muted)',
-                        }
-                  }
-                >
-                  {cp.submit}
-                  <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
-                </button>
+                      >
+                        {cp.submit}
+                        <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
             </div>

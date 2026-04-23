@@ -249,7 +249,7 @@ export function CorporateContent() {
             className="relative rounded-3xl p-px"
             style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.5), rgba(139,92,246,0.15))' }}
           >
-            <div className="rounded-3xl cta-banner-bg backdrop-blur-xl p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="rounded-3xl cta-banner-bg p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
                 <h3 className="hero-text text-xl sm:text-2xl font-bold mb-2">{corporate.ctaBannerTitle}</h3>
                 <p className="hero-text-muted text-sm">{corporate.ctaBannerSubtitle}</p>

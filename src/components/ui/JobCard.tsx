@@ -9,6 +9,7 @@ import { EASE_OUT_EXPO } from '@/lib/motion';
 interface JobCardProps {
   job: TKLOpportunity;
   color?: string;
+  entryDelay?: number;
 }
 
 const TYPE_COLORS: Record<OpportunityType, string> = {
@@ -18,7 +19,7 @@ const TYPE_COLORS: Record<OpportunityType, string> = {
   trainee: '#F59E0B', // orange — nystart, energi
 };
 
-export function JobCard({ job, color }: JobCardProps) {
+export function JobCard({ job, color, entryDelay = 0 }: JobCardProps) {
   const { t, locale } = useLanguage();
   const opp = t.opportunities;
   const shouldReduceMotion = useReducedMotion();
@@ -42,13 +43,11 @@ export function JobCard({ job, color }: JobCardProps) {
 
   return (
     <motion.article
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16, scale: 0.97 }}
-      transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
+      transition={{ duration: 0.22, delay: entryDelay, ease: EASE_OUT_EXPO }}
       whileHover={shouldReduceMotion ? {} : { y: -4 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
-      layout
       className="glass-card group relative overflow-hidden rounded-2xl flex flex-col"
       style={{ backgroundImage: `linear-gradient(135deg, ${cardColor}08 0%, transparent 50%)` }}
     >

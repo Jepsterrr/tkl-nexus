@@ -223,7 +223,16 @@ export function StudentsContent() {
               <div className="h-px flex-1 bg-border" aria-hidden="true" />
             </RevealItem>
           </StaggerReveal>
-          <div className="flex gap-5 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory sm:snap-none -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div
+            className="flex gap-5 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory sm:snap-none -mx-4 px-4 sm:mx-0 sm:px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981]"
+            tabIndex={0}
+            role="region"
+            aria-label={students.benefitsTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight') { e.preventDefault(); e.currentTarget.scrollBy({ left: 288, behavior: 'smooth' }); }
+              else if (e.key === 'ArrowLeft') { e.preventDefault(); e.currentTarget.scrollBy({ left: -288, behavior: 'smooth' }); }
+            }}
+          >
             {BENEFITS.map((b, i) => (
               <div key={b.title} className="min-w-70 sm:min-w-0 flex-1 snap-center">
                 <BenefitCardComponent {...b} index={i} />

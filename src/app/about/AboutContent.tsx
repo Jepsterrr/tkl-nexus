@@ -114,44 +114,34 @@ export function AboutContent() {
 
         <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
           <StaggerReveal className="text-left" delay={0.1}>
-            <RevealItem className="flex justify-start mb-6">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                style={{
-                  background: 'rgba(227, 6, 19, 0.2)',
-                  border: '1px solid rgba(227, 6, 19, 0.3)',
-                  color: '#E30613',
-                }}
+
+            {/* Typografisk caption — ersätter badge-pill */}
+            <RevealItem>
+              <p
+                className="text-xs font-mono uppercase tracking-[0.2em] mb-5 opacity-55"
+                style={{ color: '#E30613' }}
               >
-                <span aria-hidden="true">⬡</span>
-                {about.badge}
-              </span>
+                Est. 2025 · TKL Nexus
+              </p>
             </RevealItem>
 
+            {/* Rubrik — andra raden indenterad för redaktionell känsla */}
             <RevealItem>
               <h1
                 id="about-hero-heading"
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl hero-text hero-heading"
+                className="hero-text hero-heading"
+                style={{ fontSize: 'clamp(2.75rem, 6vw + 0.5rem, 6.5rem)', lineHeight: 0.95 }}
               >
-                {about.heading}{' '}
-                <span className="text-accent-red">{about.headingAccent}</span>
+                {about.heading}
+                <br />
+                <span className="text-accent-red pl-8 sm:pl-16">{about.headingAccent}</span>
               </h1>
             </RevealItem>
 
             <RevealItem>
-              <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
+              <p className="mt-8 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
                 {about.description}
               </p>
-            </RevealItem>
-
-            {/* Mobile trust chips */}
-            <RevealItem className="flex flex-wrap justify-start gap-2 mt-4 lg:hidden">
-              {[about.pills.founded, about.pills.org, about.pills.sections].map((label) => (
-                <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(227,6,19,0.10)', border: '1px solid rgba(227,6,19,0.22)', color: '#E30613' }}>
-                  <span className="w-1 h-1 rounded-full bg-[#E30613] shrink-0" />
-                  {label}
-                </span>
-              ))}
             </RevealItem>
 
             <RevealItem className="flex mt-10">
