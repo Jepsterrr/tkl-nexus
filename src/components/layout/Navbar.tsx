@@ -18,6 +18,8 @@ export function Navbar() {
   const { locale, setLocale, t } = useLanguage();
   const scrollContainer = useScrollContainer();
 
+  if (pathname.startsWith('/admin')) return null;
+
   const NAV_LINKS = [
     { href: '/', label: t.nav.home, Icon: Home },
     { href: '/corporate', label: t.nav.corporate, Icon: Building2 },

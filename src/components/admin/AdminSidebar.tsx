@@ -10,6 +10,7 @@ import {
   Handshake,
   Settings,
   Shield,
+  ArrowLeft,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -50,11 +51,17 @@ export function AdminSidebar() {
             );
           })}
         </nav>
+        <div className="admin-sidebar-footer">
+          <Link href="/" className="admin-back-link">
+            <ArrowLeft size={14} aria-hidden="true" />
+            Tillbaka till sajten
+          </Link>
+        </div>
       </aside>
 
       {/* Mobile bottom nav — visas via CSS endast på < 768px */}
       <nav className="admin-bottom-nav" aria-label="Admin-navigation (mobil)">
-        {NAV_ITEMS.slice(0, 5).map(({ label, icon: Icon, href }) => {
+        {NAV_ITEMS.slice(0, 4).map(({ label, icon: Icon, href }) => {
           const isActive =
             pathname === href || pathname.startsWith(href + '/');
           return (
@@ -69,6 +76,9 @@ export function AdminSidebar() {
             </Link>
           );
         })}
+        <Link href="/" className="admin-bottom-nav-item" aria-label="Tillbaka till sajten">
+          <ArrowLeft size={20} aria-hidden="true" />
+        </Link>
       </nav>
     </>
   );

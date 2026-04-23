@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { CONTACT_ITEMS } from '@/lib/types';
 
@@ -25,7 +26,10 @@ const CONTACT = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
   const { t } = useLanguage();
+
+  if (pathname.startsWith('/admin')) return null;
 
   const QUICK_LINKS = [
     { label: t.footer.links.students, href: '/students' },
