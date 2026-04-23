@@ -11,6 +11,7 @@ import {
   getCountFromServer,
   Timestamp,
 } from 'firebase/firestore';
+import Link from 'next/link';
 import {
   Calendar,
   Tag,
@@ -45,13 +46,11 @@ interface DashData {
   recentOpportunities: RecentItem[] | null;
 }
 
-const INITIAL_STAT: StatData = { published: null, total: null, error: false };
-
 const INITIAL: DashData = {
-  events:        INITIAL_STAT,
-  deals:         INITIAL_STAT,
-  opportunities: INITIAL_STAT,
-  admins:        INITIAL_STAT,
+  events:        { published: null, total: null, error: false },
+  deals:         { published: null, total: null, error: false },
+  opportunities: { published: null, total: null, error: false },
+  admins:        { published: null, total: null, error: false },
   recentEvents:        null,
   recentDeals:         null,
   recentOpportunities: null,
@@ -220,6 +219,8 @@ export function DashboardContent() {
   const [data, setData] = useState<DashData>(INITIAL);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       const results = await Promise.allSettled([
         fetchStat('events', true),
@@ -234,20 +235,22 @@ export function DashboardContent() {
       const [events, deals, opportunities, admins, recentEvents, recentDeals, recentOpportunities] =
         results;
 
+      if (cancelled) return;
       const errStat: StatData = { published: null, total: null, error: true };
 
       setData({
-        events:        events.status        === 'fulfilled' ? events.value        : errStat,
-        deals:         deals.status         === 'fulfilled' ? deals.value         : errStat,
+        events: events.status === 'fulfilled' ? events.value : errStat,
+        deals: deals.status === 'fulfilled' ? deals.value : errStat,
         opportunities: opportunities.status === 'fulfilled' ? opportunities.value : errStat,
-        admins:        admins.status        === 'fulfilled' ? admins.value        : errStat,
-        recentEvents:        recentEvents.status        === 'fulfilled' ? recentEvents.value        : [],
-        recentDeals:         recentDeals.status         === 'fulfilled' ? recentDeals.value         : [],
+        admins: admins.status === 'fulfilled' ? admins.value : errStat,
+        recentEvents: recentEvents.status === 'fulfilled' ? recentEvents.value : [],
+        recentDeals: recentDeals.status === 'fulfilled' ? recentDeals.value : [],
         recentOpportunities: recentOpportunities.status === 'fulfilled' ? recentOpportunities.value : [],
       });
     }
 
     load();
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -255,9 +258,9 @@ export function DashboardContent() {
       {/* Stat-kort */}
       <p className="dash-section-title">Översikt</p>
       <div className="dash-stats-grid">
-        <StatCard label="Events"       icon={Calendar}  stat={data.events} />
-        <StatCard label="Deals"        icon={Tag}       stat={data.deals} />
-        <StatCard label="Jobb & Exj."  icon={Briefcase} stat={data.opportunities} />
+        <StatCard label="Events" icon={Calendar} stat={data.events} />
+        <StatCard label="Deals" icon={Tag} stat={data.deals} />
+        <StatCard label="Jobb & Exj." icon={Briefcase} stat={data.opportunities} />
         <StatCard
           label="Admins"
           icon={Shield}
@@ -270,33 +273,33 @@ export function DashboardContent() {
       {/* Snabblänkar */}
       <p className="dash-section-title">Hantera</p>
       <div className="dash-links-grid">
-        <a href="/admin/events" className="dash-link-card">
+        <Link href="/admin/events" className="dash-link-card">
           <Calendar size={16} aria-hidden="true" />
           Events
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </a>
-        <a href="/admin/deals" className="dash-link-card">
+        </Link>
+        <Link href="/admin/deals" className="dash-link-card">
           <Tag size={16} aria-hidden="true" />
           Deals
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </a>
-        <a href="/admin/opportunities" className="dash-link-card">
+        </Link>
+        <Link href="/admin/opportunities" className="dash-link-card">
           <Briefcase size={16} aria-hidden="true" />
           Jobb & Exjobb
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </a>
-        <a href="/admin/admins" className="dash-link-card">
+        </Link>
+        <Link href="/admin/admins" className="dash-link-card">
           <Shield size={16} aria-hidden="true" />
           Adminhantering
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </a>
+        </Link>
       </div>
 
       {/* Senaste poster */}
       <p className="dash-section-title">Senaste poster</p>
       <div className="dash-recent">
-        <RecentCol label="Events"      icon={Calendar}  items={data.recentEvents} />
-        <RecentCol label="Deals"       icon={Tag}       items={data.recentDeals} />
+        <RecentCol label="Events" icon={Calendar} items={data.recentEvents} />
+        <RecentCol label="Deals" icon={Tag} items={data.recentDeals} />
         <RecentCol label="Jobb & Exj." icon={Briefcase} items={data.recentOpportunities} />
       </div>
     </div>
