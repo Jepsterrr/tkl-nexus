@@ -7,9 +7,10 @@ interface TagInputProps {
   value: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
+  id?: string;
 }
 
-export function TagInput({ value, onChange, placeholder = 'Lägg till tagg…' }: TagInputProps) {
+export function TagInput({ value, onChange, placeholder = 'Lägg till tagg…', id }: TagInputProps) {
   const [input, setInput] = useState('');
 
   const addTag = () => {
@@ -52,6 +53,7 @@ export function TagInput({ value, onChange, placeholder = 'Lägg till tagg…' }
         </span>
       ))}
       <input
+        id={id}
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}

@@ -26,6 +26,7 @@ const SECTIONS = [
 function toDatetimeLocal(iso: string | undefined): string {
   if (!iso) return '';
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -36,7 +37,9 @@ function toDatetimeLocal(iso: string | undefined): string {
 
 function fromDatetimeLocal(local: string): string {
   if (!local) return '';
-  return new Date(local).toISOString();
+  const d = new Date(local);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString();
 }
 
 export function EventForm({ mode, initialData }: EventFormProps) {
@@ -61,6 +64,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+
+    if (mode === 'edit' && !initialData) {
+      setSubmitError('Eventdata saknas — ladda om sidan och försök igen.');
+      return;
+    }
 
     const formData = {
       title,
@@ -92,8 +100,8 @@ export function EventForm({ mode, initialData }: EventFormProps) {
     try {
       if (mode === 'create') {
         await createEvent(result.data);
-      } else if (initialData) {
-        await updateEvent(initialData.id, result.data);
+      } else {
+        await updateEvent(initialData!.id, result.data);
       }
       router.push('/admin/events');
     } catch {
@@ -112,6 +120,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
 
   const labelCls = 'block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5';
   const errorCls = 'mt-1 text-xs text-[oklch(65%_0.2_25)]';
+  const reqMark  = <span className="text-[oklch(65%_0.2_25)]" aria-hidden="true">*</span>;
   const sectionHdCls = [
     'font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest',
     'text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]',
@@ -134,7 +143,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
         </div>
 
         {/* Publish toggle */}
-        <label className="flex items-center gap-2.5 cursor-pointer mt-6 shrink-0">
+        <div className="flex items-center gap-2.5 mt-6 shrink-0">
           <span className="text-xs font-medium text-[oklch(50%_0.02_265)]">
             {published ? 'Publicerad' : 'Utkast'}
           </span>
@@ -154,7 +163,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               }`}
             />
           </button>
-        </label>
+        </div>
       </div>
 
       <div className="space-y-10 max-w-3xl">
@@ -164,15 +173,27 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           <h2 className={sectionHdCls}>Identitet</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>
-                Titel (sv) <span className="text-[oklch(62%_0.2_25)]">*</span>
+              <label htmlFor="ef-title" className={labelCls}>
+                Titel (sv) {reqMark}
               </label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls} />
+              <input
+                id="ef-title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={inputCls}
+              />
               {errors.title && <p className={errorCls}>{errors.title}</p>}
             </div>
             <div>
-              <label className={labelCls}>Titel (en)</label>
-              <input type="text" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} className={inputCls} />
+              <label htmlFor="ef-title-en" className={labelCls}>Titel (en)</label>
+              <input
+                id="ef-title-en"
+                type="text"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                className={inputCls}
+              />
             </div>
           </div>
         </section>
@@ -182,10 +203,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           <h2 className={sectionHdCls}>Tid & Plats</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className={labelCls}>
-                Startdatum <span className="text-[oklch(62%_0.2_25)]">*</span>
+              <label htmlFor="ef-date" className={labelCls}>
+                Startdatum {reqMark}
               </label>
               <input
+                id="ef-date"
                 type="datetime-local"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -194,8 +216,9 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               {errors.date && <p className={errorCls}>{errors.date}</p>}
             </div>
             <div>
-              <label className={labelCls}>Slutdatum (valfritt)</label>
+              <label htmlFor="ef-end-date" className={labelCls}>Slutdatum (valfritt)</label>
               <input
+                id="ef-end-date"
                 type="datetime-local"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
@@ -204,10 +227,16 @@ export function EventForm({ mode, initialData }: EventFormProps) {
             </div>
           </div>
           <div>
-            <label className={labelCls}>
-              Plats <span className="text-[oklch(62%_0.2_25)]">*</span>
+            <label htmlFor="ef-location" className={labelCls}>
+              Plats {reqMark}
             </label>
-            <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className={inputCls} />
+            <input
+              id="ef-location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={inputCls}
+            />
             {errors.location && <p className={errorCls}>{errors.location}</p>}
           </div>
         </section>
@@ -217,10 +246,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           <h2 className={sectionHdCls}>Innehåll</h2>
           <div className="space-y-4">
             <div>
-              <label className={labelCls}>
-                Beskrivning (sv) <span className="text-[oklch(62%_0.2_25)]">*</span>
+              <label htmlFor="ef-description" className={labelCls}>
+                Beskrivning (sv) {reqMark}
               </label>
               <textarea
+                id="ef-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}
@@ -229,8 +259,9 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               {errors.description && <p className={errorCls}>{errors.description}</p>}
             </div>
             <div>
-              <label className={labelCls}>Beskrivning (en, valfritt)</label>
+              <label htmlFor="ef-description-en" className={labelCls}>Beskrivning (en, valfritt)</label>
               <textarea
+                id="ef-description-en"
                 value={descriptionEn}
                 onChange={(e) => setDescriptionEn(e.target.value)}
                 rows={5}
@@ -245,14 +276,15 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           <h2 className={sectionHdCls}>Metadata</h2>
           <div className="space-y-4">
             <div>
-              <label className={labelCls}>
-                Sektion <span className="text-[oklch(62%_0.2_25)]">*</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
+              <p id="ef-section-label" className={labelCls}>
+                Sektion {reqMark}
+              </p>
+              <div role="group" aria-labelledby="ef-section-label" className="flex flex-wrap gap-2">
                 {SECTIONS.map((s) => (
                   <button
                     key={s.value}
                     type="button"
+                    aria-pressed={section === s.value}
                     onClick={() => setSection(s.value)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       section === s.value
@@ -266,12 +298,13 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               </div>
             </div>
             <div>
-              <label className={labelCls}>Taggar</label>
-              <TagInput value={tags} onChange={setTags} />
+              <label htmlFor="ef-tags" className={labelCls}>Taggar</label>
+              <TagInput id="ef-tags" value={tags} onChange={setTags} />
             </div>
             <div>
-              <label className={labelCls}>Bild-URL (valfritt)</label>
+              <label htmlFor="ef-image-url" className={labelCls}>Bild-URL (valfritt)</label>
               <input
+                id="ef-image-url"
                 type="url"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
@@ -287,7 +320,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
       {/* Footer */}
       <div className="flex items-center justify-between mt-10 pt-6 border-t border-[oklch(20%_0.012_265)] max-w-3xl">
         <div>
-          {submitError && <p className={errorCls}>{submitError}</p>}
+          {submitError && <p className={errorCls} role="alert">{submitError}</p>}
         </div>
         <div className="flex gap-3">
           <Link
