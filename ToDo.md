@@ -4,6 +4,10 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ## Epic 1: Admin-panel
 
+Ta bort Category på deals? De används inte alls i något?
+
+Tillbaka till sajt knapp returnerar error för Navbar och Footer
+
 ### Auth & Åtkomstkontroll
 
 - [x] Implementera inloggningssida på `/admin` med Firebase Auth (email + lösenord).
@@ -28,11 +32,11 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ### Deals-panel (`/admin/deals`)
 
-- [ ] Lista alla deals (publicerade + opublicerade) sorterade efter `createdAt`.
-- [ ] Skapa ny deal — formulär: `company`, `logoUrl`, `title`, `titleEn`, `description`, `descriptionEn`, `category`, `link`, `discountCode`, `discount`, `published`.
-- [ ] Redigera befintlig deal.
-- [ ] Publicera / avpublicera deal.
-- [ ] Ta bort deal med bekräftelsedialog.
+- [x] Lista alla deals (publicerade + opublicerade) sorterade efter `createdAt`.
+- [x] Skapa ny deal — formulär: `company`, `logoUrl`, `title`, `titleEn`, `description`, `descriptionEn`, `category`, `link`, `discountCode`, `discount`, `published`.
+- [x] Redigera befintlig deal.
+- [x] Publicera / avpublicera deal.
+- [x] Ta bort deal med bekräftelsedialog.
 
 ### Jobb & Exjobb-panel (`/admin/opportunities`)
 
