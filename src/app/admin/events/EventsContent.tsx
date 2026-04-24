@@ -29,8 +29,10 @@ export function EventsContent() {
   const [fetchKey, setFetchKey] = useState(0);
   const [filter, setFilter] = useState<FilterMode>('all');
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
+  const [toggleError, setToggleError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TKLEvent | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +63,7 @@ export function EventsContent() {
   }, []);
 
   const handleToggle = async (event: TKLEvent) => {
+    setToggleError(null);
     setToggling(t => ({ ...t, [event.id]: true }));
     try {
       await togglePublished(event.id, event.published);
@@ -68,7 +71,7 @@ export function EventsContent() {
         evs.map(e => (e.id === event.id ? { ...e, published: !e.published } : e))
       );
     } catch {
-      // tyst fel — inga extra UI-element
+      setToggleError('Kunde inte ändra publiceringsstatus. Försök igen.');
     } finally {
       setToggling(t => ({ ...t, [event.id]: false }));
     }
@@ -76,13 +79,15 @@ export function EventsContent() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
+    setDeleteError(null);
     setDeleting(true);
     try {
       await deleteEvent(deleteTarget.id);
       setEvents(evs => evs.filter(e => e.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch {
-      // tyst fel
+      setDeleteError('Kunde inte ta bort eventet. Försök igen.');
+      setDeleteTarget(null);
     } finally {
       setDeleting(false);
     }
@@ -128,6 +133,16 @@ export function EventsContent() {
             </button>
           ))}
         </div>
+
+        {/* Toggle-fel */}
+        {toggleError && (
+          <p className="mb-4 text-xs text-[oklch(65%_0.2_25)]" role="alert">{toggleError}</p>
+        )}
+
+        {/* Delete-fel */}
+        {deleteError && (
+          <p className="mb-4 text-xs text-[oklch(65%_0.2_25)]" role="alert">{deleteError}</p>
+        )}
 
         {/* Loading skeleton */}
         {loading && (
