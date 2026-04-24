@@ -68,9 +68,8 @@ function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
 }
 
 function formatDate(ts: unknown): string {
-  if (ts instanceof Timestamp) {
-    return ts.toDate().toISOString().slice(0, 10);
-  }
+  if (ts instanceof Timestamp) return ts.toDate().toISOString().slice(0, 10);
+  if (typeof ts === 'string' && ts.length >= 10) return ts.slice(0, 10);
   return '–';
 }
 

@@ -14,13 +14,24 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/admins':        'Adminhantering',
 };
 
+const PREFIX_MAP: [string, string][] = [
+  ['/admin/events',        'Events'],
+  ['/admin/deals',         'Deals'],
+  ['/admin/opportunities', 'Jobb & Exjobb'],
+  ['/admin/partners',      'Partners'],
+  ['/admin/admins',        'Adminhantering'],
+];
+
 interface AdminContentHeaderProps {
   user: User;
 }
 
 export function AdminContentHeader({ user }: AdminContentHeaderProps) {
   const pathname = usePathname();
-  const title = TITLE_MAP[pathname] ?? 'Admin';
+  const title =
+    TITLE_MAP[pathname] ??
+    PREFIX_MAP.find(([prefix]) => pathname.startsWith(prefix + '/'))?.[1] ??
+    'Admin';
 
   return (
     <header className="admin-content-header">
