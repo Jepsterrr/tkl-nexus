@@ -10,10 +10,10 @@ import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { JobCard } from '@/components/ui/JobCard';
 import { JobCardSkeleton } from '@/components/ui/JobCardSkeleton';
-import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity';
-import { getPublishedOpportunities } from '@/lib/services/opportunities';
+import type { TKLCareer, CareerType } from '@/lib/schemas/career';
+import { getPublishedCareer } from '@/lib/services/career';
 
-type FilterKey = OpportunityType | 'all';
+type FilterKey = CareerType | 'all';
 
 // Filter Färger — blåspektrum (indigo → blå → himmelblå → cyan)
 const FILTER_COLORS: Record<FilterKey, string> = {
@@ -28,7 +28,7 @@ export function CareerContent() {
   const { t } = useLanguage();
   const opportunity = t.opportunities;
 
-  const [opportunities, setOpportunities] = useState<TKLOpportunity[]>([]);
+  const [careerItems, setCareerItems] = useState<TKLCareer[]>([]);
   const [filter, setFilter] = useState<FilterKey>('all');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -48,10 +48,10 @@ export function CareerContent() {
     let isMounted = true;
     setLoading(true);
 
-    getPublishedOpportunities()
+    getPublishedCareer()
       .then((data) => {
         if (isMounted) {
-          setOpportunities(data);
+          setCareerItems(data);
           setLoading(false);
         }
       })
@@ -68,7 +68,7 @@ export function CareerContent() {
     };
   }, [opportunity.error, fetchKey]);
 
-  const filteredOpps = opportunities
+  const filteredItems = careerItems
     .filter((o) => filter === 'all' || o.type === filter)
     .filter((o) => {
       if (!search.trim()) return true;
@@ -80,12 +80,12 @@ export function CareerContent() {
       );
     });
 
-  const jobSchemaList = opportunities.length > 0 ? {
+  const jobSchemaList = careerItems.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Lediga tjänster & exjobb via TKL Nexus',
     url: 'https://tklnexus.se/career',
-    itemListElement: opportunities.map((opp, index) => {
+    itemListElement: careerItems.map((opp, index) => {
       const employmentTypeMap: Record<string, string> = {
         jobb: 'FULL_TIME',
         exjobb: 'INTERN',
@@ -291,7 +291,7 @@ export function CareerContent() {
           )}
 
           {/* Tomt State */}
-          {!loading && !error && filteredOpps.length === 0 && (
+          {!loading && !error && filteredItems.length === 0 && (
             <motion.div
               role="status"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -323,12 +323,12 @@ export function CareerContent() {
           {/* Aria-live region för filterresultat */}
           {!loading && !error && (
             <p className="sr-only" aria-live="polite" aria-atomic="true">
-              {opportunity.resultsCount.replace('{count}', String(filteredOpps.length))}
+              {opportunity.resultsCount.replace('{count}', String(filteredItems.length))}
             </p>
           )}
 
           {/* Jobb Grid */}
-          {!loading && !error && filteredOpps.length > 0 && (
+          {!loading && !error && filteredItems.length > 0 && (
             <AnimatePresence mode="wait">
               <motion.div
                 key={filter}
@@ -337,7 +337,7 @@ export function CareerContent() {
                 transition={{ duration: 0.08 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
-                {filteredOpps.map((job, idx) => (
+                {filteredItems.map((job, idx) => (
                   <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} entryDelay={idx * 0.03} />
                 ))}
               </motion.div>

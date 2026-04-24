@@ -4,8 +4,6 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ## Epic 1: Admin-panel
 
-Ta bort Category på deals? De används inte alls i något?
-
 Tillbaka till sajt knapp returnerar error för Navbar och Footer
 
 ### Auth & Åtkomstkontroll
@@ -38,13 +36,13 @@ Tillbaka till sajt knapp returnerar error för Navbar och Footer
 - [x] Publicera / avpublicera deal.
 - [x] Ta bort deal med bekräftelsedialog.
 
-### Jobb & Exjobb-panel (`/admin/opportunities`)
+### Jobb & Exjobb-panel (`/admin/career`)
 
-- [ ] Lista alla jobbannonser (publicerade + opublicerade) sorterade efter `createdAt`.
-- [ ] Skapa ny annons — formulär: `title`, `titleEn`, `company`, `type` (exjobb / jobb / praktik / trainee), `location`, `description`, `descriptionEn`, `startDate`, `startDateEn`, `deadline`, `applyUrl`, `published`.
-- [ ] Redigera befintlig annons.
-- [ ] Publicera / avpublicera annons.
-- [ ] Ta bort annons med bekräftelsedialog.
+- [x] Lista alla jobbannonser (publicerade + opublicerade) sorterade efter `createdAt`.
+- [x] Skapa ny annons — formulär: `title`, `titleEn`, `company`, `type` (exjobb / jobb / praktik / trainee), `location`, `description`, `descriptionEn`, `startDate`, `startDateEn`, `deadline`, `applyUrl`, `published`.
+- [x] Redigera befintlig annons.
+- [x] Publicera / avpublicera annons.
+- [x] Ta bort annons med bekräftelsedialog.
 
 ### Partnerföretag-panel (`/admin/partners`)
 

@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
-export const OpportunityTypeSchema = z.enum(['exjobb', 'jobb', 'praktik', 'trainee']);
-export type OpportunityType = z.infer<typeof OpportunityTypeSchema>;
+export const CareerTypeSchema = z.enum(['exjobb', 'jobb', 'praktik', 'trainee']);
+export type CareerType = z.infer<typeof CareerTypeSchema>;
 
-export const OpportunitySchema = z.object({
+export const CareerSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1).max(120),
   titleEn: z.string().max(120).optional(),
   company: z.string().min(1).max(120),
-  type: OpportunityTypeSchema,
+  type: CareerTypeSchema,
   location: z.string().min(1).max(120),
   description: z.string().max(2000).optional(),
   descriptionEn: z.string().max(2000).optional(),
@@ -20,14 +20,18 @@ export const OpportunitySchema = z.object({
   createdAt: z.string().datetime({ offset: true }),
 });
 
-export type TKLOpportunity = z.infer<typeof OpportunitySchema>;
+export type TKLCareer = z.infer<typeof CareerSchema>;
 
-export const FirestoreOpportunityDocSchema = z.object({
+// Admin form schema — utan id och createdAt
+export const CareerFormSchema = CareerSchema.omit({ id: true, createdAt: true });
+export type CareerFormData = z.infer<typeof CareerFormSchema>;
+
+export const FirestoreCareerDocSchema = z.object({
   id: z.string(),
   title: z.string(),
   titleEn: z.string().optional(),
   company: z.string(),
-  type: OpportunityTypeSchema.default('jobb'),
+  type: CareerTypeSchema.default('jobb'),
   location: z.string().default(''),
   description: z.string().optional(),
   descriptionEn: z.string().optional(),

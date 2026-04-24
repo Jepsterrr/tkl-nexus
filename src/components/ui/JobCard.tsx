@@ -3,16 +3,16 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { MapPin, Calendar, Building2, ExternalLink, ArrowRight, Clock } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import type { TKLOpportunity, OpportunityType } from '@/lib/schemas/opportunity';
+import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
 interface JobCardProps {
-  job: TKLOpportunity;
+  job: TKLCareer;
   color?: string;
   entryDelay?: number;
 }
 
-const TYPE_COLORS: Record<OpportunityType, string> = {
+const TYPE_COLORS: Record<CareerType, string> = {
   exjobb:  '#8B5CF6', // lila — akademisk tyngd
   jobb:    '#3B82F6', // blå  — professionellt
   praktik: '#10B981', // grön — tillväxt och lärande
