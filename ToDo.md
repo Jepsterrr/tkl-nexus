@@ -20,11 +20,11 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
 ### Events-panel (`/admin/events`)
 
-- [ ] Lista alla events (publicerade + opublicerade) sorterade efter datum.
-- [ ] Skapa nytt event — formulär med alla fält: `title`, `titleEn`, `description`, `descriptionEn`, `date`, `endDate`, `location`, `imageUrl`, `tags`, `section`, `published`.
-- [ ] Redigera befintligt event — samma formulär förifyllt.
-- [ ] Publicera / avpublicera event (toggle `published`-fältet).
-- [ ] Ta bort event med bekräftelsedialog.
+- [x] Lista alla events (publicerade + opublicerade) sorterade efter datum.
+- [x] Skapa nytt event — formulär med alla fält: `title`, `titleEn`, `description`, `descriptionEn`, `date`, `endDate`, `location`, `imageUrl`, `tags`, `section`, `published`.
+- [x] Redigera befintligt event — samma formulär förifyllt.
+- [x] Publicera / avpublicera event (toggle `published`-fältet).
+- [x] Ta bort event med bekräftelsedialog.
 
 ### Deals-panel (`/admin/deals`)
 
@@ -128,3 +128,4 @@ Footern har externa länkar hårdkodade i `Footer.tsx:7–19` som kan behöva up
 ### Admin-panel — Framtida förbättringar
 
 - [ ] **Collapsible sidebar (approach C):** Sidebaren kan fällas ihop till ikonläge för mer desktop-yta. Kräver collapse-state (localStorage), animerad breddtransition och tooltip-labels på ikonerna i hopfällt läge.
+- [ ] **Migrera admin-CSS till Tailwind:** Alla custom CSS-klasser i `globals.css` under `/* === Admin Shell === */` (`.admin-shell`, `.admin-sidebar`, `.admin-nav-item`, `.dash-*`, etc.) ska skrivas om till Tailwind v4-utilities direkt i respektive komponent. Görs som ett separat refactor-steg efter att alla admin-paneler är byggda.
