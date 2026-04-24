@@ -17,7 +17,12 @@ const SECTION_LABELS: Record<TKLEvent['section'], string> = {
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }).toUpperCase();
+}
+
+function getSectionLabel(section: string): string {
+  return (SECTION_LABELS as Record<string, string>)[section] ?? section;
 }
 
 type FilterMode = 'all' | 'published' | 'draft';
@@ -223,7 +228,7 @@ export function EventsContent() {
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="inline-block px-1.5 py-px text-[10px] font-medium rounded-full bg-[oklch(18%_0.012_265)] text-[oklch(55%_0.02_265)]">
-                      {SECTION_LABELS[event.section]}
+                      {getSectionLabel(event.section)}
                     </span>
                     <span className="text-xs text-[oklch(50%_0.02_265)] truncate">
                       {event.location}
@@ -261,8 +266,9 @@ export function EventsContent() {
                   <button
                     type="button"
                     aria-label={`Radera event: ${event.title}`}
-                    onClick={() => setDeleteTarget(event)}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(65%_0.2_25)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
+                    disabled={deleting}
+                    onClick={() => { setDeleteError(null); setDeleteTarget(event); }}
+                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(65%_0.2_25)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Trash2 size={15} aria-hidden="true" />
                   </button>
