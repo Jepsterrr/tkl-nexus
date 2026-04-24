@@ -57,7 +57,7 @@ export async function getPublishedEvents(): Promise<TKLEvent[]> {
 export async function getAllEvents(): Promise<TKLEvent[]> {
   const eventsRef = collection(db, 'events');
   const q = query(eventsRef, orderBy('date', 'asc'));
-  const snapshot = await getDocs(q);
+  const snapshot = await withFetchTimeout(getDocs(q));
 
   const events: TKLEvent[] = [];
   snapshot.forEach((docSnap) => {
@@ -82,7 +82,7 @@ export async function getAllEvents(): Promise<TKLEvent[]> {
 
 export async function getEventById(id: string): Promise<TKLEvent | null> {
   const docRef = doc(db, 'events', id);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await withFetchTimeout(getDoc(docRef));
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
@@ -95,27 +95,36 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
   };
 
   const parsed = EventSchema.safeParse(eventData);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) {
+    console.error(`Valideringsfel för event ${docSnap.id}:`, parsed.error);
+    return null;
+  }
+  return parsed.data;
 }
 
 export async function createEvent(data: EventFormData): Promise<string> {
+  const validated = EventFormSchema.parse(data);
   const eventsRef = collection(db, 'events');
   const docRef = await addDoc(eventsRef, {
-    ...data,
+    ...validated,
     createdAt: serverTimestamp(),
   });
   return docRef.id;
 }
 
 export async function updateEvent(id: string, data: Partial<EventFormData>): Promise<void> {
+  if (!id) throw new Error('updateEvent: id saknas');
+  const validated = EventFormSchema.partial().parse(data);
   const docRef = doc(db, 'events', id);
-  await updateDoc(docRef, data as Record<string, unknown>);
+  await updateDoc(docRef, validated as Record<string, unknown>);
 }
 
 export async function deleteEvent(id: string): Promise<void> {
+  if (!id) throw new Error('deleteEvent: id saknas');
   await deleteDoc(doc(db, 'events', id));
 }
 
 export async function togglePublished(id: string, current: boolean): Promise<void> {
+  if (!id) throw new Error('togglePublished: id saknas');
   await updateDoc(doc(db, 'events', id), { published: !current });
 }
