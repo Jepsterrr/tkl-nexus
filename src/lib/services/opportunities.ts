@@ -4,7 +4,7 @@ import { OpportunitySchema, type TKLOpportunity } from '../schemas/opportunity';
 import { withFetchTimeout } from '../fetch-timeout';
 
 export async function getPublishedOpportunities(): Promise<TKLOpportunity[]> {
-  const oppsRef = collection(db, 'opportunities');
+  const oppsRef = collection(db, 'career');
   const q = query(
     oppsRef,
     where('published', '==', true),

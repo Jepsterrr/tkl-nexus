@@ -234,11 +234,11 @@ export function DashboardContent() {
       const results = await Promise.allSettled([
         withTimeout(fetchStat('events', true), errStat),
         withTimeout(fetchStat('deals', true), errStat),
-        withTimeout(fetchStat('opportunities', true), errStat),
+        withTimeout(fetchStat('career', true), errStat),
         withTimeout(fetchStat('admins', false), errStat),
         withTimeout(fetchRecent('events', 'title'), []),
         withTimeout(fetchRecent('deals', 'title'), []),
-        withTimeout(fetchRecent('opportunities', 'title'), []),
+        withTimeout(fetchRecent('career', 'title'), []),
       ]);
 
       const [events, deals, opportunities, admins, recentEvents, recentDeals, recentOpportunities] =

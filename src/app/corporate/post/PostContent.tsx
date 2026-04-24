@@ -94,7 +94,7 @@ function buildOpportunityMailto(f: OpportunityForm): string {
     field('Kontaktperson', f.contactName),
     field('Kontakt-e-post', f.contactEmail),
     '',
-    '--- ANNONSDATA (opportunities) ---',
+    '--- ANNONSDATA (career) ---',
     field('title', f.title),
     field('titleEn', f.titleEn),
     field('company', f.company),
@@ -107,7 +107,7 @@ function buildOpportunityMailto(f: OpportunityForm): string {
     field('descriptionEn', f.descriptionEn),
     '',
     '--- NOTERINGAR ---',
-    'Samling: opportunities',
+    'Samling: career',
     'published: false (sätt till true vid publicering)',
   ].join('\n');
   return `mailto:ao@teknologkaren.se?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
