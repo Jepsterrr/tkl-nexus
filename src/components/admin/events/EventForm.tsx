@@ -111,7 +111,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
   ].join(' ');
 
   const labelCls = 'block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5';
-  const errorCls = 'mt-1 text-xs text-[oklch(62%_0.2_25)]';
+  const errorCls = 'mt-1 text-xs text-[oklch(65%_0.2_25)]';
   const sectionHdCls = [
     'font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest',
     'text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]',
