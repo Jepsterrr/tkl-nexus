@@ -102,11 +102,15 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
   return parsed.data;
 }
 
+function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+}
+
 export async function createEvent(data: EventFormData): Promise<string> {
   const validated = EventFormSchema.parse(data);
   const eventsRef = collection(db, 'events');
   const docRef = await addDoc(eventsRef, {
-    ...validated,
+    ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });
   return docRef.id;
@@ -116,7 +120,7 @@ export async function updateEvent(id: string, data: Partial<EventFormData>): Pro
   if (!id) throw new Error('updateEvent: id saknas');
   const validated = EventFormSchema.partial().parse(data);
   const docRef = doc(db, 'events', id);
-  await updateDoc(docRef, validated as Record<string, unknown>);
+  await updateDoc(docRef, omitUndefined(validated as Record<string, unknown>));
 }
 
 export async function deleteEvent(id: string): Promise<void> {
