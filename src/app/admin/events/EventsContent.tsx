@@ -207,7 +207,7 @@ export function EventsContent() {
             {filtered.map(event => (
               <li
                 key={event.id}
-                className={`flex items-center gap-4 px-4 py-3 mt-2 rounded-lg border border-[oklch(18%_0.012_265)] transition-colors ${
+                className={`flex items-center gap-4 px-4 py-3 mt-1 rounded-lg border border-[oklch(18%_0.012_265)] transition-colors ${
                   event.published
                     ? 'bg-[oklch(55%_0.12_265/8%)]'
                     : 'bg-[oklch(75%_0.12_60/8%)]'
