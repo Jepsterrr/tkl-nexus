@@ -49,7 +49,6 @@ interface DealForm {
   company: string;
   title: string;
   titleEn: string;
-  category: 'rabatt' | 'mat' | 'teknik' | 'sport' | 'övrigt' | '';
   description: string;
   descriptionEn: string;
   discountCode: string;
@@ -74,7 +73,7 @@ const EMPTY_EVENT: EventForm = {
 
 const EMPTY_DEAL: DealForm = {
   contactName: '', contactEmail: '', company: '', title: '',
-  titleEn: '', category: '', description: '', descriptionEn: '',
+  titleEn: '', description: '', descriptionEn: '',
   discountCode: '', discount: '', link: '', logoUrl: '',
 };
 
@@ -160,7 +159,6 @@ function buildDealMailto(f: DealForm): string {
     field('company', f.company),
     field('title', f.title),
     field('titleEn', f.titleEn),
-    field('category', f.category),
     field('description (sv)', f.description),
     field('descriptionEn', f.descriptionEn),
     field('discountCode', f.discountCode),
@@ -186,7 +184,7 @@ function isEventValid(f: EventForm): boolean {
 }
 
 function isDealValid(f: DealForm): boolean {
-  return !!(f.contactName && f.contactEmail && f.company && f.title && f.category && f.description);
+  return !!(f.contactName && f.contactEmail && f.company && f.title && f.description);
 }
 
 // Shared styles
@@ -642,24 +640,10 @@ export function PostContent() {
                     {cp.deal.sectionTitle}
                   </legend>
                   <div className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="deal-company" className={labelCls}>{cp.deal.company}{requiredDot}</label>
-                        <input id="deal-company" type="text" aria-required="true" placeholder={cp.deal.companyPlaceholder} className={inputCls}
-                          value={deal.company} onChange={e => setDeal(p => ({ ...p, company: e.target.value }))} />
-                      </div>
-                      <div>
-                        <label htmlFor="deal-category" className={labelCls}>{cp.deal.category}{requiredDot}</label>
-                        <select id="deal-category" aria-required="true" className={inputCls}
-                          value={deal.category} onChange={e => setDeal(p => ({ ...p, category: e.target.value as DealForm['category'] }))}>
-                          <option value="" disabled>{cp.deal.categoryPlaceholder}</option>
-                          <option value="rabatt">{cp.deal.categories.rabatt}</option>
-                          <option value="mat">{cp.deal.categories.mat}</option>
-                          <option value="teknik">{cp.deal.categories.teknik}</option>
-                          <option value="sport">{cp.deal.categories.sport}</option>
-                          <option value="övrigt">{cp.deal.categories.övrigt}</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label htmlFor="deal-company" className={labelCls}>{cp.deal.company}{requiredDot}</label>
+                      <input id="deal-company" type="text" aria-required="true" placeholder={cp.deal.companyPlaceholder} className={inputCls}
+                        value={deal.company} onChange={e => setDeal(p => ({ ...p, company: e.target.value }))} />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">

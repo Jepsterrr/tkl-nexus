@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-export const DealCategorySchema = z.enum(['rabatt', 'mat', 'teknik', 'sport', 'övrigt']);
-export type DealCategory = z.infer<typeof DealCategorySchema>;
-
 export const DealSchema = z.object({
   id: z.string(),
   company: z.string().min(1),
@@ -11,7 +8,6 @@ export const DealSchema = z.object({
   titleEn: z.string().optional(),
   description: z.string().min(1),
   descriptionEn: z.string().optional(),
-  category: DealCategorySchema,
   link: z.string().url().optional().or(z.literal('')),
   discountCode: z.string().optional(),
   discount: z.string().optional(),

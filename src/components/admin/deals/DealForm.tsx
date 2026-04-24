@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createDeal, updateDeal } from '@/lib/services/deals';
 import { DealFormSchema } from '@/lib/schemas/deal';
-import type { TKLDeal, DealFormData, DealCategory } from '@/lib/schemas/deal';
+import type { TKLDeal, DealFormData } from '@/lib/schemas/deal';
 
 interface DealFormProps {
   mode: 'create' | 'edit';
@@ -14,21 +14,12 @@ interface DealFormProps {
 
 type FormErrors = Partial<Record<keyof DealFormData, string>>;
 
-const CATEGORIES: { value: DealCategory; label: string }[] = [
-  { value: 'rabatt',  label: 'Rabatt'  },
-  { value: 'mat',     label: 'Mat'     },
-  { value: 'teknik',  label: 'Teknik'  },
-  { value: 'sport',   label: 'Sport'   },
-  { value: 'övrigt',  label: 'Övrigt'  },
-];
-
 export function DealForm({ mode, initialData }: DealFormProps) {
   const router = useRouter();
 
   const [company, setCompany]             = useState(initialData?.company ?? '');
   const [title, setTitle]                 = useState(initialData?.title ?? '');
   const [titleEn, setTitleEn]             = useState(initialData?.titleEn ?? '');
-  const [category, setCategory]           = useState<DealCategory>(initialData?.category ?? 'rabatt');
   const [logoUrl, setLogoUrl]             = useState(initialData?.logoUrl ?? '');
   const [description, setDescription]     = useState(initialData?.description ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initialData?.descriptionEn ?? '');
@@ -54,7 +45,6 @@ export function DealForm({ mode, initialData }: DealFormProps) {
       company,
       title,
       titleEn: titleEn || undefined,
-      category,
       logoUrl: logoUrl || undefined,
       description,
       descriptionEn: descriptionEn || undefined,
@@ -202,28 +192,6 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                   onChange={e => setTitleEn(e.target.value)}
                   className={inputCls}
                 />
-              </div>
-            </div>
-            <div>
-              <p id="df-category-label" className={labelCls}>
-                Kategori {reqMark}
-              </p>
-              <div role="group" aria-labelledby="df-category-label" className="flex flex-wrap gap-2">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat.value}
-                    type="button"
-                    aria-pressed={category === cat.value}
-                    onClick={() => setCategory(cat.value)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                      category === cat.value
-                        ? 'bg-[oklch(55%_0.12_265)] text-white'
-                        : 'bg-[oklch(18%_0.012_265)] border border-[oklch(28%_0.015_265)] text-[oklch(52%_0.02_265)] hover:text-[oklch(80%_0.01_265)]'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
               </div>
             </div>
           </div>

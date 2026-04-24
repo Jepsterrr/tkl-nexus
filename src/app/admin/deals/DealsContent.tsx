@@ -5,15 +5,7 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog';
 import { getAllDeals, deleteDeal, toggleDealPublished } from '@/lib/services/deals';
-import type { TKLDeal, DealCategory } from '@/lib/schemas/deal';
-
-const CATEGORY_LABELS: Record<DealCategory, string> = {
-  rabatt:  'Rabatt',
-  mat:     'Mat',
-  teknik:  'Teknik',
-  sport:   'Sport',
-  övrigt:  'Övrigt',
-};
+import type { TKLDeal } from '@/lib/schemas/deal';
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -223,9 +215,6 @@ export function DealsContent() {
                     {deal.title}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="inline-block px-1.5 py-px text-[10px] font-medium rounded-full bg-[oklch(18%_0.012_265)] text-[oklch(55%_0.02_265)]">
-                      {CATEGORY_LABELS[deal.category]}
-                    </span>
                     <span className="text-xs text-[oklch(50%_0.02_265)] truncate">
                       {deal.company}
                     </span>
