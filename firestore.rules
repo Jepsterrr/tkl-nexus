@@ -33,6 +33,17 @@ service cloud.firestore {
       allow write: if request.auth != null && isAdmin();
     }
 
+    // Settings: publik läsning, admin-skrivning
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    match /settings/timeline/items/{itemId} {
+      allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
     // Allt annat kräver admin-tillgång
     match /{document=**} {
       allow read, write: if request.auth != null && isAdmin();
