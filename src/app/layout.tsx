@@ -5,6 +5,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { LanguageProvider } from '@/components/providers/LanguageProvider';
+import { SettingsProvider } from '@/components/providers/SettingsProvider';
 import { HtmlLangSync } from '@/components/providers/HtmlLangSync';
 import { ScrollProvider } from '@/components/providers/ScrollProvider';
 import { ScrollContainer } from '@/components/providers/ScrollContainer';
@@ -103,21 +104,23 @@ export default function RootLayout({
       <body className="antialiased bg-cosmic-bg overflow-x-hidden">
         <LanguageProvider>
           <HtmlLangSync />
-          <ThemeProvider>
-            <ScrollProvider>
-              <ScrollResetter />
-              <a href="#main-content" className="skip-nav">
-                Hoppa till innehåll
-              </a>
-              <Navbar />
-              <ScrollContainer>
-                <main id="main-content" className="relative overflow-x-hidden">
-                  {children}
-                </main>
-                <Footer />
-              </ScrollContainer>
-            </ScrollProvider>
-          </ThemeProvider>
+          <SettingsProvider>
+            <ThemeProvider>
+              <ScrollProvider>
+                <ScrollResetter />
+                <a href="#main-content" className="skip-nav">
+                  Hoppa till innehåll
+                </a>
+                <Navbar />
+                <ScrollContainer>
+                  <main id="main-content" className="relative overflow-x-hidden">
+                    {children}
+                  </main>
+                  <Footer />
+                </ScrollContainer>
+              </ScrollProvider>
+            </ThemeProvider>
+          </SettingsProvider>
         </LanguageProvider>
       </body>
     </html>
