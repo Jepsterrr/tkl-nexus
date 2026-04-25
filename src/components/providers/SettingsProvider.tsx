@@ -60,13 +60,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
     async function run() {
       try {
         const data = await withTimeout(fetchAll(), 5000);
         if (!cancelled) setValue(data);
       } catch {
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise<void>(r => { retryTimer = setTimeout(r, 1000); });
         if (cancelled) return;
         try {
           const data = await withTimeout(fetchAll(), 8000);
@@ -78,7 +79,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
 
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+    };
   }, []);
 
   return (
