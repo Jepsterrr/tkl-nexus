@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getServicesSettings, saveServicesSettings } from '@/lib/services/settings';
 import { ServicesSettingsSchema } from '@/lib/schemas/settings';
 
@@ -13,6 +13,7 @@ const inputCls = [
   'focus:border-[oklch(55%_0.12_265)]',
 ].join(' ');
 const labelCls = 'block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5';
+const cardHd = 'text-xs font-semibold text-[oklch(60%_0.02_265)] mt-6 mb-3';
 
 export function ServicesForm() {
   const [etSv, setEtSv] = useState(''); const [etEn, setEtEn] = useState('');
@@ -27,6 +28,13 @@ export function ServicesForm() {
   const [fetchKey,   setFetchKey]   = useState(0);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError,  setSaveError]  = useState<string | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +70,7 @@ export function ServicesForm() {
     try {
       await saveServicesSettings(r.data);
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
       setSaveStatus('error');
       setSaveError('Något gick fel. Försök igen.');
@@ -85,8 +93,6 @@ export function ServicesForm() {
       </button>
     </div>
   );
-
-  const cardHd = 'text-xs font-semibold text-[oklch(60%_0.02_265)] mt-6 mb-3';
 
   return (
     <form onSubmit={handleSubmit} noValidate className="p-6 sm:p-8 max-w-2xl">

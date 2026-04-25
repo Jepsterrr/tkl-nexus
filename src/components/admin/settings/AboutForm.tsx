@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getAboutSettings, saveAboutSettings } from '@/lib/services/settings';
 import { AboutSettingsSchema } from '@/lib/schemas/settings';
 
@@ -30,6 +30,13 @@ export function AboutForm() {
   const [fetchKey,   setFetchKey]   = useState(0);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError,  setSaveError]  = useState<string | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +68,7 @@ export function AboutForm() {
     try {
       await saveAboutSettings(r.data);
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
       setSaveStatus('error');
       setSaveError('Något gick fel. Försök igen.');

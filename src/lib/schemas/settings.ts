@@ -9,8 +9,14 @@ export type StatsSettings = z.infer<typeof StatsSettingsSchema>;
 
 export const ContactSettingsSchema = z.object({
   email:     z.string().max(120).optional(),
-  linkedin:  z.string().url().max(300).optional().or(z.literal('')),
-  instagram: z.string().url().max(300).optional().or(z.literal('')),
+  linkedin:  z.string().max(300).refine(
+    v => v === '' || /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
+  instagram: z.string().max(300).refine(
+    v => v === '' || /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
   address:   z.string().max(300).optional(),
 });
 export type ContactSettings = z.infer<typeof ContactSettingsSchema>;
@@ -45,13 +51,22 @@ export type ServicesSettings = z.infer<typeof ServicesSettingsSchema>;
 
 export const SectionLinkSchema = z.object({
   name: z.string().max(120),
-  href: z.string().url().max(300),
+  href: z.string().url().max(300).refine(
+    v => /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ),
 });
 export type SectionLink = z.infer<typeof SectionLinkSchema>;
 
 export const LinksSettingsSchema = z.object({
-  teknologkaren: z.string().url().max(300).optional().or(z.literal('')),
-  larv:          z.string().url().max(300).optional().or(z.literal('')),
+  teknologkaren: z.string().max(300).refine(
+    v => v === '' || /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
+  larv: z.string().max(300).refine(
+    v => v === '' || /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
   sectionLinks:  z.array(SectionLinkSchema).max(4).optional(),
 });
 export type LinksSettings = z.infer<typeof LinksSettingsSchema>;

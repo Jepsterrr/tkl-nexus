@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getLinksSettings, saveLinksSettings } from '@/lib/services/settings';
 import { LinksSettingsSchema } from '@/lib/schemas/settings';
 
@@ -32,6 +32,13 @@ export function LinksForm() {
   const [fetchKey,   setFetchKey]   = useState(0);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError,  setSaveError]  = useState<string | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,7 +77,7 @@ export function LinksForm() {
     try {
       await saveLinksSettings(r.data);
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
       setSaveStatus('error');
       setSaveError('Något gick fel. Försök igen.');
