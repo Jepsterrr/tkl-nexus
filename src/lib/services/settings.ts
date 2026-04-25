@@ -40,7 +40,12 @@ export async function getStatsSettings(): Promise<StatsSettings | null> {
   const data = await getSettings('stats');
   if (!data) return null;
   const r = StatsSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:stats] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveStatsSettings(data: StatsSettings): Promise<void> {
@@ -54,7 +59,12 @@ export async function getContactSettings(): Promise<ContactSettings | null> {
   const data = await getSettings('contact');
   if (!data) return null;
   const r = ContactSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:contact] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveContactSettings(data: ContactSettings): Promise<void> {
@@ -68,7 +78,12 @@ export async function getAboutSettings(): Promise<AboutSettings | null> {
   const data = await getSettings('about');
   if (!data) return null;
   const r = AboutSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:about] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveAboutSettings(data: AboutSettings): Promise<void> {
@@ -82,7 +97,12 @@ export async function getServicesSettings(): Promise<ServicesSettings | null> {
   const data = await getSettings('services');
   if (!data) return null;
   const r = ServicesSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:services] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveServicesSettings(data: ServicesSettings): Promise<void> {
@@ -96,7 +116,12 @@ export async function getLinksSettings(): Promise<LinksSettings | null> {
   const data = await getSettings('links');
   if (!data) return null;
   const r = LinksSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:links] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveLinksSettings(data: LinksSettings): Promise<void> {
@@ -110,7 +135,12 @@ export async function getBannerSettings(): Promise<BannerSettings | null> {
   const data = await getSettings('banner');
   if (!data) return null;
   const r = BannerSettingsSchema.safeParse(data);
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:banner] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function saveBannerSettings(data: BannerSettings): Promise<void> {
@@ -129,6 +159,8 @@ export async function getTimelineItems(): Promise<TimelineItem[]> {
   snap.forEach(s => {
     const r = TimelineItemSchema.safeParse({ id: s.id, ...s.data() });
     if (r.success) items.push(r.data);
+    else if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:timeline] Ogiltigt dokument:', s.id, r.error.flatten());
   });
   return items;
 }
@@ -138,7 +170,12 @@ export async function getTimelineItem(id: string): Promise<TimelineItem | null> 
   const snap = await withFetchTimeout(getDoc(ref));
   if (!snap.exists()) return null;
   const r = TimelineItemSchema.safeParse({ id: snap.id, ...snap.data() });
-  return r.success ? r.data : null;
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:timeline] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
 }
 
 export async function createTimelineItem(data: TimelineItemData): Promise<string> {
@@ -148,10 +185,12 @@ export async function createTimelineItem(data: TimelineItemData): Promise<string
 }
 
 export async function saveTimelineItem(id: string, data: TimelineItemData): Promise<void> {
+  if (!id) throw new Error('saveTimelineItem: id saknas');
   const validated = TimelineItemDataSchema.parse(data);
   await updateDoc(doc(db, 'settings', 'timeline', 'items', id), omitUndefined(validated as Record<string, unknown>));
 }
 
 export async function deleteTimelineItem(id: string): Promise<void> {
+  if (!id) throw new Error('deleteTimelineItem: id saknas');
   await deleteDoc(doc(db, 'settings', 'timeline', 'items', id));
 }
