@@ -22,7 +22,7 @@ const inputCls = [
   "focus:border-[oklch(55%_0.12_265)]",
 ].join(" ");
 const labelCls =
-  "block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5";
+  "block text-[10px] font-semibold text-[oklch(58%_0.02_265)] uppercase tracking-widest mb-1.5";
 
 export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
   const router = useRouter();
@@ -132,7 +132,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
     <div className="p-6 sm:p-8 max-w-2xl">
       <Link
         href="/admin/settings/timeline"
-        className="text-xs text-[oklch(40%_0.02_265)] hover:text-[oklch(60%_0.02_265)] transition-colors mb-3 flex items-center gap-1"
+        className="text-xs text-[oklch(56%_0.02_265)] hover:text-[oklch(70%_0.02_265)] transition-colors mb-3 flex items-center gap-1"
       >
         ← Tillbaka till tidslinje
       </Link>
@@ -234,14 +234,14 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
           <div className="flex gap-3">
             <Link
               href="/admin/settings/timeline"
-              className="px-4 py-2 text-sm font-medium text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] transition-colors rounded-lg"
+              className="px-4 py-2 text-sm font-medium text-[oklch(58%_0.02_265)] hover:text-[oklch(80%_0.01_265)] transition-colors rounded-lg"
             >
               Avbryt
             </Link>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(55%_0.12_265)] text-white hover:bg-[oklch(60%_0.12_265)] disabled:opacity-50 transition-colors"
+              className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 transition-colors"
             >
               {submitting
                 ? "Sparar…"

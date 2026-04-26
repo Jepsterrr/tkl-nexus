@@ -52,7 +52,7 @@ export function ConfirmDialog({
         >
           {title}
         </h2>
-        <p id="confirm-dialog-desc" className="text-sm text-[oklch(52%_0.02_265)] mb-6 leading-relaxed">
+        <p id="confirm-dialog-desc" className="text-sm text-[oklch(57%_0.02_265)] mb-6 leading-relaxed">
           {description}
         </p>
         <div className="flex justify-end gap-3">
@@ -69,7 +69,7 @@ export function ConfirmDialog({
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
               destructive
                 ? 'bg-[oklch(38%_0.18_25)] text-[oklch(88%_0.06_25)] hover:bg-[oklch(43%_0.2_25)]'
-                : 'bg-[oklch(55%_0.12_265)] text-white hover:bg-[oklch(60%_0.12_265)]'
+                : 'bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)]'
             }`}
           >
             {confirmLabel}

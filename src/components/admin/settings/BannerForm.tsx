@@ -21,7 +21,7 @@ const inputCls = [
   "focus:border-[oklch(55%_0.12_265)]",
 ].join(" ");
 const labelCls =
-  "block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5";
+  "block text-[10px] font-semibold text-[oklch(58%_0.02_265)] uppercase tracking-widest mb-1.5";
 
 export function BannerForm() {
   const [active, setActive] = useState(false);
@@ -123,7 +123,7 @@ export function BannerForm() {
       <div className="mt-4 space-y-5">
         {/* Active toggle */}
         <div className="flex items-center gap-4">
-          <span className="text-xs font-medium text-[oklch(50%_0.02_265)]">
+          <span className="text-xs font-medium text-[oklch(58%_0.02_265)]">
             {active ? "Aktiv" : "Inaktiv"}
           </span>
           <button
@@ -204,7 +204,7 @@ export function BannerForm() {
         <button
           type="submit"
           disabled={saveStatus === "saving"}
-          className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(55%_0.12_265)] text-white hover:bg-[oklch(60%_0.12_265)] disabled:opacity-50 transition-colors"
+          className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 transition-colors"
         >
           {saveStatus === "saving"
             ? "Sparar…"

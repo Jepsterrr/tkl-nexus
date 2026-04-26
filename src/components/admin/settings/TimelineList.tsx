@@ -94,7 +94,7 @@ export function TimelineList() {
       </div>
 
       {items.length === 0 && (
-        <p className="text-sm text-[oklch(45%_0.02_265)] py-4">
+        <p className="text-sm text-[oklch(56%_0.02_265)] py-4">
           Inga poster ännu.
         </p>
       )}
@@ -105,7 +105,7 @@ export function TimelineList() {
             key={item.id}
             className="flex items-center gap-4 py-3 border-b border-[oklch(18%_0.012_265)]"
           >
-            <span className="text-xs font-mono text-[oklch(48%_0.02_265)] w-12 shrink-0">
+            <span className="text-xs font-mono text-[oklch(58%_0.02_265)] w-12 shrink-0">
               {item.year}
             </span>
             <span className="flex-1 text-sm text-[oklch(75%_0.01_265)] truncate">
