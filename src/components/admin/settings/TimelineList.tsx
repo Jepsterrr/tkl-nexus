@@ -113,7 +113,7 @@ export function TimelineList() {
             </span>
             <div className="flex items-center gap-1 shrink-0">
               <Link
-                href={`/admin/settings/timeline/${item.id}`}
+                href={`/admin/settings/timeline/edit?id=${item.id}`}
                 className="p-1.5 rounded text-[oklch(45%_0.02_265)] hover:text-[oklch(75%_0.01_265)] transition-colors"
                 aria-label={`Redigera ${item.titleSv}`}
               >

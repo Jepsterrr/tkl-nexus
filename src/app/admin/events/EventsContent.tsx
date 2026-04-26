@@ -255,7 +255,7 @@ export function EventsContent() {
 
                   {/* Redigera */}
                   <Link
-                    href={`/admin/events/${event.id}`}
+                    href={`/admin/events/edit?id=${event.id}`}
                     aria-label={`Redigera event: ${event.title}`}
                     className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
                   >

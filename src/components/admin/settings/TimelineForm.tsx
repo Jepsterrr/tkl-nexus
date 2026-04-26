@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   getTimelineItem,
@@ -26,8 +26,8 @@ const labelCls =
 
 export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
   const router = useRouter();
-  const params = useParams<{ id?: string }>();
-  const id = idProp ?? params.id;
+  const searchParams = useSearchParams();
+  const id = idProp ?? searchParams.get('id') ?? undefined;
   const [year, setYear] = useState("");
   const [order, setOrder] = useState("0");
   const [titleSv, setTitleSv] = useState("");

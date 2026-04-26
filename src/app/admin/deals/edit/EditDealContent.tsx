@@ -1,32 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { CareerForm } from '@/components/admin/career/CareerForm';
-import { getCareerById } from '@/lib/services/career';
-import type { TKLCareer } from '@/lib/schemas/career';
+import { useSearchParams } from 'next/navigation';
+import { DealForm } from '@/components/admin/deals/DealForm';
+import { getDealById } from '@/lib/services/deals';
+import type { TKLDeal } from '@/lib/schemas/deal';
 
-export function EditCareerContent() {
-  const { id } = useParams<{ id: string }>();
-  const [career, setCareer] = useState<TKLCareer | null>(null);
+export function EditDealContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') ?? '';
+  const [deal, setDeal] = useState<TKLDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!id) { setError(true); setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
-    getCareerById(id)
+    getDealById(id)
       .then(data => {
-        if (!cancelled) {
-          setCareer(data);
-          setLoading(false);
-        }
+        if (!cancelled) { setDeal(data); setLoading(false); }
       })
       .catch(() => {
-        if (!cancelled) {
-          setError(true);
-          setLoading(false);
-        }
+        if (!cancelled) { setError(true); setLoading(false); }
       });
     return () => { cancelled = true; };
   }, [id]);
@@ -45,11 +41,11 @@ export function EditCareerContent() {
     );
   }
 
-  if (error || !career) {
+  if (error || !deal) {
     return (
       <div className="p-6 sm:p-8">
         <p className="text-sm text-[oklch(65%_0.2_25)]">
-          {error ? 'Kunde inte hämta annonsen. Kontrollera anslutningen.' : 'Annonsen hittades inte.'}
+          {error ? 'Kunde inte hämta dealen. Kontrollera anslutningen.' : 'Dealen hittades inte.'}
         </p>
       </div>
     );
@@ -57,7 +53,7 @@ export function EditCareerContent() {
 
   return (
     <div className="p-6 sm:p-8">
-      <CareerForm mode="edit" initialData={career} />
+      <DealForm mode="edit" initialData={deal} />
     </div>
   );
 }

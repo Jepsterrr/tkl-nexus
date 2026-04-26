@@ -1,32 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { EventForm } from '@/components/admin/events/EventForm';
 import { getEventById } from '@/lib/services/events';
 import type { TKLEvent } from '@/lib/schemas/event';
 
 export function EditEventContent() {
-  const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') ?? '';
   const [event, setEvent] = useState<TKLEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!id) { setError(true); setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
     getEventById(id)
       .then(data => {
-        if (!cancelled) {
-          setEvent(data);
-          setLoading(false);
-        }
+        if (!cancelled) { setEvent(data); setLoading(false); }
       })
       .catch(() => {
-        if (!cancelled) {
-          setError(true);
-          setLoading(false);
-        }
+        if (!cancelled) { setError(true); setLoading(false); }
       });
     return () => { cancelled = true; };
   }, [id]);

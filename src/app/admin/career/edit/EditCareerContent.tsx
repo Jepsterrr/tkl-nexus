@@ -1,23 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { DealForm } from '@/components/admin/deals/DealForm';
-import { getDealById } from '@/lib/services/deals';
-import type { TKLDeal } from '@/lib/schemas/deal';
+import { useSearchParams } from 'next/navigation';
+import { CareerForm } from '@/components/admin/career/CareerForm';
+import { getCareerById } from '@/lib/services/career';
+import type { TKLCareer } from '@/lib/schemas/career';
 
-export function EditDealContent() {
-  const { id } = useParams<{ id: string }>();
-  const [deal, setDeal]     = useState<TKLDeal | null>(null);
+export function EditCareerContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') ?? '';
+  const [career, setCareer] = useState<TKLCareer | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!id) { setError(true); setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
-    getDealById(id)
+    getCareerById(id)
       .then(data => {
-        if (!cancelled) { setDeal(data); setLoading(false); }
+        if (!cancelled) { setCareer(data); setLoading(false); }
       })
       .catch(() => {
         if (!cancelled) { setError(true); setLoading(false); }
@@ -39,11 +41,11 @@ export function EditDealContent() {
     );
   }
 
-  if (error || !deal) {
+  if (error || !career) {
     return (
       <div className="p-6 sm:p-8">
         <p className="text-sm text-[oklch(65%_0.2_25)]">
-          {error ? 'Kunde inte hämta dealen. Kontrollera anslutningen.' : 'Dealen hittades inte.'}
+          {error ? 'Kunde inte hämta annonsen. Kontrollera anslutningen.' : 'Annonsen hittades inte.'}
         </p>
       </div>
     );
@@ -51,7 +53,7 @@ export function EditDealContent() {
 
   return (
     <div className="p-6 sm:p-8">
-      <DealForm mode="edit" initialData={deal} />
+      <CareerForm mode="edit" initialData={career} />
     </div>
   );
 }
