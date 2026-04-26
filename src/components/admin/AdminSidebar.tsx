@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard',      icon: LayoutDashboard, href: '/admin/dashboard' },
   { label: 'Events',         icon: Calendar,        href: '/admin/events' },
   { label: 'Deals',          icon: Tag,             href: '/admin/deals' },
-  { label: 'Jobb & Exjobb',  icon: Briefcase,       href: '/admin/opportunities' },
+  { label: 'Jobb & Exjobb',  icon: Briefcase,       href: '/admin/career' },
   { label: 'Partners',       icon: Handshake,       href: '/admin/partners' },
   { label: 'Inställningar',  icon: Settings,        href: '/admin/settings' },
   { label: 'Adminhantering', icon: Shield,          href: '/admin/admins' },

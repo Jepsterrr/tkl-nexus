@@ -8,7 +8,7 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/dashboard':     'Dashboard',
   '/admin/events':        'Events',
   '/admin/deals':         'Deals',
-  '/admin/opportunities': 'Jobb & Exjobb',
+  '/admin/career': 'Jobb & Exjobb',
   '/admin/partners':      'Partners',
   '/admin/settings':      'Inställningar',
   '/admin/admins':        'Adminhantering',
@@ -17,7 +17,7 @@ const TITLE_MAP: Record<string, string> = {
 const PREFIX_MAP: [string, string][] = [
   ['/admin/events',        'Events'],
   ['/admin/deals',         'Deals'],
-  ['/admin/opportunities', 'Jobb & Exjobb'],
+  ['/admin/career', 'Jobb & Exjobb'],
   ['/admin/partners',      'Partners'],
   ['/admin/admins',        'Adminhantering'],
 ];
