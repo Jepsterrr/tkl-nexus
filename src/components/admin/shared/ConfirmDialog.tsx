@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -21,13 +21,57 @@ export function ConfirmDialog({
   onCancel,
   destructive = true,
 }: ConfirmDialogProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
+
   useEffect(() => {
     if (!open) return;
+
+    triggerRef.current = document.activeElement;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const focusable = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute('disabled'));
+
+    const confirmBtn = focusable().at(-1);
+    confirmBtn?.focus();
+
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
+      if (e.key === 'Escape') {
+        onCancel();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const els = focusable();
+      if (!els.length) { e.preventDefault(); return; }
+      const firstEl = els[0];
+      const lastEl = els[els.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
     };
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (triggerRef.current instanceof HTMLElement) {
+        triggerRef.current.focus();
+      }
+    };
   }, [open, onCancel]);
 
   if (!open) return null;
@@ -45,7 +89,7 @@ export function ConfirmDialog({
         onClick={onCancel}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-sm mx-4 p-6 rounded-xl bg-[oklch(14%_0.012_265)] border border-[oklch(28%_0.015_265)]">
+      <div ref={panelRef} className="relative z-10 w-full max-w-sm mx-4 p-6 rounded-xl bg-[oklch(14%_0.012_265)] border border-[oklch(28%_0.015_265)]">
         <h2
           id="confirm-dialog-title"
           className="font-[family-name:var(--font-heading)] text-sm font-bold text-[oklch(88%_0.01_265)] mb-2"
