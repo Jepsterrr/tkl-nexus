@@ -291,7 +291,7 @@ export function DashboardContent() {
           Deals
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
         </Link>
-        <Link href="/admin/opportunities" className="dash-link-card">
+        <Link href="/admin/career" className="dash-link-card">
           <Briefcase size={16} aria-hidden="true" />
           Jobb & Exjobb
           <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
