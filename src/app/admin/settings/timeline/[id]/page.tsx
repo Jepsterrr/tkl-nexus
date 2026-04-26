@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { TimelineForm } from "@/components/admin/settings/TimelineForm";
 
 export const metadata: Metadata = {
-  title: "Redigera tidslinjeppost — TKL Admin",
+  title: "Redigera tidslinjpost — TKL Admin",
 };
 
 export default async function EditTimelinePage({

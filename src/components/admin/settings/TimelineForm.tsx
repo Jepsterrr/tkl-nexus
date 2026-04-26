@@ -88,7 +88,11 @@ export function TimelineForm({ mode, id }: TimelineFormProps) {
       if (mode === "create") {
         await createTimelineItem(r.data);
       } else {
-        await saveTimelineItem(id!, r.data);
+        if (!id) {
+          setSubmitError("Internt fel: post-ID saknas.");
+          return;
+        }
+        await saveTimelineItem(id, r.data);
       }
       router.push("/admin/settings/timeline");
     } catch {
@@ -131,7 +135,7 @@ export function TimelineForm({ mode, id }: TimelineFormProps) {
         ← Tillbaka till tidslinje
       </Link>
       <h1 className="font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(28%_0.015_265)]">
-        {mode === "create" ? "Ny tidslinjeppost" : "Redigera post"}
+        {mode === "create" ? "Ny tidslinjpost" : "Redigera post"}
       </h1>
 
       <form onSubmit={handleSubmit} noValidate className="mt-4 space-y-4">

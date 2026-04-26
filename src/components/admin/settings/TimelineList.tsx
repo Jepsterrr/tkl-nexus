@@ -39,7 +39,7 @@ export function TimelineList() {
   }, [fetchKey]);
 
   const handleDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleting) return;
     setDeleting(true);
     setDeleteError(null);
     try {
@@ -140,7 +140,7 @@ export function TimelineList() {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Ta bort tidslinjeppost?"
+        title="Ta bort tidslinjpost?"
         description={`"${deleteTarget?.titleSv}" tas bort permanent.`}
         confirmLabel={deleting ? "Tar bort…" : "Ta bort"}
         onConfirm={handleDelete}
