@@ -10,6 +10,7 @@ import { HtmlLangSync } from '@/components/providers/HtmlLangSync';
 import { ScrollProvider } from '@/components/providers/ScrollProvider';
 import { ScrollContainer } from '@/components/providers/ScrollContainer';
 import { ScrollResetter } from '@/components/providers/ScrollResetter';
+import { GlobalBanner } from '@/components/layout/GlobalBanner';
 
 const unbounded = Unbounded({
   variable: '--font-heading',
@@ -108,6 +109,7 @@ export default function RootLayout({
             <ThemeProvider>
               <ScrollProvider>
                 <ScrollResetter />
+                <GlobalBanner />
                 <a href="#main-content" className="skip-nav">
                   Hoppa till innehåll
                 </a>
