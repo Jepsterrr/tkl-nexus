@@ -61,61 +61,33 @@ Ny Firestore-kollektion `partners`. Partnerföretag visas på `/corporate`-sidan
 
 Inställningar sparas som Firestore-dokument under `settings/<id>`. Fält som idag är hårdkodade i källkoden och bör bli redigerbara utan koddeploy:
 
-#### Statistik (`settings/stats`)
+#### Statistik (`settings/stats`) ✅
 
-Värdena visas på flera ställen: `CorporateContent.tsx:37–39` (siffror), `i18n.ts:78` (home pills), `i18n.ts:219–220` (corporate pills), `i18n.ts:49` (home hero-text).
+- [x] `members`, `programs`, `sections` — redigerbara via `/admin/settings/stats`. `CorporateContent.tsx` hämtar från Firestore med i18n-fallback.
 
-- [ ] `members` — antal aktiva kårmedlemmar (t.ex. `"1 600+"`). Visas i stats-raden på `/corporate`, hero-pills på startsidan och `/corporate`, och i home-beskrivningstexten.
-- [ ] `programs` — antal civilingenjörsprogram (t.ex. `"30"`). Visas i stats-raden och corporate-pills.
-- [ ] `sections` — antal sektioner (t.ex. `"4"`). Visas i stats-raden, corporate-pills och about-pills.
-- [ ] `CorporateContent.tsx` hämtar värden från `settings/stats` istället för hårdkodade strängar.
+#### Kontaktuppgifter (`settings/contact`) ✅
 
-#### Kontaktuppgifter (`settings/contact`)
+- [x] `email`, `linkedin`, `instagram`, `address` — redigerbara via `/admin/settings/contact`. `PostContent.tsx`, `AboutContent.tsx` och `Footer.tsx` hämtar dynamiskt med fallback.
 
-- [ ] `email` — kontaktmailadressen (`ao@teknologkaren.se`). Hårdkodad i `src/lib/types.ts:97–99` och `PostContent.tsx` (×3 mailto-länkar). Ska hämtas dynamiskt i `PostContent.tsx`, `AboutContent.tsx` och `Footer`.
-- [ ] `linkedIn` — LinkedIn-URL (`https://linkedin.com/in/tkl-nexus/`). Hårdkodad i `src/lib/types.ts:103`.
-- [ ] `instagram` — Instagram-URL (`https://instagram.com/tkl_nexus`). Hårdkodad i `src/lib/types.ts:108`.
-- [ ] `address` — besöksadress (`Tekniktorget 3, 977 54 Luleå`). Hårdkodad i `i18n.ts:408` (`about.contactAddress`) och Google Maps-länken i `AboutContent.tsx:29`. Ska generera Maps-länk dynamiskt av adressvärdet.
+#### Om-oss-texter (`settings/about`) ✅
 
-#### Om-oss-texter (`settings/about`)
+- [x] `whatIs.p1/p2/p3` (sv+en) och `footerDescription` (sv+en) — redigerbara via `/admin/settings/about`. `AboutContent.tsx` och `Footer.tsx` hämtar med i18n-fallback.
 
-Brödtexterna visas i glaskortet "Vad är TKL Nexus?" på `/about`-sidan. Footer-beskrivningen visas under logotypen på alla sidor.
+#### Tjänstekort på /corporate (`settings/services`) ✅
 
-- [ ] `whatIs.p1` / `whatIs.p2` / `whatIs.p3` — de tre brödtextstyckena (`i18n.ts:411–413`), sv + en.
-- [ ] `footerDescription` — kort org-beskrivning under logotypen i footer (`i18n.ts:27–28`), sv + en. Syns på varje sida.
-- [ ] `AboutContent.tsx` och `Footer.tsx` hämtar texter från `settings/about` med fallback till befintliga i18n-strängar.
+- [x] Redigerbara titlar och beskrivningar (sv+en) per tjänstekort via `/admin/settings/services`. `CorporateContent.tsx` hämtar med i18n-fallback.
 
-#### Tjänstekort på /corporate (`settings/services`)
+#### Historik-tidslinje (`settings/timeline`) ✅
 
-De 3 tjänstekorten i `CorporateContent.tsx` (Events & Relations, Nexus Portal, Samarbete) har titlar och beskrivningar hårdkodade i `i18n.ts:199–215`. Om ett erbjudande byter namn, beskrivning eller tas bort krävs idag en koddeploy.
+- [x] CRUD för timelineposter (år, titel sv+en, beskrivning sv+en, ordning) via `/admin/settings/timeline`. Sparas i subkollektion `settings/timeline/items/<id>`. `AboutContent.tsx` hämtar med i18n-fallback.
 
-- [ ] Redigerbara tjänstekort: `title` (sv + en), `description` (sv + en) för varje kort — sparas som `settings/services` med tre poster.
-- [ ] `CorporateContent.tsx` hämtar korten från Firestore med befintliga i18n-strängar som fallback.
+#### Externa footer-länkar (`settings/links`) ✅
 
-#### Historik-tidslinje (`settings/timeline`)
+- [x] `teknologkaren`, `larv`, 4 sektionslänkar — redigerbara via `/admin/settings/links`. `Footer.tsx` hämtar med hårdkodade fallback-värden.
 
-Tidslinjen på `/about`-sidan har 5 poster. Årtalen är hårdkodade i `AboutContent.tsx:57–61`; titlar och beskrivningar i `i18n.ts:416–421`.
+#### Global informationsbanner (`settings/banner`) ✅
 
-- [ ] Lista och redigera timelineposter — varje post: `year` (t.ex. `"2019"`), `title` (sv + en), `description` (sv + en).
-- [ ] Lägg till ny timelinepost.
-- [ ] Ta bort timelinepost med bekräftelsedialog.
-- [ ] Sortera poster efter `year` (stigande).
-- [ ] Sparas som array i `settings/timeline` (eller som subkollektion `settings/timeline/items/<id>`).
-- [ ] `AboutContent.tsx` hämtar poster från Firestore och faller tillbaka på hårdkodade i18n-data om Firestore är tom.
-
-#### Externa footer-länkar (`settings/links`)
-
-Footern har externa länkar hårdkodade i `Footer.tsx:7–19` som kan behöva uppdateras utan deploy.
-
-- [ ] `teknologkaren` — URL till Teknologkårens webbplats (idag `https://www.teknologkaren.se`).
-- [ ] `larv` — URL till LARV (idag `https://larv.org`).
-- [ ] `sections` — array med 4 poster: `{ name, href }` för Datasektionen, Geosektionen, I-sektionen och Maskinsektionen. Hårdkodade i `Footer.tsx:12–19`.
-- [ ] `Footer.tsx` hämtar dessa från `settings/links` med befintliga hårdkodade värden som fallback.
-
-#### Global informationsbanner (`settings/banner`)
-
-- [ ] Möjlighet att aktivera/deaktivera en global informationsbanner (text + färg) som visas överst på alla sidor — sparas som `settings/banner`.
-- [ ] Bannern hämtas i `RootLayout` (via klientkomponent) och renderas konditionellt.
+- [x] Aktiv/inaktiv toggle, bannertext och färgval (5 swatches) via `/admin/settings/banner`. `GlobalBanner`-komponent i root layout renderas konditionellt (döljs på `/admin/*`).
 
 ### Adminhantering (`/admin/admins`)
 
