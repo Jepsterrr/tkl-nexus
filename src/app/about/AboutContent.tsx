@@ -43,8 +43,8 @@ export function AboutContent() {
   const addressHref = contact?.address
     ? `https://maps.google.com/?q=${encodeURIComponent(contact.address)}`
     : 'https://maps.google.com/?q=Tekniktorget+3+Luleå';
-  const linkedin = contact?.linkedin ?? CONTACT_ITEMS[1].href;
-  const instagram = contact?.instagram ?? CONTACT_ITEMS[2].href;
+  const linkedin = contact?.linkedin || CONTACT_ITEMS[1].href;
+  const instagram = contact?.instagram || CONTACT_ITEMS[2].href;
 
   const CONTACT_ITEMS_ABOUT: { Icon: LucideIcon; label: string; href: string; external: boolean }[] = [
     {

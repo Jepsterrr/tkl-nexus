@@ -16,8 +16,8 @@ export function Footer() {
 
   const footerEmail = contact?.email ?? CONTACT_ITEMS[0].label;
   const footerEmailHref = contact?.email ? `mailto:${contact.email}` : CONTACT_ITEMS[0].href;
-  const footerLinkedin = contact?.linkedin ?? CONTACT_ITEMS[1].href;
-  const footerInstagram = contact?.instagram ?? CONTACT_ITEMS[2].href;
+  const footerLinkedin = contact?.linkedin || CONTACT_ITEMS[1].href;
+  const footerInstagram = contact?.instagram || CONTACT_ITEMS[2].href;
 
   const sectionItems =
     links?.sectionLinks && links.sectionLinks.length === 4
@@ -83,7 +83,7 @@ export function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <a
-                  href={links?.teknologkaren ?? 'https://www.teknologkaren.se'}
+                  href={links?.teknologkaren || 'https://www.teknologkaren.se'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
@@ -93,7 +93,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={links?.larv ?? 'https://larv.org'}
+                  href={links?.larv || 'https://larv.org'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
