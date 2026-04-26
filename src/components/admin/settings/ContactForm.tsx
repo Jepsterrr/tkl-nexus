@@ -67,6 +67,7 @@ export function ContactForm() {
     try {
       await saveContactSettings(r.data);
       setSaveStatus('saved');
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
       savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
       setSaveStatus('error');
