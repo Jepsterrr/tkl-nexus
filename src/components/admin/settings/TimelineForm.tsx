@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   getTimelineItem,
@@ -24,8 +24,10 @@ const inputCls = [
 const labelCls =
   "block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5";
 
-export function TimelineForm({ mode, id }: TimelineFormProps) {
+export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
   const router = useRouter();
+  const params = useParams<{ id?: string }>();
+  const id = idProp ?? params.id;
   const [year, setYear] = useState("");
   const [order, setOrder] = useState("0");
   const [titleSv, setTitleSv] = useState("");
@@ -134,7 +136,7 @@ export function TimelineForm({ mode, id }: TimelineFormProps) {
       >
         ← Tillbaka till tidslinje
       </Link>
-      <h1 className="font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(28%_0.015_265)]">
+      <h1 className="font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]">
         {mode === "create" ? "Ny tidslinjpost" : "Redigera post"}
       </h1>
 

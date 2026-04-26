@@ -41,7 +41,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function fetchAll(): Promise<SettingsContextValue> {
-  const [stats, contact, about, services, links, banner] = await Promise.all([
+  const [stats, contact, about, services, links, banner] = await Promise.allSettled([
     getStatsSettings(),
     getContactSettings(),
     getAboutSettings(),
@@ -49,7 +49,14 @@ async function fetchAll(): Promise<SettingsContextValue> {
     getLinksSettings(),
     getBannerSettings(),
   ]);
-  return { stats, contact, about, services, links, banner };
+  return {
+    stats:    stats.status    === 'fulfilled' ? stats.value    : null,
+    contact:  contact.status  === 'fulfilled' ? contact.value  : null,
+    about:    about.status    === 'fulfilled' ? about.value    : null,
+    services: services.status === 'fulfilled' ? services.value : null,
+    links:    links.status    === 'fulfilled' ? links.value    : null,
+    banner:   banner.status   === 'fulfilled' ? banner.value   : null,
+  };
 }
 
 export function SettingsProvider({ children }: { children: ReactNode }) {

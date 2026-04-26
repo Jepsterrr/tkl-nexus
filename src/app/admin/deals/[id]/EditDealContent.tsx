@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { DealForm } from '@/components/admin/deals/DealForm';
 import { getDealById } from '@/lib/services/deals';
 import type { TKLDeal } from '@/lib/schemas/deal';
 
-interface EditDealContentProps {
-  id: string;
-}
-
-export function EditDealContent({ id }: EditDealContentProps) {
+export function EditDealContent() {
+  const { id } = useParams<{ id: string }>();
   const [deal, setDeal]     = useState<TKLDeal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState(false);

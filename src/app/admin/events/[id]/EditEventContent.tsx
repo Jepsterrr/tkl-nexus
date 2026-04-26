@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { EventForm } from '@/components/admin/events/EventForm';
 import { getEventById } from '@/lib/services/events';
 import type { TKLEvent } from '@/lib/schemas/event';
 
-interface EditEventContentProps {
-  id: string;
-}
-
-export function EditEventContent({ id }: EditEventContentProps) {
+export function EditEventContent() {
+  const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<TKLEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

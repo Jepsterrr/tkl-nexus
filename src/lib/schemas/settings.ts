@@ -74,7 +74,7 @@ export type LinksSettings = z.infer<typeof LinksSettingsSchema>;
 export const BannerSettingsSchema = z.object({
   active: z.boolean().optional(),
   text:   z.string().max(300).optional(),
-  color:  z.string().max(30).optional(),
+  color:  z.string().max(30).regex(/^#[0-9a-fA-F]{3,8}$/, { message: 'Ogiltigt färgformat' }).optional(),
 });
 export type BannerSettings = z.infer<typeof BannerSettingsSchema>;
 

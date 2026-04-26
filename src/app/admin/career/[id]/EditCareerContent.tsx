@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { CareerForm } from '@/components/admin/career/CareerForm';
 import { getCareerById } from '@/lib/services/career';
 import type { TKLCareer } from '@/lib/schemas/career';
 
-interface EditCareerContentProps {
-  id: string;
-}
-
-export function EditCareerContent({ id }: EditCareerContentProps) {
+export function EditCareerContent() {
+  const { id } = useParams<{ id: string }>();
   const [career, setCareer] = useState<TKLCareer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

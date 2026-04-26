@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getStatsSettings, saveStatsSettings } from '@/lib/services/settings';
 import { StatsSettingsSchema } from '@/lib/schemas/settings';
 import type { StatsSettings } from '@/lib/schemas/settings';
@@ -25,6 +25,13 @@ export function StatsForm() {
   const [fetchKey, setFetchKey]   = useState(0);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [saveError, setSaveError]   = useState<string | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,7 +65,8 @@ export function StatsForm() {
     try {
       await saveStatsSettings(r.data);
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
       setSaveStatus('error');
       setSaveError('Något gick fel. Försök igen.');

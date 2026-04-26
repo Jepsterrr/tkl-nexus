@@ -1,13 +1,9 @@
 import type { Metadata } from 'next';
 import { EditCareerContent } from './EditCareerContent';
 
+export const dynamic = 'force-static';
 export const metadata: Metadata = { title: 'Redigera annons — TKL Admin' };
 
-export default async function EditCareerPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  return <EditCareerContent id={id} />;
+export default function EditCareerPage() {
+  return <EditCareerContent />;
 }
