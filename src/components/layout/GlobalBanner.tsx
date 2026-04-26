@@ -8,7 +8,7 @@ export function GlobalBanner() {
   const pathname = usePathname();
 
   if (!banner?.active || !banner.text) return null;
-  if (pathname.startsWith("/admin")) return null;
+  if (!pathname || pathname.startsWith("/admin")) return null;
 
   return (
     <div
