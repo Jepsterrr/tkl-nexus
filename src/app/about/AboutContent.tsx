@@ -1,44 +1,74 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { Mail, MapPin, Linkedin, Instagram } from 'lucide-react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import { getTimelineItems } from '@/lib/services/settings';
+import type { TimelineItem } from '@/lib/schemas/settings';
 import { Timeline } from '@/components/ui/Timeline';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { CONTACT_ITEMS } from '@/lib/types';
 
 export function AboutContent() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { about } = t;
+  const { contact, about: about_settings } = useSettings();
+
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getTimelineItems()
+      .then((items) => {
+        if (!cancelled) setTimelineItems(items);
+      })
+      .catch(() => {
+        /* keep null — use i18n fallback */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const email = contact?.email ?? CONTACT_ITEMS[0].label;
+  const emailHref = contact?.email
+    ? `mailto:${contact.email}`
+    : CONTACT_ITEMS[0].href;
+  const address = contact?.address ?? about.contactAddress;
+  const addressHref = contact?.address
+    ? `https://maps.google.com/?q=${encodeURIComponent(contact.address)}`
+    : 'https://maps.google.com/?q=Tekniktorget+3+Luleå';
+  const linkedin = contact?.linkedin ?? CONTACT_ITEMS[1].href;
+  const instagram = contact?.instagram ?? CONTACT_ITEMS[2].href;
 
   const CONTACT_ITEMS_ABOUT: { Icon: LucideIcon; label: string; href: string; external: boolean }[] = [
     {
       Icon: Mail,
-      label: CONTACT_ITEMS[0].label,
-      href: CONTACT_ITEMS[0].href,
+      label: email,
+      href: emailHref,
       external: CONTACT_ITEMS[0].external,
     },
     {
       Icon: MapPin,
-      label: about.contactAddress,
-      href: 'https://maps.google.com/?q=Tekniktorget+3+Luleå',
+      label: address,
+      href: addressHref,
       external: true,
     },
     {
       Icon: Linkedin,
       label: CONTACT_ITEMS[1].label,
-      href: CONTACT_ITEMS[1].href,
+      href: linkedin,
       external: CONTACT_ITEMS[1].external,
     },
     {
       Icon: Instagram,
       label: CONTACT_ITEMS[2].label,
-      href: CONTACT_ITEMS[2].href,
+      href: instagram,
       external: CONTACT_ITEMS[2].external,
     },
   ];
@@ -53,13 +83,20 @@ export function AboutContent() {
   });
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-8%']);
 
-  const TIMELINE_ITEMS = [
-    { year: '2019', title: about.timeline.founded.title, description: about.timeline.founded.desc },
-    { year: '2021', title: about.timeline.firstEvent.title, description: about.timeline.firstEvent.desc },
-    { year: '2023', title: about.timeline.portal.title, description: about.timeline.portal.desc },
-    { year: '2024', title: about.timeline.deals.title, description: about.timeline.deals.desc },
-    { year: '2025', title: about.timeline.growth.title, description: about.timeline.growth.desc },
-  ];
+  const TIMELINE_ITEMS =
+    timelineItems && timelineItems.length > 0
+      ? timelineItems.map((item) => ({
+          year: item.year,
+          title: locale === 'sv' ? item.titleSv : item.titleEn,
+          description: locale === 'sv' ? item.descSv : item.descEn,
+        }))
+      : [
+          { year: '2019', title: about.timeline.founded.title, description: about.timeline.founded.desc },
+          { year: '2021', title: about.timeline.firstEvent.title, description: about.timeline.firstEvent.desc },
+          { year: '2023', title: about.timeline.portal.title, description: about.timeline.portal.desc },
+          { year: '2024', title: about.timeline.deals.title, description: about.timeline.deals.desc },
+          { year: '2025', title: about.timeline.growth.title, description: about.timeline.growth.desc },
+        ];
 
   return (
     <>
@@ -197,9 +234,9 @@ export function AboutContent() {
                     {about.whatIsTitle}
                   </h2>
                   <div className="space-y-4 hero-text-muted text-sm sm:text-base leading-relaxed">
-                    <p>{about.whatIs.p1}</p>
-                    <p>{about.whatIs.p2}</p>
-                    <p>{about.whatIs.p3}</p>
+                    <p>{(locale === 'sv' ? about_settings?.whatIsP1Sv : about_settings?.whatIsP1En) ?? about.whatIs.p1}</p>
+                    <p>{(locale === 'sv' ? about_settings?.whatIsP2Sv : about_settings?.whatIsP2En) ?? about.whatIs.p2}</p>
+                    <p>{(locale === 'sv' ? about_settings?.whatIsP3Sv : about_settings?.whatIsP3En) ?? about.whatIs.p3}</p>
                   </div>
                 </div>
               </RevealItem>

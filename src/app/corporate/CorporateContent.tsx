@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { CalendarDays, LayoutGrid, Handshake, Building2, Users, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { MegaStat } from '@/components/ui/MegaStat';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -19,8 +20,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 export function CorporateContent() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { corporate } = t;
+  const { stats, services } = useSettings();
   const shouldReduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const scrollContainer = useScrollContainer();
@@ -34,15 +36,27 @@ export function CorporateContent() {
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
 
   const STATS: StatItem[] = [
-    { value: '1 600+', label: corporate.stats.members },
-    { value: '30', label: corporate.stats.programs },
-    { value: '4', label: corporate.stats.sections },
+    { value: stats?.members ?? '1 600+', label: corporate.stats.members },
+    { value: stats?.programs ?? '30', label: corporate.stats.programs },
+    { value: stats?.sections ?? '4', label: corporate.stats.sections },
   ];
 
   const SERVICES = [
-    { title: corporate.services.events.title, description: corporate.services.events.description, linkLabel: corporate.services.events.linkLabel, iconName: 'CalendarDays', linkHref: '/events', accentColor: 'purple' as const },
-    { title: corporate.services.portal.title, description: corporate.services.portal.description, linkLabel: corporate.services.portal.linkLabel, iconName: 'LayoutGrid', linkHref: '/corporate/post', accentColor: 'purple' as const },
-    { title: corporate.services.partnership.title, description: corporate.services.partnership.description, linkLabel: corporate.services.partnership.linkLabel, iconName: 'Handshake', linkHref: '/about#kontakt', accentColor: 'purple' as const },
+    {
+      title: (locale === 'sv' ? services?.eventsTitleSv : services?.eventsTitleEn) ?? corporate.services.events.title,
+      description: (locale === 'sv' ? services?.eventsDescSv : services?.eventsDescEn) ?? corporate.services.events.description,
+      linkLabel: corporate.services.events.linkLabel, iconName: 'CalendarDays', linkHref: '/events', accentColor: 'purple' as const,
+    },
+    {
+      title: (locale === 'sv' ? services?.portalTitleSv : services?.portalTitleEn) ?? corporate.services.portal.title,
+      description: (locale === 'sv' ? services?.portalDescSv : services?.portalDescEn) ?? corporate.services.portal.description,
+      linkLabel: corporate.services.portal.linkLabel, iconName: 'LayoutGrid', linkHref: '/corporate/post', accentColor: 'purple' as const,
+    },
+    {
+      title: (locale === 'sv' ? services?.partnershipTitleSv : services?.partnershipTitleEn) ?? corporate.services.partnership.title,
+      description: (locale === 'sv' ? services?.partnershipDescSv : services?.partnershipDescEn) ?? corporate.services.partnership.description,
+      linkLabel: corporate.services.partnership.linkLabel, iconName: 'Handshake', linkHref: '/about#kontakt', accentColor: 'purple' as const,
+    },
   ];
 
   return (

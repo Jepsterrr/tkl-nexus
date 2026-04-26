@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
@@ -83,7 +84,7 @@ function field(label: string, value: string): string {
   return `${label}: ${value || '(ej angivet)'}`;
 }
 
-function buildOpportunityMailto(f: OpportunityForm): string {
+function buildOpportunityMailto(f: OpportunityForm, email: string): string {
   const subject = `[Nexus Portal] ${f.type} – ${f.company} – ${f.title}`;
   const body = [
     '=== TKL Nexus — Ny inlämning ===',
@@ -110,10 +111,10 @@ function buildOpportunityMailto(f: OpportunityForm): string {
     'Samling: career',
     'published: false (sätt till true vid publicering)',
   ].join('\n');
-  return `mailto:ao@teknologkaren.se?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-function buildEventMailto(f: EventForm): string {
+function buildEventMailto(f: EventForm, email: string): string {
   const subject = `[Event] ${f.contactName} (${f.contactEmail}) – ${f.title}`;
   const body = [
     '=== TKL Nexus — Ny inlämning ===',
@@ -141,10 +142,10 @@ function buildEventMailto(f: EventForm): string {
     'published: false (sätt till true vid publicering)',
     'tags: dela upp på kommatecken → array i Firestore',
   ].join('\n');
-  return `mailto:ao@teknologkaren.se?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-function buildDealMailto(f: DealForm): string {
+function buildDealMailto(f: DealForm, email: string): string {
   const subject = `[Deal] ${f.company} – ${f.title}`;
   const body = [
     '=== TKL Nexus — Ny inlämning ===',
@@ -170,7 +171,7 @@ function buildDealMailto(f: DealForm): string {
     'Samling: deals',
     'published: false (sätt till true vid publicering)',
   ].join('\n');
-  return `mailto:ao@teknologkaren.se?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 // Validation
@@ -203,6 +204,8 @@ export function PostContent() {
   const { t } = useLanguage();
   const cp = t.corporatePost;
   const colors = ACCENT_COLOR_MAP['blue'];
+  const { contact } = useSettings();
+  const recipientEmail = contact?.email ?? 'ao@teknologkaren.se';
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('opportunity');
   const [opp, setOpp] = useState<OpportunityForm>(EMPTY_OPPORTUNITY);
@@ -214,9 +217,9 @@ export function PostContent() {
 
   function handleSubmit() {
     let url = '';
-    if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail });
-    else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail });
-    else url = buildDealMailto({ ...deal, contactName, contactEmail });
+    if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
+    else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail }, recipientEmail);
+    else url = buildDealMailto({ ...deal, contactName, contactEmail }, recipientEmail);
     window.location.href = url;
     setSubmitted(true);
   }

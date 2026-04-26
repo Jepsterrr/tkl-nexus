@@ -3,33 +3,31 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { CONTACT_ITEMS } from '@/lib/types';
 
-const OUR_PAGES = [
-  { label: 'Teknologkåren', href: 'https://www.teknologkaren.se', external: true },
-  { label: 'LARV', href: 'https://larv.org', external: true },
-];
-
-const SECTION_PAGES = [
-  { href: 'https://teknologkaren.se/om-oss/sektioner/datasektionen' },
-  { href: 'https://teknologkaren.se/om-oss/sektioner/geosektionen' },
-  { href: 'https://teknologkaren.se/om-oss/sektioner/i-sektionen' },
-  { href: 'https://teknologkaren.se/om-oss/sektioner/maskinsektionen' },
-];
-
-const SECTION_LABELS = ['Datasektionen', 'Geosektionen', 'I-sektionen', 'Maskinsektionen'];
-
-const CONTACT = [
-  { label: CONTACT_ITEMS[0].label, href: CONTACT_ITEMS[0].href },
-  { label: CONTACT_ITEMS[1].label, href: CONTACT_ITEMS[1].href, external: CONTACT_ITEMS[1].external },
-  { label: CONTACT_ITEMS[2].label, href: CONTACT_ITEMS[2].href, external: CONTACT_ITEMS[2].external },
-];
 
 export function Footer() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const { contact, about, links } = useSettings();
 
   if (pathname.startsWith('/admin')) return null;
+
+  const footerEmail = contact?.email ?? CONTACT_ITEMS[0].label;
+  const footerEmailHref = contact?.email ? `mailto:${contact.email}` : CONTACT_ITEMS[0].href;
+  const footerLinkedin = contact?.linkedin ?? CONTACT_ITEMS[1].href;
+  const footerInstagram = contact?.instagram ?? CONTACT_ITEMS[2].href;
+
+  const sectionItems =
+    links?.sectionLinks && links.sectionLinks.length === 4
+      ? links.sectionLinks
+      : [
+          { name: 'Datasektionen', href: 'https://teknologkaren.se/om-oss/sektioner/datasektionen' },
+          { name: 'Geosektionen', href: 'https://teknologkaren.se/om-oss/sektioner/geosektionen' },
+          { name: 'I-sektionen', href: 'https://teknologkaren.se/om-oss/sektioner/i-sektionen' },
+          { name: 'Maskinsektionen', href: 'https://teknologkaren.se/om-oss/sektioner/maskinsektionen' },
+        ];
 
   const QUICK_LINKS = [
     { label: t.footer.links.students, href: '/students' },
@@ -54,7 +52,7 @@ export function Footer() {
               </span>
             </div>
             <p className="footer-text-muted text-sm leading-relaxed max-w-xs">
-              {t.footer.description}
+              {(locale === 'sv' ? about?.footerDescSv : about?.footerDescEn) ?? t.footer.description}
             </p>
           </div>
 
@@ -83,24 +81,32 @@ export function Footer() {
               {t.footer.ourPages}
             </h3>
             <ul className="space-y-2.5">
-              {OUR_PAGES.map(({ label, href, external }) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    target={external ? '_blank' : undefined}
-                    rel={external ? 'noopener noreferrer' : undefined}
-                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <a
+                  href={links?.teknologkaren ?? 'https://www.teknologkaren.se'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
+                >
+                  Teknologkåren
+                </a>
+              </li>
+              <li>
+                <a
+                  href={links?.larv ?? 'https://larv.org'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
+                >
+                  LARV
+                </a>
+              </li>
             </ul>
             <h3 className="footer-text text-xs font-semibold uppercase tracking-widest mt-6 mb-4">
               {t.footer.ourSections}
             </h3>
             <ul className="space-y-2.5">
-              {SECTION_PAGES.map(({ href }, i) => (
+              {sectionItems.map(({ name, href }) => (
                 <li key={href}>
                   <a
                     href={href}
@@ -108,7 +114,7 @@ export function Footer() {
                     rel="noopener noreferrer"
                     className="footer-text-muted text-sm hover:footer-text transition-colors duration-150"
                   >
-                    {SECTION_LABELS[i]}
+                    {name}
                   </a>
                 </li>
               ))}
@@ -121,18 +127,34 @@ export function Footer() {
               {t.footer.contactLabel}
             </h3>
             <ul className="space-y-2.5">
-              {CONTACT.map(({ label, href, external }) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    target={external ? '_blank' : undefined}
-                    rel={external ? 'noopener noreferrer' : undefined}
-                    className="footer-text-muted text-sm hover:footer-text transition-colors duration-150 break-all"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
+              <li>
+                <a
+                  href={footerEmailHref}
+                  className="footer-text-muted text-sm hover:footer-text transition-colors duration-150 break-all"
+                >
+                  {footerEmail}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={footerLinkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-text-muted text-sm hover:footer-text transition-colors duration-150 break-all"
+                >
+                  {CONTACT_ITEMS[1].label}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={footerInstagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-text-muted text-sm hover:footer-text transition-colors duration-150 break-all"
+                >
+                  {CONTACT_ITEMS[2].label}
+                </a>
+              </li>
             </ul>
           </nav>
         </div>
