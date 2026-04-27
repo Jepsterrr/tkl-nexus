@@ -93,7 +93,7 @@ function EventCard({ event, entryDelay = 0 }: { event: ExtendedEvent; entryDelay
             </span>
           </div>
 
-          <h3 className="hero-text font-semibold text-base leading-snug mb-1 line-clamp-2 group-hover:text-(--foreground) transition-colors">
+          <h3 className="hero-text font-semibold text-base leading-snug mb-1 line-clamp-2 group-hover:text-foreground transition-colors">
             {displayTitle}
           </h3>
 
