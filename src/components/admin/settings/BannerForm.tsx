@@ -163,7 +163,7 @@ export function BannerForm() {
                 aria-label={s.label}
                 aria-pressed={color === s.value}
                 onClick={() => setColor(s.value)}
-                className="w-7 h-7 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(55%_0.12_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-[oklch(18%_0.012_265)]"
+                className="w-7 h-7 rounded-full transition-[outline,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(55%_0.12_265)] focus-visible:ring-offset-2 focus-visible:ring-offset-[oklch(18%_0.012_265)]"
                 style={{
                   backgroundColor: s.value,
                   outline:
