@@ -9,13 +9,12 @@ import {
   saveTimelineItem,
 } from "@/lib/services/settings";
 import { TimelineItemDataSchema } from "@/lib/schemas/settings";
+import { inputCls, inputClsNumeric, labelCls, errorCls, sectionHdCls } from "@/components/admin/shared/formStyles";
 
 interface TimelineFormProps {
   mode: "create" | "edit";
   id?: string;
 }
-
-import { inputCls, labelCls } from "@/components/admin/shared/formStyles";
 
 export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
   const router = useRouter();
@@ -129,7 +128,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
       >
         ← Tillbaka till tidslinje
       </Link>
-      <h1 className="font-(family-name:--font-heading) text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]">
+      <h1 className={sectionHdCls}>
         {mode === "create" ? "Ny tidslinjpost" : "Redigera post"}
       </h1>
 
@@ -157,7 +156,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
               type="number"
               value={order}
               onChange={(e) => setOrder(e.target.value)}
-              className={inputCls}
+              className={inputClsNumeric}
             />
           </div>
         </div>
@@ -219,7 +218,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
         <div className="flex items-center justify-between pt-4 border-t border-[oklch(28%_0.015_265)]">
           <div>
             {submitError && (
-              <p className="text-xs text-[oklch(65%_0.2_25)]" role="alert">
+              <p className={errorCls} role="alert">
                 {submitError}
               </p>
             )}
@@ -234,7 +233,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {submitting
                 ? "Sparar…"
