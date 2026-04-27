@@ -109,7 +109,7 @@ export function EventsContent() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[oklch(88%_0.01_265)]">
+          <h1 className="font-(family-name:--font-heading) text-2xl font-bold text-[oklch(88%_0.01_265)]">
             Events
           </h1>
           <Link
@@ -223,7 +223,7 @@ export function EventsContent() {
 
                 {/* Mitten: titel + meta */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-[family-name:var(--font-body)] font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
+                  <p className="font-(family-name:--font-body) font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
                     {event.title}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">

@@ -14,6 +14,6 @@ export const labelCls =
 export const errorCls = 'mt-1 text-xs text-[oklch(65%_0.2_25)]';
 
 export const sectionHdCls = [
-  'font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest',
+  'font-(family-name:--font-heading) text-[10px] font-bold uppercase tracking-widest',
   'text-[oklch(58%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]',
 ].join(' ');

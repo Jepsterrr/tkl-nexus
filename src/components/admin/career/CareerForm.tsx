@@ -120,7 +120,7 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
           >
             ← Tillbaka till annonser
           </Link>
-          <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold text-[oklch(88%_0.01_265)]">
+          <h1 className="font-(family-name:--font-heading) text-xl font-bold text-[oklch(88%_0.01_265)]">
             {mode === 'create' ? 'Ny annons' : 'Redigera annons'}
           </h1>
         </div>

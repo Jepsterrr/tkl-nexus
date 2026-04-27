@@ -192,11 +192,11 @@ function isDealValid(f: DealForm): boolean {
 
 const inputCls =
   'w-full rounded-xl px-4 py-3 text-sm transition-all duration-150 outline-none ' +
-  'bg-[var(--glass-bg-subtle)] border border-[var(--glass-border-subtle)] ' +
-  'text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] ' +
+  'bg-(--glass-bg-subtle) border border-(--glass-border-subtle) ' +
+  'text-(--foreground) placeholder:text-(--muted-foreground) ' +
   'focus:ring-1 focus:ring-[rgba(59,130,246,0.4)]';
 
-const labelCls = 'block text-xs font-semibold tracking-wide text-[var(--hero-text-muted)] mb-1.5';
+const labelCls = 'block text-xs font-semibold tracking-wide text-(--hero-text-muted) mb-1.5';
 
 // Component
 
@@ -328,7 +328,7 @@ export function PostContent() {
 
       {/* TAB NAVIGATION */}
       <div
-        className="sticky top-[var(--navbar-height)] z-20 py-4 px-4 sm:px-6 lg:px-8"
+        className="sticky top-(--navbar-height) z-20 py-4 px-4 sm:px-6 lg:px-8"
         style={{
           background: 'var(--cosmic-bg)',
           borderBottom: '1px solid var(--glass-border-subtle)',

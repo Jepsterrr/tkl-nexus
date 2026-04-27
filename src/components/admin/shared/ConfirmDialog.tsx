@@ -92,7 +92,7 @@ export function ConfirmDialog({
       <div ref={panelRef} className="relative z-10 w-full max-w-sm mx-4 p-6 rounded-xl bg-[oklch(14%_0.012_265)] border border-[oklch(28%_0.015_265)]">
         <h2
           id="confirm-dialog-title"
-          className="font-[family-name:var(--font-heading)] text-sm font-bold text-[oklch(88%_0.01_265)] mb-2"
+          className="font-(family-name:--font-heading) text-sm font-bold text-[oklch(88%_0.01_265)] mb-2"
         >
           {title}
         </h2>

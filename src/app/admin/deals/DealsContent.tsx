@@ -89,7 +89,7 @@ export function DealsContent() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-[family-name:var(--font-heading)] text-2xl font-bold text-[oklch(88%_0.01_265)]">
+          <h1 className="font-(family-name:--font-heading) text-2xl font-bold text-[oklch(88%_0.01_265)]">
             Deals
           </h1>
           <Link
@@ -211,7 +211,7 @@ export function DealsContent() {
 
                 {/* Mitten: titel + meta */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-[family-name:var(--font-body)] font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
+                  <p className="font-(family-name:--font-body) font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
                     {deal.title}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">

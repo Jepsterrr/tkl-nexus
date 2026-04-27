@@ -82,7 +82,7 @@ export function TimelineList() {
   return (
     <div className="p-6 sm:p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]">
-        <h1 className="font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)]">
+        <h1 className="font-(family-name:--font-heading) text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)]">
           Tidslinje
         </h1>
         <Link

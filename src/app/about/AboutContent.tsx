@@ -275,7 +275,7 @@ export function AboutContent() {
                           >
                             <Icon className="w-5 h-5" style={{ color: '#E30613' }} strokeWidth={1.5} />
                           </div>
-                          <span className="hero-text-muted text-sm group-hover:text-[var(--hero-text)] transition-colors duration-150">
+                          <span className="hero-text-muted text-sm group-hover:text-(--hero-text) transition-colors duration-150">
                             {label}
                           </span>
                         </a>

@@ -125,7 +125,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
           >
             ← Tillbaka till events
           </Link>
-          <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold text-[oklch(88%_0.01_265)]">
+          <h1 className="font-(family-name:--font-heading) text-xl font-bold text-[oklch(88%_0.01_265)]">
             {mode === 'create' ? 'Nytt event' : 'Redigera event'}
           </h1>
         </div>

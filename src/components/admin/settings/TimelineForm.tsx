@@ -129,7 +129,7 @@ export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
       >
         ← Tillbaka till tidslinje
       </Link>
-      <h1 className="font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]">
+      <h1 className="font-(family-name:--font-heading) text-[10px] font-bold uppercase tracking-widest text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]">
         {mode === "create" ? "Ny tidslinjpost" : "Redigera post"}
       </h1>
 

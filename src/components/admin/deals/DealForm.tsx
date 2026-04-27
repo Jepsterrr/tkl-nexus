@@ -95,7 +95,7 @@ export function DealForm({ mode, initialData }: DealFormProps) {
           >
             ← Tillbaka till deals
           </Link>
-          <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold text-[oklch(88%_0.01_265)]">
+          <h1 className="font-(family-name:--font-heading) text-xl font-bold text-[oklch(88%_0.01_265)]">
             {mode === 'create' ? 'Ny deal' : 'Redigera deal'}
           </h1>
         </div>
