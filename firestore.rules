@@ -10,9 +10,11 @@ service cloud.firestore {
 
     // Admins-kollektion: autentiserad användare kan läsa sitt eget dokument
     // (för att kontrollera om de är admin). Skrivning kräver admin.
+    // Delete: admin kan inte ta bort sig själv (skydd mot oavsiktlig utlåsning).
     match /admins/{email} {
       allow read: if request.auth != null && request.auth.token.email == email;
-      allow write: if request.auth != null && isAdmin();
+      allow create, update: if request.auth != null && isAdmin();
+      allow delete: if request.auth != null && isAdmin() && request.auth.token.email != email;
     }
 
     // Events: publik läsning av publicerade, admin kan läsa alla (inkl opublicerade)
