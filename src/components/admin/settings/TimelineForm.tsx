@@ -15,14 +15,7 @@ interface TimelineFormProps {
   id?: string;
 }
 
-const inputCls = [
-  "w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors",
-  "bg-[oklch(18%_0.012_265)] border border-[oklch(28%_0.015_265)]",
-  "text-[oklch(88%_0.01_265)] placeholder:text-[oklch(38%_0.02_265)]",
-  "focus:border-[oklch(55%_0.12_265)]",
-].join(" ");
-const labelCls =
-  "block text-[10px] font-semibold text-[oklch(58%_0.02_265)] uppercase tracking-widest mb-1.5";
+import { inputCls, labelCls } from "@/components/admin/shared/formStyles";
 
 export function TimelineForm({ mode, id: idProp }: TimelineFormProps) {
   const router = useRouter();

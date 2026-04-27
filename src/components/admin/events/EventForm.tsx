@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TagInput } from '@/components/admin/shared/TagInput';
+import { inputCls, labelCls, errorCls, sectionHdCls } from '@/components/admin/shared/formStyles';
 import { createEvent, updateEvent } from '@/lib/services/events';
 import { EventFormSchema } from '@/lib/schemas/event';
 import type { TKLEvent, EventFormData } from '@/lib/schemas/event';
@@ -111,20 +112,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
     }
   };
 
-  const inputCls = [
-    'w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors',
-    'bg-[oklch(18%_0.012_265)] border border-[oklch(28%_0.015_265)]',
-    'text-[oklch(88%_0.01_265)] placeholder:text-[oklch(38%_0.02_265)]',
-    'focus:border-[oklch(55%_0.12_265)]',
-  ].join(' ');
-
-  const labelCls = 'block text-[10px] font-semibold text-[oklch(48%_0.02_265)] uppercase tracking-widest mb-1.5';
-  const errorCls = 'mt-1 text-xs text-[oklch(65%_0.2_25)]';
-  const reqMark  = <span className="text-[oklch(65%_0.2_25)]" aria-hidden="true">*</span>;
-  const sectionHdCls = [
-    'font-[family-name:var(--font-heading)] text-[10px] font-bold uppercase tracking-widest',
-    'text-[oklch(48%_0.02_265)] mb-4 pb-2 border-b border-[oklch(20%_0.012_265)]',
-  ].join(' ');
+  const reqMark = <span className="text-[oklch(65%_0.2_25)]" aria-hidden="true">*</span>;
 
   return (
     <form onSubmit={handleSubmit} noValidate>
