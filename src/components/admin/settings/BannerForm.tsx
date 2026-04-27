@@ -125,10 +125,10 @@ export function BannerForm() {
             aria-checked={active}
             aria-label={active ? "Deaktivera banner" : "Aktivera banner"}
             onClick={() => setActive((v) => !v)}
-            className={`relative w-10 h-6 rounded-full transition-colors duration-200 ${active ? "bg-[oklch(55%_0.12_265)]" : "bg-[oklch(28%_0.015_265)]"}`}
+            className={`relative w-14 h-8 rounded-full transition-colors duration-200 ${active ? "bg-[oklch(55%_0.12_265)]" : "bg-[oklch(28%_0.015_265)]"}`}
           >
             <span
-              className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${active ? "translate-x-4" : ""}`}
+              className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${active ? "translate-x-6" : ""}`}
             />
           </button>
         </div>
@@ -197,7 +197,7 @@ export function BannerForm() {
         <button
           type="submit"
           disabled={saveStatus === "saving"}
-          className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 transition-colors"
+          className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 transition-colors"
         >
           {saveStatus === "saving"
             ? "Sparar…"

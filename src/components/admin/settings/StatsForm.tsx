@@ -115,7 +115,7 @@ export function StatsForm() {
         <button
           type="submit"
           disabled={saveStatus === 'saving'}
-          className="px-5 py-2 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {saveStatus === 'saving' ? 'Sparar…' : saveStatus === 'saved' ? 'Sparat ✓' : 'Spara inställningar'}
         </button>

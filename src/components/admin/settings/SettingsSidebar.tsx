@@ -31,7 +31,7 @@ export function SettingsSidebar() {
             className={[
               'block px-4 py-3 text-xs font-medium whitespace-nowrap transition-colors',
               isActive
-                ? 'bg-[oklch(22%_0.012_265)] border-l border-[oklch(55%_0.12_265)] text-[oklch(88%_0.01_265)]'
+                ? 'bg-[oklch(22%_0.012_265)] border-b sm:border-b-0 sm:border-l border-[oklch(55%_0.12_265)] text-[oklch(88%_0.01_265)]'
                 : 'text-[oklch(58%_0.02_265)] hover:text-[oklch(75%_0.015_265)]',
             ].join(' ')}
           >
