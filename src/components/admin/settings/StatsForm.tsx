@@ -111,6 +111,7 @@ export function StatsForm() {
       <div className="flex items-center justify-between mt-8 pt-4 border-t border-[oklch(28%_0.015_265)]">
         <div>
           {saveError && <p className="text-xs text-[oklch(65%_0.2_25)]" role="alert">{saveError}</p>}
+          <span className="sr-only" aria-live="polite">{saveStatus === 'saved' ? 'Sparat' : ''}</span>
         </div>
         <button
           type="submit"

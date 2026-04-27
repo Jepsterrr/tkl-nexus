@@ -7,11 +7,11 @@ import { BannerSettingsSchema } from "@/lib/schemas/settings";
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const SWATCHES = [
-  { label: "Blå", value: "#3B82F6" },
-  { label: "Röd", value: "#E30613" },
-  { label: "Grön", value: "#10B981" },
-  { label: "Gul", value: "#F59E0B" },
-  { label: "Lila", value: "#8B5CF6" },
+  { label: "Blå",  value: "oklch(62% 0.21 255)" },
+  { label: "Röd",  value: "oklch(48% 0.25 28)"  },
+  { label: "Grön", value: "oklch(70% 0.17 163)"  },
+  { label: "Gul",  value: "oklch(77% 0.17 77)"   },
+  { label: "Lila", value: "oklch(60% 0.22 291)"  },
 ];
 
 import { inputCls, labelCls } from "@/components/admin/shared/formStyles";
@@ -193,6 +193,7 @@ export function BannerForm() {
               {saveError}
             </p>
           )}
+          <span className="sr-only" aria-live="polite">{saveStatus === "saved" ? "Sparat" : ""}</span>
         </div>
         <button
           type="submit"

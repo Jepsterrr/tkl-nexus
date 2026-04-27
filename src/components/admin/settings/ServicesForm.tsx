@@ -133,7 +133,10 @@ export function ServicesForm() {
       </div>
 
       <div className="flex items-center justify-between mt-8 pt-4 border-t border-[oklch(28%_0.015_265)]">
-        <div>{saveError && <p className="text-xs text-[oklch(65%_0.2_25)]" role="alert">{saveError}</p>}</div>
+        <div>
+          {saveError && <p className="text-xs text-[oklch(65%_0.2_25)]" role="alert">{saveError}</p>}
+          <span className="sr-only" aria-live="polite">{saveStatus === 'saved' ? 'Sparat' : ''}</span>
+        </div>
         <button type="submit" disabled={saveStatus === 'saving'}
           className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-[oklch(40%_0.14_265)] text-white hover:bg-[oklch(45%_0.14_265)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           {saveStatus === 'saving' ? 'Sparar\u2026' : saveStatus === 'saved' ? 'Sparat \u2713' : 'Spara inställningar'}
