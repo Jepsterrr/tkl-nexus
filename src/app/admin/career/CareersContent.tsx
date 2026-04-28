@@ -20,7 +20,14 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }).toUpperCase();
 }
 
-type FilterMode = 'all' | 'published' | 'draft';
+type FilterMode = 'all' | 'published' | 'draft' | 'expired';
+
+function isExpired(deadlineIso?: string): boolean {
+  if (!deadlineIso) return false;
+  const d = new Date(deadlineIso);
+  if (isNaN(d.getTime())) return false;
+  return d < new Date();
+}
 
 export function CareersContent() {
   const [items, setItems] = useState<TKLCareer[]>([]);
@@ -85,20 +92,20 @@ export function CareersContent() {
       setDeleteTarget(null);
     } catch {
       setDeleteError('Kunde inte ta bort annonsen. Försök igen.');
-      setDeleteTarget(null);
     } finally {
       setDeleting(false);
     }
   };
 
   const filtered = items.filter(c => {
-    if (filter === 'published') return c.published;
-    if (filter === 'draft') return !c.published;
+    if (filter === 'published') return c.published && !isExpired(c.deadline);
+    if (filter === 'draft')     return !c.published && !isExpired(c.deadline);
+    if (filter === 'expired')   return isExpired(c.deadline);
     return true;
   });
 
   return (
-    <div className="min-h-screen bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
+    <div className="min-h-full bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -114,8 +121,13 @@ export function CareersContent() {
         </div>
 
         {/* Filterrad */}
-        <div className="flex gap-2 mb-6" role="group" aria-label="Filtrera annonser">
-          {(['all', 'published', 'draft'] as const).map(mode => (
+        <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filtrera annonser">
+          {([
+            { mode: 'all',      label: 'Alla' },
+            { mode: 'published',label: 'Publicerade' },
+            { mode: 'draft',    label: 'Utkast' },
+            { mode: 'expired',  label: 'Utgångna' },
+          ] as const).map(({ mode, label }) => (
             <button
               key={mode}
               type="button"
@@ -123,11 +135,13 @@ export function CareersContent() {
               onClick={() => setFilter(mode)}
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                 filter === mode
-                  ? 'bg-[oklch(55%_0.12_265)] text-white'
+                  ? mode === 'expired'
+                    ? 'bg-[oklch(55%_0.15_50)] text-white'
+                    : 'bg-[oklch(55%_0.12_265)] text-white'
                   : 'bg-[oklch(18%_0.012_265)] text-[oklch(50%_0.02_265)] hover:text-[oklch(75%_0.01_265)]'
               }`}
             >
-              {mode === 'all' ? 'Alla' : mode === 'published' ? 'Publicerade' : 'Utkast'}
+              {label}
             </button>
           ))}
         </div>
@@ -243,6 +257,7 @@ export function CareersContent() {
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
+                    title={item.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
                     aria-label={item.published ? 'Avpublicera annons' : 'Publicera annons'}
                     disabled={toggling[item.id]}
                     onClick={() => handleToggle(item)}
@@ -257,6 +272,7 @@ export function CareersContent() {
 
                   <Link
                     href={`/admin/career/edit?id=${item.id}`}
+                    title="Redigera annons"
                     aria-label={`Redigera annons: ${item.title}`}
                     className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
                   >
@@ -265,6 +281,7 @@ export function CareersContent() {
 
                   <button
                     type="button"
+                    title="Radera annons permanent"
                     aria-label={`Radera annons: ${item.title}`}
                     disabled={deleting}
                     onClick={() => { setDeleteError(null); setDeleteTarget(item); }}

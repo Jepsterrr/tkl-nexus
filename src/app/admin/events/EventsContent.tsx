@@ -25,7 +25,13 @@ function getSectionLabel(section: string): string {
   return (SECTION_LABELS as Record<string, string>)[section] ?? section;
 }
 
-type FilterMode = 'all' | 'published' | 'draft';
+type FilterMode = 'all' | 'published' | 'draft' | 'expired';
+
+function isExpired(dateIso: string): boolean {
+  const d = new Date(dateIso);
+  if (isNaN(d.getTime())) return false;
+  return d < new Date();
+}
 
 export function EventsContent() {
   const [events, setEvents] = useState<TKLEvent[]>([]);
@@ -92,20 +98,20 @@ export function EventsContent() {
       setDeleteTarget(null);
     } catch {
       setDeleteError('Kunde inte ta bort eventet. Försök igen.');
-      setDeleteTarget(null);
     } finally {
       setDeleting(false);
     }
   };
 
   const filtered = events.filter(e => {
-    if (filter === 'published') return e.published;
-    if (filter === 'draft') return !e.published;
+    if (filter === 'published') return e.published && !isExpired(e.date);
+    if (filter === 'draft')     return !e.published && !isExpired(e.date);
+    if (filter === 'expired')   return isExpired(e.date);
     return true;
   });
 
   return (
-    <div className="min-h-screen bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
+    <div className="min-h-full bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -121,8 +127,13 @@ export function EventsContent() {
         </div>
 
         {/* Filterrad */}
-        <div className="flex gap-2 mb-6" role="group" aria-label="Filtrera events">
-          {(['all', 'published', 'draft'] as const).map(mode => (
+        <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filtrera events">
+          {([
+            { mode: 'all',      label: 'Alla' },
+            { mode: 'published',label: 'Publicerade' },
+            { mode: 'draft',    label: 'Utkast' },
+            { mode: 'expired',  label: 'Utgångna' },
+          ] as const).map(({ mode, label }) => (
             <button
               key={mode}
               type="button"
@@ -130,11 +141,13 @@ export function EventsContent() {
               onClick={() => setFilter(mode)}
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
                 filter === mode
-                  ? 'bg-[oklch(55%_0.12_265)] text-white'
+                  ? mode === 'expired'
+                    ? 'bg-[oklch(55%_0.15_50)] text-white'
+                    : 'bg-[oklch(55%_0.12_265)] text-white'
                   : 'bg-[oklch(18%_0.012_265)] text-[oklch(50%_0.02_265)] hover:text-[oklch(75%_0.01_265)]'
               }`}
             >
-              {mode === 'all' ? 'Alla' : mode === 'published' ? 'Publicerade' : 'Utkast'}
+              {label}
             </button>
           ))}
         </div>
@@ -241,6 +254,7 @@ export function EventsContent() {
                   {/* Toggle publicera */}
                   <button
                     type="button"
+                    title={event.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
                     aria-label={event.published ? 'Avpublicera event' : 'Publicera event'}
                     disabled={toggling[event.id]}
                     onClick={() => handleToggle(event)}
@@ -256,6 +270,7 @@ export function EventsContent() {
                   {/* Redigera */}
                   <Link
                     href={`/admin/events/edit?id=${event.id}`}
+                    title="Redigera event"
                     aria-label={`Redigera event: ${event.title}`}
                     className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
                   >
@@ -265,6 +280,7 @@ export function EventsContent() {
                   {/* Radera */}
                   <button
                     type="button"
+                    title="Radera event permanent"
                     aria-label={`Radera event: ${event.title}`}
                     disabled={deleting}
                     onClick={() => { setDeleteError(null); setDeleteTarget(event); }}

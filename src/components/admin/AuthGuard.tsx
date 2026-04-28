@@ -41,10 +41,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   if (authState.status === 'loading') {
     return (
-      <div className="admin-login-wrap" aria-busy="true" aria-label="Laddar…">
-        <div style={{ color: 'oklch(55% 0.02 265)', fontFamily: 'var(--font-body)', fontSize: '0.875rem' }}>
+      <div className="min-h-[calc(100svh-var(--navbar-height,72px))] flex items-center justify-center bg-[oklch(12%_0.01_265)] p-6" aria-busy="true" aria-label="Laddar…">
+        <p className="font-(family-name:--font-body) text-sm text-[oklch(55%_0.02_265)]">
           Laddar…
-        </div>
+        </p>
       </div>
     );
   }

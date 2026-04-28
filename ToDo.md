@@ -44,7 +44,7 @@ Tillbaka till sajt knapp returnerar error för Navbar och Footer
 - [x] Publicera / avpublicera annons.
 - [x] Ta bort annons med bekräftelsedialog.
 
-### Partnerföretag-panel (`/admin/partners`)
+### Partnerföretag-panel (`/admin/partners`) (Borde det göras?)
 
 Ny Firestore-kollektion `partners`. Partnerföretag visas på `/corporate`-sidan som ett förtroendebyggande element.
 
@@ -91,9 +91,9 @@ Inställningar sparas som Firestore-dokument under `settings/<id>`. Fält som id
 
 ### Adminhantering (`/admin/admins`)
 
-- [ ] Lista alla e-postadresser i `admins`-kollektionen.
-- [ ] Lägg till ny admin (skapar dokument med e-post som nyckel).
-- [ ] Ta bort admin med bekräftelsedialog (kan ej ta bort sig själv).
+- [x] Lista alla e-postadresser i `admins`-kollektionen.
+- [x] Lägg till ny admin (skapar dokument med e-post som nyckel).
+- [x] Ta bort admin med bekräftelsedialog (kan ej ta bort sig själv).
 
 ---
 
@@ -101,5 +101,6 @@ Inställningar sparas som Firestore-dokument under `settings/<id>`. Fält som id
 
 ### Admin-panel — Framtida förbättringar
 
-- [ ] **Collapsible sidebar (approach C):** Sidebaren kan fällas ihop till ikonläge för mer desktop-yta. Kräver collapse-state (localStorage), animerad breddtransition och tooltip-labels på ikonerna i hopfällt läge.
-- [ ] **Migrera admin-CSS till Tailwind:** Alla custom CSS-klasser i `globals.css` under `/* === Admin Shell === */` (`.admin-shell`, `.admin-sidebar`, `.admin-nav-item`, `.dash-*`, etc.) ska skrivas om till Tailwind v4-utilities direkt i respektive komponent. Görs som ett separat refactor-steg efter att alla admin-paneler är byggda.
+- [x] **Collapsible sidebar:** Sidebaren kan fällas ihop till ikonläge för mer desktop-yta. Kräver collapse-state (localStorage), animerad breddtransition och tooltip-labels på ikonerna i hopfällt läge.
+- [x] **Migrera admin-CSS till Tailwind:** Alla custom CSS-klasser i `globals.css` under `/* === Admin Shell === */` (`.admin-shell`, `.admin-sidebar`, `.admin-nav-item`, `.dash-*`, etc.) ska skrivas om till Tailwind v4-utilities direkt i respektive komponent. Görs som ett separat refactor-steg efter att alla admin-paneler är byggda.
+- [x] **Lista "utgågna" events och annat:** Just nu visas alla saker som inte syns i själva publika sidorna ändå likadant i Admin sidorna, förslagsvis en form av "Gamla" eller något åt det hållet för att visa vad som hänt tidigare så man kan ta bort eller uppdatera vad som helst. Men mest för att kunna se vad som inte syns publika men som ändå finns.

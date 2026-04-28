@@ -71,7 +71,6 @@ export function DealsContent() {
       setDeleteTarget(null);
     } catch {
       setDeleteError('Kunde inte ta bort dealen. Försök igen.');
-      setDeleteTarget(null);
     } finally {
       setDeleting(false);
     }
@@ -84,7 +83,7 @@ export function DealsContent() {
   });
 
   return (
-    <div className="min-h-screen bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
+    <div className="min-h-full bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 
         {/* Header */}
@@ -235,6 +234,7 @@ export function DealsContent() {
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
+                    title={deal.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
                     aria-label={deal.published ? 'Avpublicera deal' : 'Publicera deal'}
                     disabled={toggling[deal.id]}
                     onClick={() => handleToggle(deal)}
@@ -249,6 +249,7 @@ export function DealsContent() {
 
                   <Link
                     href={`/admin/deals/edit?id=${deal.id}`}
+                    title="Redigera deal"
                     aria-label={`Redigera deal: ${deal.title}`}
                     className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
                   >
@@ -257,6 +258,7 @@ export function DealsContent() {
 
                   <button
                     type="button"
+                    title="Radera deal permanent"
                     aria-label={`Radera deal: ${deal.title}`}
                     disabled={deleting}
                     onClick={() => { setDeleteError(null); setDeleteTarget(deal); }}

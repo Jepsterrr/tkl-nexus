@@ -11,11 +11,11 @@ interface AdminShellProps {
 
 export function AdminShell({ user, children }: AdminShellProps) {
   return (
-    <div className="admin-shell">
+    <div className="flex h-svh bg-[oklch(12%_0.01_265)] text-[oklch(88%_0.01_265)] font-(family-name:--font-body)">
       <AdminSidebar />
-      <div className="admin-main">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <AdminContentHeader user={user} />
-        <div className="admin-content">
+        <div className="flex-1 overflow-y-auto p-8">
           {children}
         </div>
       </div>

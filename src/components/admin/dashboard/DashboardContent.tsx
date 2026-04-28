@@ -125,6 +125,16 @@ async function fetchRecent(
   }
 }
 
+// Skeleton pulse — inline animation via Tailwind animate-pulse equiv
+function Skeleton({ width, height }: { width?: string; height: string }) {
+  return (
+    <div
+      className="rounded-[3px] bg-[oklch(22%_0.012_265)] animate-[admin-pulse_1.4s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-50"
+      style={{ height, width }}
+    />
+  );
+}
+
 // Sub-components
 
 function StatCard({
@@ -143,30 +153,33 @@ function StatCard({
   const loading = stat.published === null && !stat.error;
 
   return (
-    <div className="dash-stat-card" aria-busy={loading || undefined}>
-      <div className="dash-stat-header">
+    <div
+      className="bg-[oklch(15%_0.012_265)] border border-[oklch(22%_0.015_265)] rounded-md p-5 transition-colors hover:bg-[oklch(20%_0.012_265)] hover:-translate-y-px"
+      aria-busy={loading || undefined}
+    >
+      <div className="flex items-center gap-2 mb-4 text-[oklch(55%_0.02_265)] text-xs font-medium uppercase tracking-[0.08em]">
         <Icon size={14} aria-hidden="true" />
         {label}
       </div>
       {stat.error ? (
-        <div className="dash-stat-number" aria-label="Data otillgänglig">–</div>
+        <div className="font-(family-name:--font-heading) text-[1.75rem] font-bold text-[oklch(88%_0.01_265)] leading-none mb-1" aria-label="Data otillgänglig">–</div>
       ) : loading ? (
         <>
-          <div
-            className="admin-skeleton"
-            style={{ height: '2rem', width: '3.5rem', marginBottom: 'var(--space-1)' }}
-          />
-          <div
-            className="admin-skeleton"
-            style={{ height: '0.75rem', width: '5rem' }}
-          />
+          <Skeleton height="2rem" width="3.5rem" />
+          <div className="mt-1">
+            <Skeleton height="0.75rem" width="5rem" />
+          </div>
         </>
       ) : (
         <>
-          <div className="dash-stat-number">{stat.published}</div>
-          <div className="dash-stat-label">{valueLabel}</div>
+          <div className="font-(family-name:--font-heading) text-[1.75rem] font-bold text-[oklch(88%_0.01_265)] leading-none mb-1">
+            {stat.published}
+          </div>
+          <div className="text-xs text-[oklch(55%_0.02_265)]">{valueLabel}</div>
           {showTotal && (
-            <div className="dash-stat-total">{stat.total} totalt</div>
+            <div className="text-[0.6875rem] text-[oklch(40%_0.01_265)] mt-0.5">
+              {stat.total} totalt
+            </div>
           )}
         </>
       )}
@@ -184,36 +197,41 @@ function RecentCol({
   items: RecentItem[] | null;
 }) {
   return (
-    <div className="dash-recent-col">
-      <div className="dash-recent-col-header">
+    <div className="bg-[oklch(15%_0.012_265)] border border-[oklch(22%_0.015_265)] rounded-md overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-[oklch(22%_0.015_265)] text-xs font-semibold text-[oklch(65%_0.02_265)] uppercase tracking-[0.08em]">
         <Icon size={13} aria-hidden="true" />
         {label}
       </div>
       {items === null ? (
         <>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="dash-recent-row">
-              <div
-                className="admin-skeleton dash-recent-title"
-                style={{ height: '0.875rem' }}
-              />
+            <div key={i} className="flex items-center gap-3 px-5 py-3 border-b border-[oklch(18%_0.01_265)] last:border-b-0 min-w-0 text-[0.8125rem]">
+              <div className="flex-1 min-w-0">
+                <Skeleton height="0.875rem" />
+              </div>
             </div>
           ))}
         </>
       ) : items.length === 0 ? (
-        <div className="dash-recent-empty">Inga poster ännu.</div>
+        <div className="px-5 py-5 text-[0.8125rem] text-[oklch(40%_0.01_265)]">Inga poster ännu.</div>
       ) : (
         items.map((item) => (
-          <div key={item.id} className="dash-recent-row">
-            <span className="dash-recent-title">{item.title}</span>
+          <div key={item.id} className="flex items-center gap-3 px-5 py-3 border-b border-[oklch(18%_0.01_265)] last:border-b-0 text-[0.8125rem] min-w-0">
+            <span className="flex-1 text-[oklch(75%_0.01_265)] whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
+              {item.title}
+            </span>
             <span
-              className={`dash-badge ${
-                item.published ? 'dash-badge-published' : 'dash-badge-draft'
+              className={`shrink-0 text-[0.625rem] font-semibold uppercase tracking-[0.05em] px-1.5 py-0.5 rounded ${
+                item.published
+                  ? 'bg-[oklch(55%_0.15_145/20%)] text-[oklch(70%_0.15_145)]'
+                  : 'bg-[oklch(22%_0.012_265)] text-[oklch(50%_0.02_265)]'
               }`}
             >
               {item.published ? 'Pub' : 'Utkast'}
             </span>
-            <span className="dash-recent-date">{item.date}</span>
+            <span className="text-[0.6875rem] text-[oklch(40%_0.01_265)] shrink-0">
+              {item.date}
+            </span>
           </div>
         ))
       )}
@@ -264,8 +282,10 @@ export function DashboardContent() {
   return (
     <div>
       {/* Stat-kort */}
-      <p className="dash-section-title">Översikt</p>
-      <div className="dash-stats-grid">
+      <p className="text-[0.8125rem] font-semibold text-[oklch(55%_0.02_265)] uppercase tracking-[0.08em] mb-4">
+        Översikt
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard label="Events" icon={Calendar} stat={data.events} />
         <StatCard label="Deals" icon={Tag} stat={data.deals} />
         <StatCard label="Jobb & Exj." icon={Briefcase} stat={data.opportunities} />
@@ -279,33 +299,33 @@ export function DashboardContent() {
       </div>
 
       {/* Snabblänkar */}
-      <p className="dash-section-title">Hantera</p>
-      <div className="dash-links-grid">
-        <Link href="/admin/events" className="dash-link-card">
-          <Calendar size={16} aria-hidden="true" />
-          Events
-          <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </Link>
-        <Link href="/admin/deals" className="dash-link-card">
-          <Tag size={16} aria-hidden="true" />
-          Deals
-          <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </Link>
-        <Link href="/admin/career" className="dash-link-card">
-          <Briefcase size={16} aria-hidden="true" />
-          Jobb & Exjobb
-          <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </Link>
-        <Link href="/admin/admins" className="dash-link-card">
-          <Shield size={16} aria-hidden="true" />
-          Adminhantering
-          <ArrowRight size={14} className="dash-link-arrow" aria-hidden="true" />
-        </Link>
+      <p className="text-[0.8125rem] font-semibold text-[oklch(55%_0.02_265)] uppercase tracking-[0.08em] mb-4">
+        Hantera
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[
+          { href: '/admin/events',  Icon: Calendar,  label: 'Events' },
+          { href: '/admin/deals',   Icon: Tag,        label: 'Deals' },
+          { href: '/admin/career',  Icon: Briefcase,  label: 'Jobb & Exjobb' },
+          { href: '/admin/admins',  Icon: Shield,     label: 'Adminhantering' },
+        ].map(({ href, Icon, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center gap-3 bg-[oklch(15%_0.012_265)] border border-[oklch(22%_0.015_265)] rounded-md px-5 py-4 no-underline text-[oklch(72%_0.02_265)] text-sm font-medium transition-colors hover:bg-[oklch(20%_0.012_265)] hover:text-[oklch(88%_0.01_265)] hover:-translate-y-px"
+          >
+            <Icon size={16} aria-hidden="true" />
+            {label}
+            <ArrowRight size={14} className="ml-auto text-[oklch(45%_0.02_265)]" aria-hidden="true" />
+          </Link>
+        ))}
       </div>
 
       {/* Senaste poster */}
-      <p className="dash-section-title">Senaste poster</p>
-      <div className="dash-recent">
+      <p className="text-[0.8125rem] font-semibold text-[oklch(55%_0.02_265)] uppercase tracking-[0.08em] mb-4">
+        Senaste poster
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <RecentCol label="Events" icon={Calendar} items={data.recentEvents} />
         <RecentCol label="Deals" icon={Tag} items={data.recentDeals} />
         <RecentCol label="Jobb & Exj." icon={Briefcase} items={data.recentOpportunities} />
