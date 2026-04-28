@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog';
+import { AdminRowActions } from '@/components/admin/shared/AdminRowActions';
+import { adminRowCls, expiredBadgeCls } from '@/components/admin/shared/formStyles';
 import { getAllEvents, deleteEvent, togglePublished } from '@/lib/services/events';
 import type { TKLEvent } from '@/lib/schemas/event';
 
@@ -220,15 +221,11 @@ export function EventsContent() {
             {filtered.map(event => (
               <li
                 key={event.id}
-                className={`flex items-center gap-4 px-4 py-3 mt-1 rounded-lg border border-[oklch(18%_0.012_265)] transition-colors ${
-                  event.published
-                    ? 'bg-[oklch(55%_0.12_265/8%)]'
-                    : 'bg-[oklch(75%_0.12_60/8%)]'
-                }`}
+                className={adminRowCls({ published: event.published, expired: isExpired(event.date) })}
               >
                 {/* Datumblock */}
                 <div
-                  className="w-14 shrink-0 text-center font-mono text-xs leading-tight text-[oklch(50%_0.02_265)]"
+                  className={`w-14 shrink-0 text-center font-mono text-xs leading-tight ${isExpired(event.date) ? 'text-[oklch(45%_0.02_265)]' : 'text-[oklch(50%_0.02_265)]'}`}
                   aria-label={`Datum: ${event.date}`}
                 >
                   {formatDate(event.date)}
@@ -236,9 +233,14 @@ export function EventsContent() {
 
                 {/* Mitten: titel + meta */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-(family-name:--font-body) font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
-                    {event.title}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className={`font-(family-name:--font-body) font-medium text-sm truncate ${isExpired(event.date) ? 'text-[oklch(55%_0.01_265)]' : 'text-[oklch(88%_0.01_265)]'}`}>
+                      {event.title}
+                    </p>
+                    {isExpired(event.date) && (
+                      <span className={expiredBadgeCls}>Utgången</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="inline-block px-1.5 py-px text-[10px] font-medium rounded-full bg-[oklch(18%_0.012_265)] text-[oklch(55%_0.02_265)]">
                       {getSectionLabel(event.section)}
@@ -250,45 +252,16 @@ export function EventsContent() {
                 </div>
 
                 {/* Åtgärder */}
-                <div className="flex items-center gap-1 shrink-0">
-                  {/* Toggle publicera */}
-                  <button
-                    type="button"
-                    title={event.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
-                    aria-label={event.published ? 'Avpublicera event' : 'Publicera event'}
-                    disabled={toggling[event.id]}
-                    onClick={() => handleToggle(event)}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {event.published ? (
-                      <Eye size={15} aria-hidden="true" />
-                    ) : (
-                      <EyeOff size={15} aria-hidden="true" />
-                    )}
-                  </button>
-
-                  {/* Redigera */}
-                  <Link
-                    href={`/admin/events/edit?id=${event.id}`}
-                    title="Redigera event"
-                    aria-label={`Redigera event: ${event.title}`}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
-                  >
-                    <Pencil size={15} aria-hidden="true" />
-                  </Link>
-
-                  {/* Radera */}
-                  <button
-                    type="button"
-                    title="Radera event permanent"
-                    aria-label={`Radera event: ${event.title}`}
-                    disabled={deleting}
-                    onClick={() => { setDeleteError(null); setDeleteTarget(event); }}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(65%_0.2_25)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                  </button>
-                </div>
+                <AdminRowActions
+                  published={event.published}
+                  toggling={toggling[event.id] ?? false}
+                  deleting={deleting}
+                  editHref={`/admin/events/edit?id=${event.id}`}
+                  title={event.title}
+                  resourceLabel="event"
+                  onToggle={() => handleToggle(event)}
+                  onDelete={() => { setDeleteError(null); setDeleteTarget(event); }}
+                />
               </li>
             ))}
           </ul>

@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog';
+import { AdminRowActions } from '@/components/admin/shared/AdminRowActions';
+import { adminRowCls } from '@/components/admin/shared/formStyles';
 import { getAllDeals, deleteDeal, toggleDealPublished } from '@/lib/services/deals';
 import type { TKLDeal } from '@/lib/schemas/deal';
 
@@ -184,11 +185,7 @@ export function DealsContent() {
             {filtered.map(deal => (
               <li
                 key={deal.id}
-                className={`flex items-center gap-4 px-4 py-3 mt-1 rounded-lg border border-[oklch(18%_0.012_265)] transition-colors ${
-                  deal.published
-                    ? 'bg-[oklch(55%_0.12_265/8%)]'
-                    : 'bg-[oklch(75%_0.12_60/8%)]'
-                }`}
+                className={adminRowCls({ published: deal.published })}
               >
                 {/* Logotyp eller initial */}
                 <div
@@ -231,42 +228,16 @@ export function DealsContent() {
                 </div>
 
                 {/* Åtgärder */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    title={deal.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
-                    aria-label={deal.published ? 'Avpublicera deal' : 'Publicera deal'}
-                    disabled={toggling[deal.id]}
-                    onClick={() => handleToggle(deal)}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {deal.published ? (
-                      <Eye size={15} aria-hidden="true" />
-                    ) : (
-                      <EyeOff size={15} aria-hidden="true" />
-                    )}
-                  </button>
-
-                  <Link
-                    href={`/admin/deals/edit?id=${deal.id}`}
-                    title="Redigera deal"
-                    aria-label={`Redigera deal: ${deal.title}`}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
-                  >
-                    <Pencil size={15} aria-hidden="true" />
-                  </Link>
-
-                  <button
-                    type="button"
-                    title="Radera deal permanent"
-                    aria-label={`Radera deal: ${deal.title}`}
-                    disabled={deleting}
-                    onClick={() => { setDeleteError(null); setDeleteTarget(deal); }}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(65%_0.2_25)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                  </button>
-                </div>
+                <AdminRowActions
+                  published={deal.published}
+                  toggling={toggling[deal.id] ?? false}
+                  deleting={deleting}
+                  editHref={`/admin/deals/edit?id=${deal.id}`}
+                  title={deal.title}
+                  resourceLabel="deal"
+                  onToggle={() => handleToggle(deal)}
+                  onDelete={() => { setDeleteError(null); setDeleteTarget(deal); }}
+                />
               </li>
             ))}
           </ul>

@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/admin/shared/ConfirmDialog';
+import { AdminRowActions } from '@/components/admin/shared/AdminRowActions';
+import { adminRowCls, expiredBadgeCls } from '@/components/admin/shared/formStyles';
 import { getAllCareer, deleteCareer, toggleCareerPublished } from '@/lib/services/career';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 
@@ -212,11 +213,7 @@ export function CareersContent() {
             {filtered.map(item => (
               <li
                 key={item.id}
-                className={`flex items-center gap-4 px-4 py-3 mt-1 rounded-lg border border-[oklch(18%_0.012_265)] transition-colors ${
-                  item.published
-                    ? 'bg-[oklch(55%_0.12_265/8%)]'
-                    : 'bg-[oklch(75%_0.12_60/8%)]'
-                }`}
+                className={adminRowCls({ published: item.published, expired: isExpired(item.deadline) })}
               >
                 {/* Typ-badge */}
                 <div className="w-16 shrink-0">
@@ -227,9 +224,14 @@ export function CareersContent() {
 
                 {/* Mitten: titel + meta */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-(family-name:--font-body) font-medium text-sm text-[oklch(88%_0.01_265)] truncate">
-                    {item.title}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className={`font-(family-name:--font-body) font-medium text-sm truncate ${isExpired(item.deadline) ? 'text-[oklch(55%_0.01_265)]' : 'text-[oklch(88%_0.01_265)]'}`}>
+                      {item.title}
+                    </p>
+                    {isExpired(item.deadline) && (
+                      <span className={expiredBadgeCls}>Utgången</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-xs text-[oklch(50%_0.02_265)] truncate">
                       {item.company}
@@ -254,42 +256,16 @@ export function CareersContent() {
                 </div>
 
                 {/* Åtgärder */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    title={item.published ? 'Avpublicera — dölj för användare' : 'Publicera — visa för användare'}
-                    aria-label={item.published ? 'Avpublicera annons' : 'Publicera annons'}
-                    disabled={toggling[item.id]}
-                    onClick={() => handleToggle(item)}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {item.published ? (
-                      <Eye size={15} aria-hidden="true" />
-                    ) : (
-                      <EyeOff size={15} aria-hidden="true" />
-                    )}
-                  </button>
-
-                  <Link
-                    href={`/admin/career/edit?id=${item.id}`}
-                    title="Redigera annons"
-                    aria-label={`Redigera annons: ${item.title}`}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(80%_0.01_265)] hover:bg-[oklch(18%_0.012_265)] transition-colors"
-                  >
-                    <Pencil size={15} aria-hidden="true" />
-                  </Link>
-
-                  <button
-                    type="button"
-                    title="Radera annons permanent"
-                    aria-label={`Radera annons: ${item.title}`}
-                    disabled={deleting}
-                    onClick={() => { setDeleteError(null); setDeleteTarget(item); }}
-                    className="p-1.5 rounded-md text-[oklch(50%_0.02_265)] hover:text-[oklch(65%_0.2_25)] hover:bg-[oklch(18%_0.012_265)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                  </button>
-                </div>
+                <AdminRowActions
+                  published={item.published}
+                  toggling={toggling[item.id] ?? false}
+                  deleting={deleting}
+                  editHref={`/admin/career/edit?id=${item.id}`}
+                  title={item.title}
+                  resourceLabel="annons"
+                  onToggle={() => handleToggle(item)}
+                  onDelete={() => { setDeleteError(null); setDeleteTarget(item); }}
+                />
               </li>
             ))}
           </ul>
