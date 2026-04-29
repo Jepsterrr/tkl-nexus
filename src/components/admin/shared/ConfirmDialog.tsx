@@ -85,7 +85,7 @@ export function ConfirmDialog({
       aria-describedby="confirm-dialog-desc"
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#0a0118]/70 backdrop-blur-sm"
         onClick={onCancel}
         aria-hidden="true"
       />

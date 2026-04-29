@@ -111,7 +111,8 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
           {deal.discountCode ? (
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95"
+              disabled={copied}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
               style={{
                 background: `${ORANGE}18`,
                 border: `1px solid ${ORANGE}40`,

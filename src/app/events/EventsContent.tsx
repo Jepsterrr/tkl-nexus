@@ -567,7 +567,7 @@ export function EventsContent() {
                 )}
                 {!luddLoading && !luddError && luddEvents.length === 0 && (
                   <p role="status" className="text-center hero-text-muted py-16">
-                    {ev.luddFetchError}
+                    {ev.luddNoEvents}
                   </p>
                 )}
 
