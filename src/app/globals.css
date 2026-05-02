@@ -24,7 +24,7 @@
   --text-title:   clamp(1.5rem, 2vw + 0.5rem, 2rem);      /* 24px → 32px */
   --text-heading: clamp(1.25rem, 1.5vw + 0.25rem, 1.5rem); /* 20px → 24px */
 
-  /* TKL Nexus Custom Colors */
+  /* TKL NEXUS Custom Colors */
   --tkl-red: #E30613;
   --corporate-purple: #8B5CF6;
   --student-green: #10B981;
@@ -212,7 +212,7 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
 
-  /* TKL Nexus tokens */
+  /* TKL NEXUS tokens */
   --color-tkl-red: var(--tkl-red);
   --color-corporate-purple: var(--corporate-purple);
   --color-student-green: var(--student-green);

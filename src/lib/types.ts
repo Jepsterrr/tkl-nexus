@@ -99,7 +99,7 @@ export const CONTACT_ITEMS = [
     external: false,
   },
   {
-    label: 'LinkedIn: TKL Nexus',
+    label: 'LinkedIn: TKL NEXUS',
     href: 'https://linkedin.com/in/tkl-nexus/',
     external: true,
   },

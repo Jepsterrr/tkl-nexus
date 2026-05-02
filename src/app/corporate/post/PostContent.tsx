@@ -85,9 +85,9 @@ function field(label: string, value: string): string {
 }
 
 function buildOpportunityMailto(f: OpportunityForm, email: string): string {
-  const subject = `[Nexus Portal] ${f.type} – ${f.company} – ${f.title}`;
+  const subject = `[NEXUS Portal] ${f.type} – ${f.company} – ${f.title}`;
   const body = [
-    '=== TKL Nexus — Ny inlämning ===',
+    '=== TKL NEXUS — Ny inlämning ===',
     'Typ: Jobb/Exjobb',
     `Inlämnad: ${new Date().toLocaleDateString('sv-SE')}`,
     '',
@@ -117,7 +117,7 @@ function buildOpportunityMailto(f: OpportunityForm, email: string): string {
 function buildEventMailto(f: EventForm, email: string): string {
   const subject = `[Event] ${f.contactName} (${f.contactEmail}) – ${f.title}`;
   const body = [
-    '=== TKL Nexus — Ny inlämning ===',
+    '=== TKL NEXUS — Ny inlämning ===',
     'Typ: Event',
     `Inlämnad: ${new Date().toLocaleDateString('sv-SE')}`,
     '',
@@ -148,7 +148,7 @@ function buildEventMailto(f: EventForm, email: string): string {
 function buildDealMailto(f: DealForm, email: string): string {
   const subject = `[Deal] ${f.company} – ${f.title}`;
   const body = [
-    '=== TKL Nexus — Ny inlämning ===',
+    '=== TKL NEXUS — Ny inlämning ===',
     'Typ: Deal',
     `Inlämnad: ${new Date().toLocaleDateString('sv-SE')}`,
     '',

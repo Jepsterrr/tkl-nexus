@@ -83,7 +83,7 @@ export function CareerContent() {
   const jobSchemaList = careerItems.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Lediga tjänster & exjobb via TKL Nexus',
+    name: 'Lediga tjänster & exjobb via TKL NEXUS',
     url: 'https://tklnexus.se/career',
     itemListElement: careerItems.map((opp, index) => {
       const employmentTypeMap: Record<string, string> = {

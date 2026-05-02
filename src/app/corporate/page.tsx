@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'Nå 1 600+ ingenjörsstudenter vid LTU. Publicera exjobb, boka event och stärk ert employer brand via Teknologkåren.',
     url: 'https://tklnexus.se/corporate',
-    siteName: 'TKL Nexus',
+    siteName: 'TKL NEXUS',
     locale: 'sv_SE',
     type: 'website',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],

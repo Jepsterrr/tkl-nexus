@@ -143,7 +143,7 @@ export function BannerForm() {
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Välkommen till TKL Nexus!"
+            placeholder="Välkommen till TKL NEXUS!"
             className={inputCls}
           />
         </div>

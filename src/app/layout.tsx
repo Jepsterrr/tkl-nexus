@@ -27,13 +27,13 @@ const hankenGrotesk = Hanken_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: 'TKL Nexus – Karriärportal för LTU-studenter & Företag',
-    template: '%s | TKL Nexus',
+    default: 'TKL NEXUS – Karriärportal för LTU-studenter & Företag',
+    template: '%s | TKL NEXUS',
   },
   description:
-    'TKL Nexus kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',
+    'TKL NEXUS kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',
   keywords: [
-    'LTU', 'Luleå tekniska universitet', 'Teknologkåren', 'TKL Nexus',
+    'LTU', 'Luleå tekniska universitet', 'Teknologkåren', 'TKL NEXUS',
     'exjobb', 'exjobb LTU', 'exjobb Luleå', 'examensarbete LTU',
     'praktik', 'praktik LTU', 'praktikplats Luleå',
     'trainee', 'traineeprogram ingenjör',
@@ -47,10 +47,10 @@ export const metadata: Metadata = {
   ],
   metadataBase: new URL('https://tklnexus.se'),
   openGraph: {
-    siteName: 'TKL Nexus',
+    siteName: 'TKL NEXUS',
     locale: 'sv_SE',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TKL Nexus' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TKL NEXUS' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -64,7 +64,7 @@ export default function RootLayout({
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'TKL Nexus',
+    name: 'TKL NEXUS',
     alternateName: 'Teknologkårens Arbetsmarknadsportal',
     url: 'https://tklnexus.se',
     logo: {
@@ -73,7 +73,7 @@ export default function RootLayout({
       width: 1200,
       height: 630,
     },
-    description: 'TKL Nexus är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
+    description: 'TKL NEXUS är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Luleå',
@@ -90,7 +90,7 @@ export default function RootLayout({
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'TKL Nexus',
+    name: 'TKL NEXUS',
     url: 'https://tklnexus.se',
     description: 'Arbetsmarknadsportal för LTU-studenter — exjobb, praktik, trainee och karriärevent.',
   };

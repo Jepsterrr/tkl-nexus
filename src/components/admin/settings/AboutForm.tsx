@@ -94,7 +94,7 @@ export function AboutForm() {
         Om oss
       </h1>
 
-      <p className={subHdCls}>Vad är TKL Nexus? — Stycke 1</p>
+      <p className={subHdCls}>Vad är TKL NEXUS? — Stycke 1</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label htmlFor="ab-p1sv" className={labelCls}>Svenska</label>
           <textarea id="ab-p1sv" value={p1Sv} onChange={e => setP1Sv(e.target.value)} rows={5} className={inputCls} /></div>

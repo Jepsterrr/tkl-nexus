@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description:
       'Din ingång till exjobb, praktik, traineeprogram och kårförmåner som LTU-student. Teknologkårens arbetsmarknadsportal vid Luleå tekniska universitet.',
     url: 'https://tklnexus.se/students',
-    siteName: 'TKL Nexus',
+    siteName: 'TKL NEXUS',
     locale: 'sv_SE',
     type: 'website',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],

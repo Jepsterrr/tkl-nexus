@@ -158,7 +158,7 @@ export function AboutContent() {
                 className="text-xs font-mono uppercase tracking-[0.2em] mb-5 opacity-55"
                 style={{ color: '#E30613' }}
               >
-                Est. 2025 · TKL Nexus
+                Est. 2025 · TKL NEXUS
               </p>
             </RevealItem>
 
@@ -219,7 +219,7 @@ export function AboutContent() {
         <GradientOrb color="red" size={350} top="30%" left="80%" opacity={0.07} />
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Vad är TKL Nexus? */}
+            {/* Vad är TKL NEXUS? */}
             <StaggerReveal>
               <RevealItem>
                 <div

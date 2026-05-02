@@ -108,7 +108,7 @@ export function ServicesForm() {
           <textarea id="sv-ed-en" value={edEn} onChange={e => setEdEn(e.target.value)} rows={3} className={inputCls} /></div>
       </div>
 
-      <p className={cardHd}>Nexus Portal</p>
+      <p className={cardHd}>NEXUS Portal</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label htmlFor="sv-pt-sv" className={labelCls}>Titel (sv)</label>
           <input id="sv-pt-sv" type="text" value={ptSv} onChange={e => setPtSv(e.target.value)} className={inputCls} /></div>

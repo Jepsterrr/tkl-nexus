@@ -25,7 +25,7 @@ export const TRANSLATIONS = {
     // --- Footer ---
     footer: {
       description:
-        'TKL Nexus är ett förlängt organ till Teknologkåren som arbetar mot näringslivet, skapar samarbeten och bidrar till att förbättra studietiden för aktiva studenter.',
+        'TKL NEXUS är ett förlängt organ till Teknologkåren som arbetar mot näringslivet, skapar samarbeten och bidrar till att förbättra studietiden för aktiva studenter.',
       quickLinks: 'Snabblänkar',
       ourPages: 'Våra Sidor',
       ourSections: 'Våra Sektioners Sidor',
@@ -69,7 +69,7 @@ export const TRANSLATIONS = {
           linkLabel: 'Se kommande events',
         },
         deals: {
-          title: 'Nexus Deals',
+          title: 'NEXUS Deals',
           description: 'Exklusiva rabatter och förmåner för dig som är kårmedlem i Teknologkåren. Spar pengar som student.',
           linkLabel: 'Utforska förmåner',
         },
@@ -87,12 +87,12 @@ export const TRANSLATIONS = {
       heading: 'Din brygga till',
       headingAccent: 'arbetslivet',
       description:
-        'Nexus kopplar ihop dig med företag, events och möjligheter som är relevanta för din utbildning.',
+        'NEXUS kopplar ihop dig med företag, events och möjligheter som är relevanta för din utbildning.',
       ctaExplore: 'Utforska möjligheter',
-      ctaDeals: 'Nexus Deals',
+      ctaDeals: 'NEXUS Deals',
       benefitsTitle: 'Vad vi erbjuder',
       jobsTitle: 'Exjobb',
-      dealsTitle: 'Nexus Deals',
+      dealsTitle: 'NEXUS Deals',
       dealsSubtitle:
         'Exklusiva rabatter och erbjudanden för dig som är kårmedlem i Teknologkåren.',
       dealsBtn: 'Se alla deals',
@@ -104,7 +104,7 @@ export const TRANSLATIONS = {
         career: {
           title: 'Kickstarta Karriären',
           description:
-            'Hitta drömjobbet redan som student via Nexus Portal och direktkontakter.',
+            'Hitta drömjobbet redan som student via NEXUS Portal och direktkontakter.',
         },
         network: {
           title: 'Nätverka',
@@ -125,7 +125,7 @@ export const TRANSLATIONS = {
           cta: 'Utforska',
         },
         deals: {
-          label: 'Nexus Deals',
+          label: 'NEXUS Deals',
           description: 'Exklusiva rabatter och förmåner för kårmedlemmar.',
           cta: 'Utforska',
         },
@@ -133,7 +133,7 @@ export const TRANSLATIONS = {
       pills: {
         jobs: 'Exjobb & Praktik',
         events: 'Campus Events',
-        deals: 'Nexus Deals',
+        deals: 'NEXUS Deals',
       },
     },
 
@@ -143,7 +143,7 @@ export const TRANSLATIONS = {
       heading: 'Kommande',
       headingAccent: 'Events',
       description:
-        'Håll koll på TKL Nexus egna events — från arbetsmarknadsdagar till mingel och sektionsaktiviteter.',
+        'Håll koll på TKL NEXUS egna events — från arbetsmarknadsdagar till mingel och sektionsaktiviteter.',
       filterAll: 'Alla sektioner',
       filterData: 'Datasektionen',
       filterGeo: 'Geosektionen',
@@ -174,7 +174,7 @@ export const TRANSLATIONS = {
         general: 'Allmänt',
       },
       pills: {
-        nexus: 'TKL Nexus Events',
+        nexus: 'TKL NEXUS Events',
         campus: 'Campus Events (LUDD)',
         sections: 'Data · Geo · I · Maskin',
       },
@@ -186,7 +186,7 @@ export const TRANSLATIONS = {
       heading: 'Nå framtidens',
       headingAccent: 'ingenjörer',
       description:
-        'TKL Nexus hjälper er att komma i kontakt med LTU-studenter via event, aktiviteter, jobbannonser och kårförmåner.',
+        'TKL NEXUS hjälper er att komma i kontakt med LTU-studenter via event, aktiviteter, jobbannonser och kårförmåner.',
       ctaContact: 'Kontakta oss',
       ctaServices: 'Se våra tjänster',
       servicesTitle: 'Hur vi kan hjälpa er',
@@ -206,7 +206,7 @@ export const TRANSLATIONS = {
           linkLabel: 'Se kommande events',
         },
         portal: {
-          title: 'Nexus Portal',
+          title: 'NEXUS Portal',
           description:
             'Annonsera praktik, exjobb och tjänster till rätt målgrupp med tydliga kontaktvägar.',
           linkLabel: 'Publicera annons',
@@ -214,7 +214,7 @@ export const TRANSLATIONS = {
         partnership: {
           title: 'Samarbete',
           description:
-            'Vi hjälper dig att synas på webben, sociala kanaler, på campus och via Nexus Deals.',
+            'Vi hjälper dig att synas på webben, sociala kanaler, på campus och via NEXUS Deals.',
           linkLabel: 'Läs om samarbete',
         },
       },
@@ -334,7 +334,7 @@ export const TRANSLATIONS = {
       badge: 'Karriärportalen',
       heading: 'Hitta ditt nästa',
       headingAccent: 'Karriärsteg',
-      description: 'Knyt kontakt med toppföretag, hitta exjobb, praktikplatser och kickstarta din karriär via Nexus-nätverket.',
+      description: 'Knyt kontakt med toppföretag, hitta exjobb, praktikplatser och kickstarta din karriär via NEXUS-nätverket.',
       noOpps: 'Uppehåll inför nästa möjlighet.',
       noOppsFiltered: 'Inga annonser matchar det filtret. Prova ett bredare urval.',
       loading: 'Hämtar annonser...',
@@ -401,23 +401,23 @@ export const TRANSLATIONS = {
       heading: 'Vi bygger',
       headingAccent: 'broar',
       description:
-        'TKL Nexus är Teknologkårens arbetsmarknadsprojektgrupp och arbetar med löpande företagskontakt för att skapa mervärde och förbättra studietiden för kårmedlemmar på campus.',
+        'TKL NEXUS är Teknologkårens arbetsmarknadsprojektgrupp och arbetar med löpande företagskontakt för att skapa mervärde och förbättra studietiden för kårmedlemmar på campus.',
       ctaContact: 'Kontakta oss',
-      whatIsTitle: 'Vad är TKL Nexus?',
+      whatIsTitle: 'Vad är TKL NEXUS?',
       contactTitle: 'Kontakta oss',
       reachOutTitle: 'Hör av dig',
       contactAddress: 'Tekniktorget 3, 977 54 Luleå',
       timelineTitle: 'Vår resa',
       whatIs: {
-        p1: 'Verksamheten omfattar bland annat Fyents & Relations, som stöttar det operativa arbetet kring event och företagsuppföljning, Nexus Portal som i dagsläget fungerar som en portal för exjobb, samt Nexus Deals, där kårmedlemmarnas förmåner samlas på ett och samma ställe.',
-        p2: 'För studenter hjälper vi till att hitta exjobb via Nexus Portal, samla kårförmåner i Nexus Deals och hålla koll på aktuella event och aktiviteter i Ludds eventkalender.',
+        p1: 'Verksamheten omfattar bland annat Fyents & Relations, som stöttar det operativa arbetet kring event och företagsuppföljning, NEXUS Portal som i dagsläget fungerar som en portal för exjobb, samt NEXUS Deals, där kårmedlemmarnas förmåner samlas på ett och samma ställe.',
+        p2: 'För studenter hjälper vi till att hitta exjobb via NEXUS Portal, samla kårförmåner i NEXUS Deals och hålla koll på aktuella event och aktiviteter i Ludds eventkalender.',
         p3: 'För företag och partners som söker framtida ingenjörer, eller vill bidra till en mer attraktiv studietid, erbjuder vi samarbeten genom event, aktiviteter, annonsering och erbjudanden till våra kårmedlemmar.',
       },
       timeline: {
-        founded: { title: 'TKL Nexus grundas', desc: 'Arbetsmarknadsprojektgruppen bildas under Teknologkåren vid LTU.' },
-        firstEvent: { title: 'Första arbetsmarknadsdagen', desc: 'Nexus arrangerar sitt första stora event med över 20 företag på campus.' },
-        portal: { title: 'Nexus Portal lanseras', desc: 'En digital plattform för exjobb och praktikplatser görs tillgänglig för kårmedlemmar.' },
-        deals: { title: 'Nexus Deals introduceras', desc: 'Exklusiva förmåner och rabatter samlas för alla kårmedlemmar.' },
+        founded: { title: 'TKL NEXUS grundas', desc: 'Arbetsmarknadsprojektgruppen bildas under Teknologkåren vid LTU.' },
+        firstEvent: { title: 'Första arbetsmarknadsdagen', desc: 'NEXUS arrangerar sitt första stora event med över 20 företag på campus.' },
+        portal: { title: 'NEXUS Portal lanseras', desc: 'En digital plattform för exjobb och praktikplatser görs tillgänglig för kårmedlemmar.' },
+        deals: { title: 'NEXUS Deals introduceras', desc: 'Exklusiva förmåner och rabatter samlas för alla kårmedlemmar.' },
         growth: { title: 'Plattformen växer', desc: 'Utökad funktionalitet, fler samarbetspartners och en ny digital närvaro.' },
       },
       pills: {
@@ -452,13 +452,13 @@ export const TRANSLATIONS = {
     // --- Footer ---
     footer: {
       description:
-        'TKL Nexus is an arm of Teknologkåren, working with industry to create partnerships and improve student life for active members.',
+        'TKL NEXUS is an arm of Teknologkåren, working with industry to create partnerships and improve student life for active members.',
       quickLinks: 'Quick Links',
       ourPages: 'Our Sites',
       ourSections: 'Section Sites',
       contactLabel: 'Contact',
       copyright: 'All rights reserved.',
-      builtBy: 'Built by the TKL Nexus team',
+      builtBy: 'Built by the TKL NEXUS team',
       links: {
         students: 'For students',
         corporate: 'For companies',
@@ -496,7 +496,7 @@ export const TRANSLATIONS = {
           linkLabel: 'See upcoming events',
         },
         deals: {
-          title: 'Nexus Deals',
+          title: 'NEXUS Deals',
           description: 'Exclusive discounts and benefits for Teknologkåren members. Save money as a student.',
           linkLabel: 'Explore benefits',
         },
@@ -514,12 +514,12 @@ export const TRANSLATIONS = {
       heading: 'Your bridge to',
       headingAccent: 'working life',
       description:
-        'Nexus connects you with companies, events and opportunities relevant to your degree.',
+        'NEXUS connects you with companies, events and opportunities relevant to your degree.',
       ctaExplore: 'Explore opportunities',
-      ctaDeals: 'Nexus Deals',
+      ctaDeals: 'NEXUS Deals',
       benefitsTitle: 'What we offer',
       jobsTitle: 'Thesis Projects',
-      dealsTitle: 'Nexus Deals',
+      dealsTitle: 'NEXUS Deals',
       dealsSubtitle:
         'Exclusive discounts and offers for Teknologkåren union members.',
       dealsBtn: 'See all deals',
@@ -530,7 +530,7 @@ export const TRANSLATIONS = {
         },
         career: {
           title: 'Kickstart Your Career',
-          description: 'Land your dream job as a student through Nexus Portal and direct contacts.',
+          description: 'Land your dream job as a student through NEXUS Portal and direct contacts.',
         },
         network: {
           title: 'Network',
@@ -551,7 +551,7 @@ export const TRANSLATIONS = {
           cta: 'Explore',
         },
         deals: {
-          label: 'Nexus Deals',
+          label: 'NEXUS Deals',
           description: 'Exclusive discounts and benefits for union members.',
           cta: 'Explore',
         },
@@ -559,7 +559,7 @@ export const TRANSLATIONS = {
       pills: {
         jobs: 'Thesis & Internship',
         events: 'Campus Events',
-        deals: 'Nexus Deals',
+        deals: 'NEXUS Deals',
       },
     },
 
@@ -569,7 +569,7 @@ export const TRANSLATIONS = {
       heading: 'Upcoming',
       headingAccent: 'Events',
       description:
-        'Stay up to date with TKL Nexus events — from career fairs to networking and section activities.',
+        'Stay up to date with TKL NEXUS events — from career fairs to networking and section activities.',
       filterAll: 'All sections',
       filterData: 'Data Section',
       filterGeo: 'Geo Section',
@@ -600,7 +600,7 @@ export const TRANSLATIONS = {
         general: 'General',
       },
       pills: {
-        nexus: 'TKL Nexus Events',
+        nexus: 'TKL NEXUS Events',
         campus: 'Campus Events (LUDD)',
         sections: 'Data · Geo · I · Maskin',
       },
@@ -612,7 +612,7 @@ export const TRANSLATIONS = {
       heading: "Reach tomorrow's",
       headingAccent: 'engineers',
       description:
-        'TKL Nexus helps you connect with LTU students through events, activities, job listings and student union benefits.',
+        'TKL NEXUS helps you connect with LTU students through events, activities, job listings and student union benefits.',
       ctaContact: 'Contact us',
       ctaServices: 'See our services',
       servicesTitle: 'How we can help you',
@@ -631,13 +631,13 @@ export const TRANSLATIONS = {
           linkLabel: 'See upcoming events',
         },
         portal: {
-          title: 'Nexus Portal',
+          title: 'NEXUS Portal',
           description: 'Post internships, thesis projects and positions to the right audience with clear contact paths.',
           linkLabel: 'Post a listing',
         },
         partnership: {
           title: 'Partnership',
-          description: 'We help you get visibility online, on social media, on campus and through Nexus Deals.',
+          description: 'We help you get visibility online, on social media, on campus and through NEXUS Deals.',
           linkLabel: 'Read about partnership',
         },
       },
@@ -757,7 +757,7 @@ export const TRANSLATIONS = {
       badge: 'Career Portal',
       heading: 'Find your next',
       headingAccent: 'Career Step',
-      description: 'Connect with top companies, find thesis projects, internships, and launch your career through the Nexus network.',
+      description: 'Connect with top companies, find thesis projects, internships, and launch your career through the NEXUS network.',
       noOpps: 'Quiet for now. New opportunities post regularly.',
       noOppsFiltered: 'No opportunities match this filter. Try broadening your selection.',
       loading: 'Fetching opportunities...',
@@ -814,7 +814,7 @@ export const TRANSLATIONS = {
       pills: {
         exclusive: 'Exclusive to union members',
         offers: 'Discounts & Offers',
-        name: 'Nexus Deals',
+        name: 'NEXUS Deals',
       },
     },
 
@@ -824,24 +824,24 @@ export const TRANSLATIONS = {
       heading: 'We build',
       headingAccent: 'bridges',
       description:
-        'TKL Nexus is the career project group of Teknologkåren, maintaining continuous industry contact to create value and improve student life for union members on campus.',
+        'TKL NEXUS is the career project group of Teknologkåren, maintaining continuous industry contact to create value and improve student life for union members on campus.',
       ctaContact: 'Contact us',
-      whatIsTitle: 'What is TKL Nexus?',
+      whatIsTitle: 'What is TKL NEXUS?',
       contactTitle: 'Contact us',
       reachOutTitle: 'Reach out',
       contactAddress: 'Tekniktorget 3, 977 54 Luleå',
       timelineTitle: 'Our journey',
       whatIs: {
-        p1: 'Our work includes Events & Relations, which supports operational work around events and company follow-up, Nexus Portal which today serves as a platform for thesis projects, and Nexus Deals where member benefits are collected in one place.',
-        p2: 'For students, we help you find thesis projects through Nexus Portal, collect union benefits in Nexus Deals, and stay updated on current events and activities in the Ludd event calendar.',
+        p1: 'Our work includes Events & Relations, which supports operational work around events and company follow-up, NEXUS Portal which today serves as a platform for thesis projects, and NEXUS Deals where member benefits are collected in one place.',
+        p2: 'For students, we help you find thesis projects through NEXUS Portal, collect union benefits in NEXUS Deals, and stay updated on current events and activities in the Ludd event calendar.',
         p3: 'For companies and partners seeking future engineers, or wanting to contribute to a more attractive student life, we offer collaborations through events, activities, advertising and offers to our union members.',
       },
       timeline: {
-        founded: { title: 'TKL Nexus founded', desc: 'The career project group is established under Teknologkåren at LTU.' },
-        firstEvent: { title: 'First career fair', desc: 'Nexus organises its first major event with over 20 companies on campus.' },
-        portal: { title: 'Nexus Portal launched', desc: 'A digital platform for thesis projects and internships is made available to union members.' },
-        deals: { title: 'Nexus Deals introduced', desc: 'Exclusive benefits and discounts collected for all union members.' },
-        growth: { title: 'Platform grows', desc: 'Expanded features, more partners and a new digital presence.' },
+        founded: { title: 'TKL NEXUS founded', desc: 'The career project group is established under Teknologkåren at LTU.' },
+        firstEvent: { title: 'First career fair', desc: 'TKL NEXUS organises its first major event with over 20 companies on campus.' },
+        portal: { title: 'NEXUS Portal launched', desc: 'A digital platform for thesis projects and internships is made available to union members.' },
+        deals: { title: 'NEXUS Deals introduced', desc: 'Exclusive benefits and discounts collected for all union members.' },
+        growth: { title: 'TKL NEXUS grows', desc: 'Expanded features, more partners and a new digital presence.' },
       },
       pills: {
         founded: 'Founded 2019',

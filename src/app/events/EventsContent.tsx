@@ -273,7 +273,7 @@ export function EventsContent() {
   const eventSchemaList = allEvents.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Kommande events – TKL Nexus',
+    name: 'Kommande events – TKL NEXUS',
     url: 'https://tklnexus.se/events',
     itemListElement: allEvents.map((event, index) => ({
       '@type': 'ListItem',
@@ -298,7 +298,7 @@ export function EventsContent() {
         },
         organizer: {
           '@type': 'Organization',
-          name: 'TKL Nexus',
+          name: 'TKL NEXUS',
           url: 'https://tklnexus.se',
         },
       },

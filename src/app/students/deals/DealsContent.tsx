@@ -190,7 +190,7 @@ export function DealsContent() {
       </section>
 
       {/* DEALS-LISTA */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="Nexus Deals">
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="NEXUS Deals">
         <div className="max-w-4xl mx-auto">
 
           {/* Laddning */}

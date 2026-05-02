@@ -48,7 +48,7 @@ export function Footer() {
                 TKL
               </span>
               <span className="font-bold text-lg tracking-wide text-red-500">
-                Nexus
+                NEXUS
               </span>
             </div>
             <p className="footer-text-muted text-sm leading-relaxed max-w-xs">
@@ -162,7 +162,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="footer-text-subtle text-xs">
-            © {new Date().getFullYear()} TKL Nexus. {t.footer.copyright}
+            © {new Date().getFullYear()} TKL NEXUS. {t.footer.copyright}
           </p>
           <p className="footer-text-subtle text-xs">
             {t.footer.builtBy}
