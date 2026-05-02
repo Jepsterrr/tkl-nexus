@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 const firebaseConfig = {
@@ -18,7 +18,14 @@ const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence).catch((e) => {
   console.warn('Failed to set auth persistence:', e);
 });
-const db = getFirestore(app);
+let db: Firestore;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch {
+  db = getFirestore(app);
+}
 const storage = getStorage(app);
 
 // Connect to emulators in development

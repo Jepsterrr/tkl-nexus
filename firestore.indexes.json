@@ -4,12 +4,29 @@
       "collectionGroup": "events",
       "queryScope": "COLLECTION",
       "fields": [
+        { 
+          "fieldPath": "published",
+          "order": "ASCENDING"
+        },
+        { 
+          "fieldPath": "date",
+          "order": "ASCENDING" 
+        }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
         {
           "fieldPath": "published",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "date",
+          "fieldPath": "endDate",
+          "order": "ASCENDING"
+        },
+        { "fieldPath": "date",
           "order": "ASCENDING"
         }
       ]
@@ -18,11 +35,29 @@
       "collectionGroup": "opportunities",
       "queryScope": "COLLECTION",
       "fields": [
-        {
+        { 
           "fieldPath": "published",
           "order": "ASCENDING"
         },
-        {
+        { 
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "career",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { 
+          "fieldPath": "published",
+          "order": "ASCENDING"
+        },
+        { 
+          "fieldPath": "deadline",
+          "order": "ASCENDING"
+        },
+        { 
           "fieldPath": "createdAt",
           "order": "DESCENDING"
         }

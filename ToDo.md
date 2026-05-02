@@ -97,10 +97,61 @@ Inställningar sparas som Firestore-dokument under `settings/<id>`. Fält som id
 
 ---
 
+## Epic 2
+
+### Event / Exjobb / Deals
+
+Just nu finns de bara som en lista med "kort" som tar dig till en annan sida med knapp, borde man inte kunna gå in på dem för att se hela texten och allt sådant på snyggare och större sätt? Det kan ju vara så att man vill se lite mer av eventet eller exjobbet innan man bestämmer sig för att klicka sig vidare. Exempelvis ett event kan ju vara en hel dag med flera delar, eller att ett exjobb har väldigt lång beskrivning.
+
+På detta kan man ha metadata och specifika bilden ifall det finns någon, annars vanliga og-image som visas på länkarna. Detta gör att studenter eller annat kan skicka specifika länken till kompisar och det syns på korrekt sätt. Följ gärna andra sidors metadata ungefärligt men behöver ju inga keywords direkt (tror jag?).
+
+---
+
 ## Tekniska & Arkitektoniska Förbättringar
 
-### Admin-panel — Framtida förbättringar
+### Caching — Firestore Offline Persistence + cacheVersion
 
-- [x] **Collapsible sidebar:** Sidebaren kan fällas ihop till ikonläge för mer desktop-yta. Kräver collapse-state (localStorage), animerad breddtransition och tooltip-labels på ikonerna i hopfällt läge.
-- [x] **Migrera admin-CSS till Tailwind:** Alla custom CSS-klasser i `globals.css` under `/* === Admin Shell === */` (`.admin-shell`, `.admin-sidebar`, `.admin-nav-item`, `.dash-*`, etc.) ska skrivas om till Tailwind v4-utilities direkt i respektive komponent. Görs som ett separat refactor-steg efter att alla admin-paneler är byggda.
-- [x] **Lista "utgågna" events och annat:** Just nu visas alla saker som inte syns i själva publika sidorna ändå likadant i Admin sidorna, förslagsvis en form av "Gamla" eller något åt det hållet för att visa vad som hänt tidigare så man kan ta bort eller uppdatera vad som helst. Men mest för att kunna se vad som inte syns publika men som ändå finns.
+Mål: spara Firebase-kvot och ge konsekvent laddningsupplevelse utan att studenter missar ny data.
+
+**Koncept:**
+
+- Faktisk data cachas i **IndexedDB** via Firestore Offline Persistence (GB-gränser, ingen custom serialisering).
+- Enbart versionen (`{ events, career, deals }`) sparas i **localStorage** (bytes, ingen risk för 5 MB-gränsen).
+- Ingen TTL — `cacheVersion`-dokumentet är den enda invalideringsmekanismen.
+- Admin-write-funktioner använder `serverTimestamp()` för att undvika klock-skev mellan olika enheter.
+
+**UX-flöde (skeleton hela vägen):**
+
+```
+1. Skeleton visas (loading = true)
+2. Hämta settings/cacheVersion från server (1 Firestore-läsning)
+3. Jämför mot localStorage-version
+   Samma  → getDocs(..., { source: 'cache' })  → visa data (loading = false)
+   Ny     → getDocs(..., { source: 'server' }) → visa data, spara ny version (loading = false)
+   Miss*  → getDocs(..., { source: 'server' }) → visa data (loading = false)
+```
+
+\*Cache-miss (första besöket) hanteras med try/catch → fallback till server.
+
+Data visas alltid en gång, definitivt. Ingen tyst uppdatering efteråt.
+
+**Implementation:**
+
+- [x] Aktivera **Firestore Offline Persistence** i `src/lib/firebase.ts` via `initializeFirestore` med `persistentLocalCache({ tabManager: persistentMultipleTabManager() })`.
+- [x] Skapa `settings/cacheVersion`-dokument i Firestore med fälten `events`, `career`, `deals`.
+- [x] Skapa `src/lib/services/cacheVersion.ts` — hämtar `settings/cacheVersion` (source: 'server') och jämför mot localStorage-versionen.
+- [x] Uppdatera `getEvents`, `getCareerPosts`, `getDeals` i respektive service-fil att använda `source: 'cache'` eller `source: 'server'` baserat på versionskollet.
+- [x] Uppdatera alla admin write-funktioner (`createEvent`, `updateEvent`, `deleteEvent` osv.) att bumpa relevant fält i `settings/cacheVersion` med `serverTimestamp()`.
+
+## Mikro-interaktioner & Skeleton-övergångar
+
+### Planen är att göra Skeleton loading på allt då det ger en bättre upplevelse
+
+- [ ] Få alla sidor som faktiskt behöver det ett snyggt skeleton medan själva datan hämtas eller laddas.
+- [ ] Många appar blinkar till fult när datan laddas klart. En mjuk animation där skeleton-korten tonar över i riktiga kort skriker "välbyggd app" och minskar stressen i UI:t.
+- [ ] Se till att övergången mellan Skeleton --> Faktisk data är "buttery smooth" med en mjuk cross-fade.
+
+## Bilder
+
+- [ ] Utforska alternativ att använda bilder på sidan där det skulle passa och se snyggt ut.
+- [ ] Utforska användningen av bilder på Firebase Spark-plan i där det finns (Kan man ladda upp från datorn? Kräver det högre betalplan eller finns det snyggt workaround?).

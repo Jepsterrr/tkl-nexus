@@ -2,6 +2,8 @@ import {
   collection,
   getDocs,
   getDoc,
+  getDocsFromCache,
+  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -10,10 +12,12 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { CareerSchema, CareerFormSchema, type TKLCareer, type CareerFormData } from '@/lib/schemas/career';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
+import { getDataSource, bumpCacheVersion } from './cacheVersion';
 
 function toIso(ts: unknown): string | undefined {
   if (!ts) return undefined;
@@ -29,9 +33,31 @@ function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
 }
 
 export async function getPublishedCareer(): Promise<TKLCareer[]> {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const startOfToday = Timestamp.fromDate(d);
+
   const ref = collection(db, 'career');
-  const q = query(ref, where('published', '==', true), orderBy('createdAt', 'desc'));
-  const snapshot = await withFetchTimeout(getDocs(q));
+  const q = query(
+    ref,
+    where('published', '==', true),
+    where('deadline', '>=', startOfToday),
+    orderBy('deadline', 'asc'),
+    orderBy('createdAt', 'desc')
+  );
+
+  const source = await getDataSource('career');
+  let snapshot;
+  if (source === 'cache') {
+    try {
+      snapshot = await withFetchTimeout(getDocsFromCache(q));
+      if (snapshot.empty) throw new Error('cache empty');
+    } catch {
+      snapshot = await withFetchTimeout(getDocsFromServer(q));
+    }
+  } else {
+    snapshot = await withFetchTimeout(getDocsFromServer(q));
+  }
 
   const items: TKLCareer[] = [];
   snapshot.forEach((docSnap) => {
@@ -46,13 +72,7 @@ export async function getPublishedCareer(): Promise<TKLCareer[]> {
     else console.error(`Valideringsfel för career ${docSnap.id}:`, parsed.error);
   });
 
-  const now = new Date();
-  return items.filter(o => {
-    if (!o.deadline) return true;
-    const d = new Date(o.deadline);
-    d.setHours(d.getHours() + 24);
-    return d > now;
-  });
+  return items;
 }
 
 export async function getAllCareer(): Promise<TKLCareer[]> {
@@ -103,6 +123,7 @@ export async function createCareer(data: CareerFormData): Promise<string> {
     ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });
+  void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
   return docRef.id;
 }
 
@@ -110,14 +131,17 @@ export async function updateCareer(id: string, data: Partial<CareerFormData>): P
   if (!id) throw new Error('updateCareer: id saknas');
   const validated = CareerFormSchema.partial().parse(data);
   await updateDoc(doc(db, 'career', id), omitUndefined(validated as Record<string, unknown>));
+  void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
 }
 
 export async function deleteCareer(id: string): Promise<void> {
   if (!id) throw new Error('deleteCareer: id saknas');
   await deleteDoc(doc(db, 'career', id));
+  void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
 }
 
 export async function toggleCareerPublished(id: string, current: boolean): Promise<void> {
   if (!id) throw new Error('toggleCareerPublished: id saknas');
   await updateDoc(doc(db, 'career', id), { published: !current });
+  void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
 }

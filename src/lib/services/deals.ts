@@ -2,6 +2,8 @@ import {
   collection,
   getDocs,
   getDoc,
+  getDocsFromCache,
+  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -14,6 +16,7 @@ import {
 import { db } from '@/lib/firebase';
 import { DealSchema, DealFormSchema, type TKLDeal, type DealFormData } from '@/lib/schemas/deal';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
+import { getDataSource, bumpCacheVersion } from './cacheVersion';
 
 function toIso(ts: unknown): string | undefined {
   if (!ts) return undefined;
@@ -36,10 +39,21 @@ export async function getPublishedDeals(): Promise<TKLDeal[]> {
     orderBy('createdAt', 'desc'),
   );
 
-  const snap = await withFetchTimeout(getDocs(q));
+  const source = await getDataSource('deals');
+  let snapshot;
+  if (source === 'cache') {
+    try {
+      snapshot = await withFetchTimeout(getDocsFromCache(q));
+      if (snapshot.empty) throw new Error('cache empty');
+    } catch {
+      snapshot = await withFetchTimeout(getDocsFromServer(q));
+    }
+  } else {
+    snapshot = await withFetchTimeout(getDocsFromServer(q));
+  }
 
   const deals: TKLDeal[] = [];
-  for (const docSnap of snap.docs) {
+  for (const docSnap of snapshot.docs) {
     const data = docSnap.data();
     const parsed = DealSchema.safeParse({
       id: docSnap.id,
@@ -104,6 +118,7 @@ export async function createDeal(data: DealFormData): Promise<string> {
     ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });
+  void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
   return docRef.id;
 }
 
@@ -112,14 +127,17 @@ export async function updateDeal(id: string, data: Partial<DealFormData>): Promi
   const validated = DealFormSchema.partial().parse(data);
   const docRef = doc(db, 'deals', id);
   await updateDoc(docRef, omitUndefined(validated as Record<string, unknown>));
+  void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }
 
 export async function deleteDeal(id: string): Promise<void> {
   if (!id) throw new Error('deleteDeal: id saknas');
   await deleteDoc(doc(db, 'deals', id));
+  void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }
 
 export async function toggleDealPublished(id: string, current: boolean): Promise<void> {
   if (!id) throw new Error('toggleDealPublished: id saknas');
   await updateDoc(doc(db, 'deals', id), { published: !current });
+  void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }

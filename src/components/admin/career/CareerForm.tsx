@@ -76,7 +76,7 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
       descriptionEn: descriptionEn || undefined,
       startDate: startDate || undefined,
       startDateEn: startDateEn || undefined,
-      deadline: deadline ? fromDatetimeLocal(deadline) : undefined,
+      deadline: fromDatetimeLocal(deadline),
       applyUrl: applyUrl || undefined,
       published,
     };
@@ -237,7 +237,7 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="cf-deadline" className={labelCls}>Deadline (valfritt)</label>
+                <label htmlFor="cf-deadline" className={labelCls}>Deadline {reqMark}</label>
                 <input id="cf-deadline" type="datetime-local" value={deadline}
                   onChange={e => setDeadline(e.target.value)} className={inputCls} />
                 {errors.deadline && <p className={errorCls}>{errors.deadline}</p>}

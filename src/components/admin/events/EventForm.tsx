@@ -75,7 +75,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
       title,
       titleEn: titleEn || undefined,
       date: fromDatetimeLocal(date),
-      endDate: endDate ? fromDatetimeLocal(endDate) : undefined,
+      endDate: fromDatetimeLocal(endDate),
       location,
       section,
       tags,
@@ -204,7 +204,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               {errors.date && <p className={errorCls}>{errors.date}</p>}
             </div>
             <div>
-              <label htmlFor="ef-end-date" className={labelCls}>Slutdatum (valfritt)</label>
+              <label htmlFor="ef-end-date" className={labelCls}>Slutdatum {reqMark}</label>
               <input
                 id="ef-end-date"
                 type="datetime-local"
@@ -212,6 +212,7 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 onChange={(e) => setEndDate(e.target.value)}
                 className={inputCls}
               />
+              {errors.endDate && <p className={errorCls}>{errors.endDate}</p>}
             </div>
           </div>
           <div>

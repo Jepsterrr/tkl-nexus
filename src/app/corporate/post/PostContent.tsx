@@ -177,11 +177,11 @@ function buildDealMailto(f: DealForm, email: string): string {
 // Validation
 
 function isOpportunityValid(f: OpportunityForm): boolean {
-  return !!(f.contactName && f.contactEmail && f.title && f.company && f.type && f.location);
+  return !!(f.contactName && f.contactEmail && f.title && f.company && f.type && f.location && f.deadline);
 }
 
 function isEventValid(f: EventForm): boolean {
-  return !!(f.contactName && f.contactEmail && f.title && f.date && f.location && f.section && f.description);
+  return !!(f.contactName && f.contactEmail && f.title && f.date && f.endDate && f.location && f.section && f.description);
 }
 
 function isDealValid(f: DealForm): boolean {
@@ -498,8 +498,8 @@ export function PostContent() {
                           value={opp.startDate} onChange={e => setOpp(p => ({ ...p, startDate: e.target.value }))} />
                       </div>
                       <div>
-                        <label htmlFor="opp-deadline" className={labelCls}>{cp.opportunity.deadline}</label>
-                        <input id="opp-deadline" type="date" className={inputCls}
+                        <label htmlFor="opp-deadline" className={labelCls}>{cp.opportunity.deadline}{requiredDot}</label>
+                        <input id="opp-deadline" type="date" aria-required="true" className={inputCls}
                           value={opp.deadline} onChange={e => setOpp(p => ({ ...p, deadline: e.target.value }))} />
                       </div>
                     </div>
@@ -567,8 +567,8 @@ export function PostContent() {
                           value={evt.date} onChange={e => setEvt(p => ({ ...p, date: e.target.value }))} />
                       </div>
                       <div>
-                        <label htmlFor="evt-endDate" className={labelCls}>{cp.event.endDate}</label>
-                        <input id="evt-endDate" type="datetime-local" className={inputCls}
+                        <label htmlFor="evt-endDate" className={labelCls}>{cp.event.endDate}{requiredDot}</label>
+                        <input id="evt-endDate" type="datetime-local" aria-required="true" className={inputCls}
                           value={evt.endDate} onChange={e => setEvt(p => ({ ...p, endDate: e.target.value }))} />
                       </div>
                     </div>
