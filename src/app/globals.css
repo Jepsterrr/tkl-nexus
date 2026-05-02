@@ -40,6 +40,10 @@
   --glass-bg-strong: rgba(255, 255, 255, 0.06);
   --glass-border-strong: rgba(255, 255, 255, 0.10);
 
+  /* Skeleton shimmer */
+  --skeleton-base:      rgba(255, 255, 255, 0.07);
+  --skeleton-highlight: rgba(255, 255, 255, 0.15);
+
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -96,6 +100,10 @@
   --glass-border-subtle: rgba(255, 255, 255, 0.08);
   --glass-bg-strong: rgba(255, 255, 255, 0.06);
   --glass-border-strong: rgba(255, 255, 255, 0.10);
+
+  /* Skeleton shimmer */
+  --skeleton-base:      rgba(255, 255, 255, 0.07);
+  --skeleton-highlight: rgba(255, 255, 255, 0.15);
 
   /* Navbar / Footer – dark defaults */
   --nav-text: rgba(255, 255, 255, 1);
@@ -180,6 +188,10 @@
   --glass-border-subtle: rgba(0, 0, 0, 0.08);
   --glass-bg-strong: rgba(255, 255, 255, 0.75);
   --glass-border-strong: rgba(0, 0, 0, 0.12);
+
+  /* Skeleton shimmer */
+  --skeleton-base:      rgba(0, 0, 0, 0.07);
+  --skeleton-highlight: rgba(0, 0, 0, 0.13);
 
   /* CTA Banner */
   --cta-banner-bg: rgba(245, 243, 255, 0.9);
@@ -460,5 +472,28 @@
 @keyframes admin-pulse {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 0.8; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base)      25%,
+    var(--skeleton-highlight) 50%,
+    var(--skeleton-base)      75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: var(--skeleton-base);
+  }
 }
 

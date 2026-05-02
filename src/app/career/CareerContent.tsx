@@ -267,12 +267,36 @@ export function CareerContent() {
             </div>
           </motion.div>
 
-          {/* Laddar-state */}
-          {loading && (
-            <div aria-live="polite" aria-busy="true" aria-label={opportunity.loading} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <JobCardSkeleton count={6} accentColor="blue" />
-            </div>
-          )}
+          {/* Laddar-state + Jobb Grid — AnimatePresence cross-fade */}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="skeleton"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                aria-live="polite"
+                aria-busy="true"
+                aria-label={opportunity.loading}
+              >
+                <JobCardSkeleton count={3} accentColor="blue" />
+              </motion.div>
+            ) : !error && filteredItems.length > 0 ? (
+              <motion.div
+                key={`grid-${filter}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {filteredItems.map((job, idx) => (
+                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} entryDelay={idx * 0.03} />
+                ))}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
           {/* Error-state */}
           {error && !loading && (
@@ -325,23 +349,6 @@ export function CareerContent() {
             <p className="sr-only" aria-live="polite" aria-atomic="true">
               {opportunity.resultsCount.replace('{count}', String(filteredItems.length))}
             </p>
-          )}
-
-          {/* Jobb Grid */}
-          {!loading && !error && filteredItems.length > 0 && (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={filter}
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {filteredItems.map((job, idx) => (
-                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} entryDelay={idx * 0.03} />
-                ))}
-              </motion.div>
-            </AnimatePresence>
           )}
 
         </div>

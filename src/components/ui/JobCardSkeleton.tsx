@@ -12,7 +12,7 @@ function SingleSkeleton({ accentColor = 'green' }: { accentColor: AccentColor })
   const colors = ACCENT_COLOR_MAP[accentColor];
   return (
     <div
-      className="rounded-2xl p-5 sm:p-6 space-y-4 animate-pulse"
+      className="rounded-2xl p-5 sm:p-6 space-y-4"
       style={{
         border: `1px solid ${colors.border}`,
         background: colors.bg,
@@ -22,21 +22,21 @@ function SingleSkeleton({ accentColor = 'green' }: { accentColor: AccentColor })
       {/* Header */}
       <div className="flex justify-between gap-3">
         <div className="flex-1 space-y-2">
-          <div className="h-3 w-16 rounded-full bg-white/10" />
-          <div className="h-5 w-4/5 rounded-lg bg-white/10" />
-          <div className="h-3 w-1/3 rounded-full bg-white/8" />
+          <div className="skeleton-shimmer h-3 w-16 rounded-full" />
+          <div className="skeleton-shimmer h-5 w-4/5 rounded-lg" />
+          <div className="skeleton-shimmer h-3 w-1/3 rounded-full" />
         </div>
-        <div className="w-11 h-11 rounded-xl bg-white/8 shrink-0" />
+        <div className="skeleton-shimmer w-11 h-11 rounded-xl shrink-0" />
       </div>
       {/* Meta */}
       <div className="space-y-2">
-        <div className="h-3 w-1/3 rounded-full bg-white/8" />
-        <div className="h-3 w-1/2 rounded-full bg-white/8" />
+        <div className="skeleton-shimmer h-3 w-1/3 rounded-full" />
+        <div className="skeleton-shimmer h-3 w-1/2 rounded-full" />
       </div>
       {/* Actions */}
       <div className="flex justify-between pt-1">
-        <div className="h-9 w-28 rounded-xl bg-white/10" />
-        <div className="w-9 h-9 rounded-xl bg-white/8" />
+        <div className="skeleton-shimmer h-9 w-28 rounded-xl" />
+        <div className="skeleton-shimmer w-9 h-9 rounded-xl" />
       </div>
     </div>
   );
