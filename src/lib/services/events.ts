@@ -12,7 +12,6 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EventSchema, EventFormSchema, type TKLEvent, type EventFormData } from '../schemas/event';
@@ -22,13 +21,13 @@ import { getDataSource, bumpCacheVersion } from './cacheVersion';
 export async function getPublishedEvents(): Promise<TKLEvent[]> {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
-  const startOfToday = Timestamp.fromDate(d);
+  const startOfTodayIso = d.toISOString();
 
   const eventsRef = collection(db, 'events');
   const q = query(
     eventsRef,
     where('published', '==', true),
-    where('endDate', '>=', startOfToday),
+    where('endDate', '>=', startOfTodayIso),
     orderBy('endDate', 'asc'),
     orderBy('date', 'asc')
   );
