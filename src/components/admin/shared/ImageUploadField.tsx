@@ -6,7 +6,7 @@ import { getCloudinarySecrets } from '@/lib/services/secrets';
 import { uploadToCloudinary } from '@/lib/services/cloudinary';
 import { inputCls, labelCls, errorCls } from '@/components/admin/shared/formStyles';
 
-const MAX_FILE_SIZE = 500 * 1024; // 500 KB
+const MAX_FILE_SIZE = 1024 * 1024; // 1 MB
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
 const ACCEPT_ATTR = ACCEPTED_TYPES.join(',');
 
@@ -23,13 +23,31 @@ export function ImageUploadField({ value, onChange, label }: ImageUploadFieldPro
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadFile = async (file: File, previewUrl: string) => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const secrets = await getCloudinarySecrets();
+      const { url, publicId } = await uploadToCloudinary(file, secrets);
+      onChange(url, publicId);
+      URL.revokeObjectURL(previewUrl);
+      setPreview(null);
+      setSelectedFile(null);
+    } catch {
+      setUploadError('Uppladdningen misslyckades. Försök igen.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
 
     setUploadError(null);
-    setSelectedFile(null);
     if (preview) URL.revokeObjectURL(preview);
+    setSelectedFile(null);
     setPreview(null);
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -38,30 +56,26 @@ export function ImageUploadField({ value, onChange, label }: ImageUploadFieldPro
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError('Filen är för stor. Max 500 KB.');
+      setUploadError('Filen är för stor. Max 1 MB.');
       return;
     }
 
+    const previewUrl = URL.createObjectURL(file);
     setSelectedFile(file);
-    setPreview(URL.createObjectURL(file));
+    setPreview(previewUrl);
+    await uploadFile(file, previewUrl);
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-    setUploading(true);
+  const handleRetry = async () => {
+    if (!selectedFile || !preview) return;
+    await uploadFile(selectedFile, preview);
+  };
+
+  const handleClearSelected = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(null);
+    setSelectedFile(null);
     setUploadError(null);
-    try {
-      const secrets = await getCloudinarySecrets();
-      const { url, publicId } = await uploadToCloudinary(selectedFile, secrets);
-      onChange(url, publicId);
-      if (preview) URL.revokeObjectURL(preview);
-      setPreview(null);
-      setSelectedFile(null);
-    } catch {
-      setUploadError('Uppladdningen misslyckades. Försök igen.');
-    } finally {
-      setUploading(false);
-    }
   };
 
   const handleClear = () => {
@@ -156,7 +170,7 @@ export function ImageUploadField({ value, onChange, label }: ImageUploadFieldPro
               {!selectedFile ? (
                 <label className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg border border-dashed border-[oklch(35%_0.02_265)] text-xs text-[oklch(55%_0.02_265)] hover:border-[oklch(50%_0.02_265)] hover:text-[oklch(70%_0.02_265)] transition-colors cursor-pointer">
                   <Upload className="w-4 h-4" />
-                  Välj fil (PNG, JPG, WebP, SVG — max 500 KB)
+                  Välj fil (PNG, JPG, WebP, SVG — max 1 MB)
                   <input
                     type="file"
                     accept={ACCEPT_ATTR}
@@ -176,31 +190,27 @@ export function ImageUploadField({ value, onChange, label }: ImageUploadFieldPro
                   <span className="text-xs text-[oklch(60%_0.02_265)] truncate flex-1 min-w-0">
                     {selectedFile.name}
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={uploading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[oklch(30%_0.02_265)] text-[oklch(85%_0.01_265)] hover:bg-[oklch(35%_0.02_265)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                  >
-                    {uploading ? (
-                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Laddar upp...</>
-                    ) : (
-                      <><Upload className="w-3.5 h-3.5" /> Ladda upp</>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (preview) URL.revokeObjectURL(preview);
-                      setPreview(null);
-                      setSelectedFile(null);
-                      setUploadError(null);
-                    }}
-                    className="shrink-0 p-3 text-[oklch(50%_0.02_265)] hover:text-[oklch(70%_0.02_265)] transition-colors"
-                    aria-label="Avbryt"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {uploading ? (
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0 text-[oklch(55%_0.02_265)]" />
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleRetry}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[oklch(30%_0.02_265)] text-[oklch(85%_0.01_265)] hover:bg-[oklch(35%_0.02_265)] transition-colors shrink-0"
+                      >
+                        <Upload className="w-3.5 h-3.5" /> Försök igen
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearSelected}
+                        className="shrink-0 p-3 text-[oklch(50%_0.02_265)] hover:text-[oklch(70%_0.02_265)] transition-colors"
+                        aria-label="Avbryt"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
