@@ -16,8 +16,8 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Fonter: Google Fonts statiska tillgångar
   "font-src 'self' https://fonts.gstatic.com",
-  // Bilder: egna + data-URI:er
-  "img-src 'self' data: blob: https://firebasestorage.googleapis.com",
+  // Bilder: egna + data-URI:er + Cloudinary
+  "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://res.cloudinary.com",
   // API-anrop: Firebase services + LUDD Events API
   [
     "connect-src 'self'",
@@ -28,6 +28,7 @@ const CSP = [
     "https://securetoken.googleapis.com",
     "https://events.ludd.ltu.se",
     "https://www.google-analytics.com",
+    "https://api.cloudinary.com",
   ].join(" "),
   // Frames: ingen inbäddning tillåten
   "frame-src 'none'",
