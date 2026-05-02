@@ -189,7 +189,7 @@ export function DealsContent() {
               >
                 {/* Logotyp eller initial */}
                 <div
-                  className="w-8 h-8 shrink-0 rounded-full bg-[oklch(22%_0.012_265)] flex items-center justify-center overflow-hidden"
+                  className="w-9 h-9 shrink-0 rounded-lg bg-[oklch(22%_0.012_265)] flex items-center justify-center overflow-hidden"
                   aria-hidden="true"
                 >
                   {deal.logoUrl ? (

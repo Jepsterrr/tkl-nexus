@@ -58,7 +58,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
 
       {/* Avatar / Logotyp - vänster kolumn */}
       <div
-        className="shrink-0 w-20 flex items-center justify-center m-4 rounded-xl self-stretch"
+        className="shrink-0 w-16 h-16 flex items-center justify-center m-4 rounded-xl self-center p-2"
         style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
         aria-hidden="true"
       >
@@ -66,7 +66,7 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
           <img
             src={deal.logoUrl}
             alt=""
-            className="w-12 h-12 object-contain rounded-lg"
+            className="w-full h-full object-contain rounded-lg"
           />
         ) : (
           <span
