@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, Loader2, ExternalLink, Search, Sparkles, X } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, Loader2, ExternalLink, Search, Sparkles, X, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -190,8 +191,12 @@ export function EventsContent() {
       .then((data) => {
         if (isMounted) { setAllEvents(data); setLoading(false); }
       })
-      .catch(() => {
-        if (isMounted) { setError(ev.nexusFetchError); setLoading(false); }
+      .catch((err) => {
+        if (isMounted) {
+          const isOffline = err?.code === 'unavailable' || !navigator.onLine;
+          setError(isOffline ? ev.nexusFetchErrorOffline : ev.nexusFetchError);
+          setLoading(false);
+        }
       });
     return () => { isMounted = false; };
   }, [ev, fetchKey]);
@@ -507,7 +512,30 @@ export function EventsContent() {
                     </div>
                   </div>
                 )}
-                {!loading && !error && filtered.length === 0 && <motion.p role="status" className="text-center hero-text-muted py-16">{filter === 'all' ? ev.noEvents : ev.noEventsFiltered}</motion.p>}
+                {!loading && !error && filtered.length === 0 && (
+                  <motion.div
+                    role="status"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
+                    style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
+                  >
+                    <CalendarDays className="w-12 h-12 mb-4 opacity-35" style={{ color: '#8B5CF6' }} aria-hidden="true" />
+                    <p className="text-lg hero-text-muted">
+                      {filter === 'all' ? ev.noEvents : ev.noEventsFiltered}
+                    </p>
+                    {filter === 'all' && (
+                      <Link
+                        href="/corporate/post"
+                        className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}
+                      >
+                        <PlusCircle className="w-4 h-4" aria-hidden="true" />
+                        {ev.emptyStateCta}
+                      </Link>
+                    )}
+                  </motion.div>
+                )}
                 {!loading && !error && filtered.length > 0 && (
                   <AnimatePresence mode="wait">
                     <motion.div

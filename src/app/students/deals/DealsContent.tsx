@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { Loader2, Tag } from 'lucide-react';
+import { Loader2, Tag, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DealCard } from '@/components/ui/DealCard';
@@ -241,6 +242,14 @@ export function DealsContent() {
               <p className="text-sm hero-text-subtle mt-2">
                 {deals?.noDealsHint ?? 'Fler förmåner är på väg!'}
               </p>
+              <Link
+                href="/corporate/post"
+                className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
+              >
+                <PlusCircle className="w-4 h-4" aria-hidden="true" />
+                {deals?.emptyStateCta ?? 'Är du företag? Publicera ett erbjudande'}
+              </Link>
             </motion.div>
           )}
 

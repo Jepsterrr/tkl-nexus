@@ -58,7 +58,8 @@ export function CareerContent() {
       .catch((err) => {
         if (isMounted) {
           console.error(err);
-          setError(opportunity.error);
+          const isOffline = err?.code === 'unavailable' || !navigator.onLine;
+          setError(isOffline ? opportunity.errorOffline : opportunity.error);
           setLoading(false);
         }
       });

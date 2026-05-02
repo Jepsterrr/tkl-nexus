@@ -214,6 +214,39 @@ export function PostContent() {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+
+  function touch(id: string) {
+    setTouched(prev => new Set([...prev, id]));
+  }
+
+  function switchTab(id: ActiveTab) {
+    setActiveTab(id);
+    setTouched(new Set());
+  }
+
+  function hasFieldErr(id: string, value: string): boolean {
+    return touched.has(id) && !value.trim();
+  }
+
+  function hasEmailErr(id: string, value: string): boolean {
+    if (!touched.has(id)) return false;
+    return !value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function fieldErr(id: string, value: string) {
+    if (!hasFieldErr(id, value)) return null;
+    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400">{cp.validation.required}</span>;
+  }
+
+  function emailErr(id: string, value: string) {
+    if (!touched.has(id)) return null;
+    const msg = !value.trim() ? cp.validation.required
+      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? cp.validation.invalidEmail
+      : null;
+    if (!msg) return null;
+    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400">{msg}</span>;
+  }
 
   function handleSubmit() {
     let url = '';
@@ -238,7 +271,7 @@ export function PostContent() {
     else return;
     e.preventDefault();
     const nextId = tabs[nextIdx];
-    setActiveTab(nextId);
+    switchTab(nextId);
     document.getElementById(`tab-${nextId}`)?.focus();
   }
 
@@ -353,7 +386,7 @@ export function PostContent() {
                   aria-selected={isActive}
                   aria-controls={`panel-${id}`}
                   id={`tab-${id}`}
-                  onClick={() => setActiveTab(id)}
+                  onClick={() => switchTab(id)}
                   onKeyDown={(e) => handleTabKeyDown(e, id)}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
                   style={
@@ -417,11 +450,15 @@ export function PostContent() {
                       type="text"
                       autoComplete="name"
                       aria-required="true"
+                      aria-invalid={hasFieldErr('contactName', contactName) || undefined}
+                      aria-describedby={hasFieldErr('contactName', contactName) ? 'error-contactName' : undefined}
                       placeholder={cp.contact.namePlaceholder}
                       className={inputCls}
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
+                      onBlur={() => touch('contactName')}
                     />
+                    {fieldErr('contactName', contactName)}
                   </div>
                   <div>
                     <label htmlFor="contactEmail" className={labelCls}>
@@ -432,11 +469,15 @@ export function PostContent() {
                       type="email"
                       autoComplete="email"
                       aria-required="true"
+                      aria-invalid={hasEmailErr('contactEmail', contactEmail) || undefined}
+                      aria-describedby={hasEmailErr('contactEmail', contactEmail) ? 'error-contactEmail' : undefined}
                       placeholder={cp.contact.emailPlaceholder}
                       className={inputCls}
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
+                      onBlur={() => touch('contactEmail')}
                     />
+                    {emailErr('contactEmail', contactEmail)}
                   </div>
                 </div>
               </fieldset>
@@ -457,8 +498,13 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="opp-title" className={labelCls}>{cp.opportunity.title}{requiredDot}</label>
-                        <input id="opp-title" type="text" aria-required="true" placeholder={cp.opportunity.titlePlaceholder} className={inputCls}
-                          value={opp.title} onChange={e => setOpp(p => ({ ...p, title: e.target.value }))} />
+                        <input id="opp-title" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('opp-title', opp.title) || undefined}
+                          aria-describedby={hasFieldErr('opp-title', opp.title) ? 'error-opp-title' : undefined}
+                          placeholder={cp.opportunity.titlePlaceholder} className={inputCls}
+                          value={opp.title} onChange={e => setOpp(p => ({ ...p, title: e.target.value }))}
+                          onBlur={() => touch('opp-title')} />
+                        {fieldErr('opp-title', opp.title)}
                       </div>
                       <div>
                         <label htmlFor="opp-titleEn" className={labelCls}>{cp.opportunity.titleEn}</label>
@@ -470,27 +516,42 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="opp-company" className={labelCls}>{cp.opportunity.company}{requiredDot}</label>
-                        <input id="opp-company" type="text" aria-required="true" placeholder={cp.opportunity.companyPlaceholder} className={inputCls}
-                          value={opp.company} onChange={e => setOpp(p => ({ ...p, company: e.target.value }))} />
+                        <input id="opp-company" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('opp-company', opp.company) || undefined}
+                          aria-describedby={hasFieldErr('opp-company', opp.company) ? 'error-opp-company' : undefined}
+                          placeholder={cp.opportunity.companyPlaceholder} className={inputCls}
+                          value={opp.company} onChange={e => setOpp(p => ({ ...p, company: e.target.value }))}
+                          onBlur={() => touch('opp-company')} />
+                        {fieldErr('opp-company', opp.company)}
                       </div>
                       <div>
                         <label htmlFor="opp-type" className={labelCls}>{cp.opportunity.type}{requiredDot}</label>
-                        <select id="opp-type" aria-required="true" className={inputCls}
-                          value={opp.type} onChange={e => setOpp(p => ({ ...p, type: e.target.value as OpportunityForm['type'] }))}>
+                        <select id="opp-type" aria-required="true"
+                          aria-invalid={hasFieldErr('opp-type', opp.type) || undefined}
+                          aria-describedby={hasFieldErr('opp-type', opp.type) ? 'error-opp-type' : undefined}
+                          className={inputCls}
+                          value={opp.type} onChange={e => setOpp(p => ({ ...p, type: e.target.value as OpportunityForm['type'] }))}
+                          onBlur={() => touch('opp-type')}>
                           <option value="" disabled>{cp.opportunity.typePlaceholder}</option>
                           <option value="exjobb">{cp.opportunity.types.exjobb}</option>
                           <option value="jobb">{cp.opportunity.types.jobb}</option>
                           <option value="praktik">{cp.opportunity.types.praktik}</option>
                           <option value="trainee">{cp.opportunity.types.trainee}</option>
                         </select>
+                        {fieldErr('opp-type', opp.type)}
                       </div>
                     </div>
 
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div>
                         <label htmlFor="opp-location" className={labelCls}>{cp.opportunity.location}{requiredDot}</label>
-                        <input id="opp-location" type="text" aria-required="true" placeholder={cp.opportunity.locationPlaceholder} className={inputCls}
-                          value={opp.location} onChange={e => setOpp(p => ({ ...p, location: e.target.value }))} />
+                        <input id="opp-location" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('opp-location', opp.location) || undefined}
+                          aria-describedby={hasFieldErr('opp-location', opp.location) ? 'error-opp-location' : undefined}
+                          placeholder={cp.opportunity.locationPlaceholder} className={inputCls}
+                          value={opp.location} onChange={e => setOpp(p => ({ ...p, location: e.target.value }))}
+                          onBlur={() => touch('opp-location')} />
+                        {fieldErr('opp-location', opp.location)}
                       </div>
                       <div>
                         <label htmlFor="opp-startDate" className={labelCls}>{cp.opportunity.startDate}</label>
@@ -499,8 +560,13 @@ export function PostContent() {
                       </div>
                       <div>
                         <label htmlFor="opp-deadline" className={labelCls}>{cp.opportunity.deadline}{requiredDot}</label>
-                        <input id="opp-deadline" type="date" aria-required="true" className={inputCls}
-                          value={opp.deadline} onChange={e => setOpp(p => ({ ...p, deadline: e.target.value }))} />
+                        <input id="opp-deadline" type="date" aria-required="true"
+                          aria-invalid={hasFieldErr('opp-deadline', opp.deadline) || undefined}
+                          aria-describedby={hasFieldErr('opp-deadline', opp.deadline) ? 'error-opp-deadline' : undefined}
+                          className={inputCls}
+                          value={opp.deadline} onChange={e => setOpp(p => ({ ...p, deadline: e.target.value }))}
+                          onBlur={() => touch('opp-deadline')} />
+                        {fieldErr('opp-deadline', opp.deadline)}
                       </div>
                     </div>
 
@@ -550,8 +616,13 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
-                        <input id="evt-title" type="text" aria-required="true" placeholder={cp.event.titlePlaceholder} className={inputCls}
-                          value={evt.title} onChange={e => setEvt(p => ({ ...p, title: e.target.value }))} />
+                        <input id="evt-title" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('evt-title', evt.title) || undefined}
+                          aria-describedby={hasFieldErr('evt-title', evt.title) ? 'error-evt-title' : undefined}
+                          placeholder={cp.event.titlePlaceholder} className={inputCls}
+                          value={evt.title} onChange={e => setEvt(p => ({ ...p, title: e.target.value }))}
+                          onBlur={() => touch('evt-title')} />
+                        {fieldErr('evt-title', evt.title)}
                       </div>
                       <div>
                         <label htmlFor="evt-titleEn" className={labelCls}>{cp.event.titleEn}</label>
@@ -563,26 +634,45 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-date" className={labelCls}>{cp.event.date}{requiredDot}</label>
-                        <input id="evt-date" type="datetime-local" aria-required="true" className={inputCls}
-                          value={evt.date} onChange={e => setEvt(p => ({ ...p, date: e.target.value }))} />
+                        <input id="evt-date" type="datetime-local" aria-required="true"
+                          aria-invalid={hasFieldErr('evt-date', evt.date) || undefined}
+                          aria-describedby={hasFieldErr('evt-date', evt.date) ? 'error-evt-date' : undefined}
+                          className={inputCls}
+                          value={evt.date} onChange={e => setEvt(p => ({ ...p, date: e.target.value }))}
+                          onBlur={() => touch('evt-date')} />
+                        {fieldErr('evt-date', evt.date)}
                       </div>
                       <div>
                         <label htmlFor="evt-endDate" className={labelCls}>{cp.event.endDate}{requiredDot}</label>
-                        <input id="evt-endDate" type="datetime-local" aria-required="true" className={inputCls}
-                          value={evt.endDate} onChange={e => setEvt(p => ({ ...p, endDate: e.target.value }))} />
+                        <input id="evt-endDate" type="datetime-local" aria-required="true"
+                          aria-invalid={hasFieldErr('evt-endDate', evt.endDate) || undefined}
+                          aria-describedby={hasFieldErr('evt-endDate', evt.endDate) ? 'error-evt-endDate' : undefined}
+                          className={inputCls}
+                          value={evt.endDate} onChange={e => setEvt(p => ({ ...p, endDate: e.target.value }))}
+                          onBlur={() => touch('evt-endDate')} />
+                        {fieldErr('evt-endDate', evt.endDate)}
                       </div>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-location" className={labelCls}>{cp.event.location}{requiredDot}</label>
-                        <input id="evt-location" type="text" aria-required="true" placeholder={cp.event.locationPlaceholder} className={inputCls}
-                          value={evt.location} onChange={e => setEvt(p => ({ ...p, location: e.target.value }))} />
+                        <input id="evt-location" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('evt-location', evt.location) || undefined}
+                          aria-describedby={hasFieldErr('evt-location', evt.location) ? 'error-evt-location' : undefined}
+                          placeholder={cp.event.locationPlaceholder} className={inputCls}
+                          value={evt.location} onChange={e => setEvt(p => ({ ...p, location: e.target.value }))}
+                          onBlur={() => touch('evt-location')} />
+                        {fieldErr('evt-location', evt.location)}
                       </div>
                       <div>
                         <label htmlFor="evt-section" className={labelCls}>{cp.event.section}{requiredDot}</label>
-                        <select id="evt-section" aria-required="true" className={inputCls}
-                          value={evt.section} onChange={e => setEvt(p => ({ ...p, section: e.target.value as EventForm['section'] }))}>
+                        <select id="evt-section" aria-required="true"
+                          aria-invalid={hasFieldErr('evt-section', evt.section) || undefined}
+                          aria-describedby={hasFieldErr('evt-section', evt.section) ? 'error-evt-section' : undefined}
+                          className={inputCls}
+                          value={evt.section} onChange={e => setEvt(p => ({ ...p, section: e.target.value as EventForm['section'] }))}
+                          onBlur={() => touch('evt-section')}>
                           <option value="" disabled>{cp.event.sectionPlaceholder}</option>
                           <option value="data">{cp.event.sections.data}</option>
                           <option value="geo">{cp.event.sections.geo}</option>
@@ -590,6 +680,7 @@ export function PostContent() {
                           <option value="maskin">{cp.event.sections.maskin}</option>
                           <option value="general">{cp.event.sections.general}</option>
                         </select>
+                        {fieldErr('evt-section', evt.section)}
                       </div>
                     </div>
 
@@ -613,9 +704,14 @@ export function PostContent() {
                           {cp.charCount.replace('{count}', String(evt.description.length))}
                         </span>
                       </label>
-                      <textarea id="evt-desc" rows={5} maxLength={2000} aria-required="true" placeholder={cp.event.descriptionPlaceholder}
+                      <textarea id="evt-desc" rows={5} maxLength={2000} aria-required="true"
+                        aria-invalid={hasFieldErr('evt-desc', evt.description) || undefined}
+                        aria-describedby={hasFieldErr('evt-desc', evt.description) ? 'error-evt-desc' : undefined}
+                        placeholder={cp.event.descriptionPlaceholder}
                         className={`${inputCls} resize-y min-h-[120px]`}
-                        value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))} />
+                        value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))}
+                        onBlur={() => touch('evt-desc')} />
+                      {fieldErr('evt-desc', evt.description)}
                     </div>
 
                     <div>
@@ -645,15 +741,25 @@ export function PostContent() {
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="deal-company" className={labelCls}>{cp.deal.company}{requiredDot}</label>
-                      <input id="deal-company" type="text" aria-required="true" placeholder={cp.deal.companyPlaceholder} className={inputCls}
-                        value={deal.company} onChange={e => setDeal(p => ({ ...p, company: e.target.value }))} />
+                      <input id="deal-company" type="text" aria-required="true"
+                        aria-invalid={hasFieldErr('deal-company', deal.company) || undefined}
+                        aria-describedby={hasFieldErr('deal-company', deal.company) ? 'error-deal-company' : undefined}
+                        placeholder={cp.deal.companyPlaceholder} className={inputCls}
+                        value={deal.company} onChange={e => setDeal(p => ({ ...p, company: e.target.value }))}
+                        onBlur={() => touch('deal-company')} />
+                      {fieldErr('deal-company', deal.company)}
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="deal-title" className={labelCls}>{cp.deal.title}{requiredDot}</label>
-                        <input id="deal-title" type="text" aria-required="true" placeholder={cp.deal.titlePlaceholder} className={inputCls}
-                          value={deal.title} onChange={e => setDeal(p => ({ ...p, title: e.target.value }))} />
+                        <input id="deal-title" type="text" aria-required="true"
+                          aria-invalid={hasFieldErr('deal-title', deal.title) || undefined}
+                          aria-describedby={hasFieldErr('deal-title', deal.title) ? 'error-deal-title' : undefined}
+                          placeholder={cp.deal.titlePlaceholder} className={inputCls}
+                          value={deal.title} onChange={e => setDeal(p => ({ ...p, title: e.target.value }))}
+                          onBlur={() => touch('deal-title')} />
+                        {fieldErr('deal-title', deal.title)}
                       </div>
                       <div>
                         <label htmlFor="deal-titleEn" className={labelCls}>{cp.deal.titleEn}</label>
@@ -669,9 +775,14 @@ export function PostContent() {
                           {cp.charCount.replace('{count}', String(deal.description.length))}
                         </span>
                       </label>
-                      <textarea id="deal-desc" rows={4} maxLength={2000} aria-required="true" placeholder={cp.deal.descriptionPlaceholder}
+                      <textarea id="deal-desc" rows={4} maxLength={2000} aria-required="true"
+                        aria-invalid={hasFieldErr('deal-desc', deal.description) || undefined}
+                        aria-describedby={hasFieldErr('deal-desc', deal.description) ? 'error-deal-desc' : undefined}
+                        placeholder={cp.deal.descriptionPlaceholder}
                         className={`${inputCls} resize-y min-h-[100px]`}
-                        value={deal.description} onChange={e => setDeal(p => ({ ...p, description: e.target.value }))} />
+                        value={deal.description} onChange={e => setDeal(p => ({ ...p, description: e.target.value }))}
+                        onBlur={() => touch('deal-desc')} />
+                      {fieldErr('deal-desc', deal.description)}
                     </div>
 
                     <div>
