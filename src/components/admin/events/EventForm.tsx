@@ -53,7 +53,6 @@ export function EventForm({ mode, initialData }: EventFormProps) {
   const [location, setLocation]           = useState(initialData?.location ?? '');
   const [section, setSection]             = useState<EventFormData['section']>(initialData?.section ?? 'general');
   const [tags, setTags]                   = useState<string[]>(initialData?.tags ?? []);
-  const [imageUrl, setImageUrl]           = useState(initialData?.imageUrl ?? '');
   const [description, setDescription]     = useState(initialData?.description ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initialData?.descriptionEn ?? '');
   const [published, setPublished]         = useState(initialData?.published ?? false);
@@ -79,7 +78,6 @@ export function EventForm({ mode, initialData }: EventFormProps) {
       location,
       section,
       tags,
-      imageUrl: imageUrl || undefined,
       description,
       descriptionEn: descriptionEn || undefined,
       published,
@@ -289,18 +287,6 @@ export function EventForm({ mode, initialData }: EventFormProps) {
             <div>
               <label htmlFor="ef-tags" className={labelCls}>Taggar</label>
               <TagInput id="ef-tags" value={tags} onChange={setTags} />
-            </div>
-            <div>
-              <label htmlFor="ef-image-url" className={labelCls}>Bild-URL (valfritt)</label>
-              <input
-                id="ef-image-url"
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://"
-                className={inputCls}
-              />
-              {errors.imageUrl && <p className={errorCls}>{errors.imageUrl}</p>}
             </div>
           </div>
         </section>

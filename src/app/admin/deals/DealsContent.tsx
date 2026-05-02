@@ -67,7 +67,7 @@ export function DealsContent() {
     setDeleteError(null);
     setDeleting(true);
     try {
-      await deleteDeal(deleteTarget.id);
+      await deleteDeal(deleteTarget.id, deleteTarget.cloudinaryPublicId);
       setDeals(ds => ds.filter(d => d.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch {

@@ -15,6 +15,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { DealSchema, DealFormSchema, type TKLDeal, type DealFormData } from '@/lib/schemas/deal';
+import { getCloudinarySecrets } from './secrets';
+import { deleteFromCloudinary } from './cloudinary';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { getDataSource, bumpCacheVersion } from './cacheVersion';
 
@@ -130,8 +132,18 @@ export async function updateDeal(id: string, data: Partial<DealFormData>): Promi
   void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }
 
-export async function deleteDeal(id: string): Promise<void> {
+export async function deleteDeal(id: string, cloudinaryPublicId?: string): Promise<void> {
   if (!id) throw new Error('deleteDeal: id saknas');
+
+  if (cloudinaryPublicId) {
+    try {
+      const secrets = await getCloudinarySecrets();
+      await deleteFromCloudinary(cloudinaryPublicId, secrets);
+    } catch (e) {
+      console.warn('[cloudinary] Kunde inte radera bild vid borttagning av deal:', e);
+    }
+  }
+
   await deleteDoc(doc(db, 'deals', id));
   void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }

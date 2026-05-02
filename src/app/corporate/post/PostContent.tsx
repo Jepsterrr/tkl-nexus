@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -39,7 +39,6 @@ interface EventForm {
   location: string;
   section: 'data' | 'geo' | 'i' | 'maskin' | 'general' | '';
   tags: string;
-  imageUrl: string;
   description: string;
   descriptionEn: string;
 }
@@ -56,6 +55,7 @@ interface DealForm {
   discount: string;
   link: string;
   logoUrl: string;
+  logoMode: 'url' | 'attach';
 }
 
 // Initial state
@@ -69,13 +69,13 @@ const EMPTY_OPPORTUNITY: OpportunityForm = {
 const EMPTY_EVENT: EventForm = {
   contactName: '', contactEmail: '', title: '', titleEn: '',
   date: '', endDate: '', location: '', section: '',
-  tags: '', imageUrl: '', description: '', descriptionEn: '',
+  tags: '', description: '', descriptionEn: '',
 };
 
 const EMPTY_DEAL: DealForm = {
   contactName: '', contactEmail: '', company: '', title: '',
   titleEn: '', description: '', descriptionEn: '',
-  discountCode: '', discount: '', link: '', logoUrl: '',
+  discountCode: '', discount: '', link: '', logoUrl: '', logoMode: 'url',
 };
 
 // Mailto builders
@@ -133,7 +133,6 @@ function buildEventMailto(f: EventForm, email: string): string {
     field('location', f.location),
     field('section', f.section),
     field('tags', f.tags),
-    field('imageUrl', f.imageUrl),
     field('description (sv)', f.description),
     field('descriptionEn', f.descriptionEn),
     '',
@@ -165,7 +164,7 @@ function buildDealMailto(f: DealForm, email: string): string {
     field('discountCode', f.discountCode),
     field('discount', f.discount),
     field('link', f.link),
-    field('logoUrl', f.logoUrl),
+    field('logoUrl', f.logoMode === 'attach' ? '(Bifogad i mailet)' : f.logoUrl),
     '',
     '--- NOTERINGAR ---',
     'Samling: deals',
@@ -684,17 +683,10 @@ export function PostContent() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="evt-tags" className={labelCls}>{cp.event.tags}</label>
-                        <input id="evt-tags" type="text" placeholder={cp.event.tagsPlaceholder} className={inputCls}
-                          value={evt.tags} onChange={e => setEvt(p => ({ ...p, tags: e.target.value }))} />
-                      </div>
-                      <div>
-                        <label htmlFor="evt-imageUrl" className={labelCls}>{cp.event.imageUrl}</label>
-                        <input id="evt-imageUrl" type="url" placeholder={cp.event.imageUrlPlaceholder} className={inputCls}
-                          value={evt.imageUrl} onChange={e => setEvt(p => ({ ...p, imageUrl: e.target.value }))} />
-                      </div>
+                    <div>
+                      <label htmlFor="evt-tags" className={labelCls}>{cp.event.tags}</label>
+                      <input id="evt-tags" type="text" placeholder={cp.event.tagsPlaceholder} className={inputCls}
+                        value={evt.tags} onChange={e => setEvt(p => ({ ...p, tags: e.target.value }))} />
                     </div>
 
                     <div>
@@ -817,9 +809,45 @@ export function PostContent() {
                           value={deal.link} onChange={e => setDeal(p => ({ ...p, link: e.target.value }))} />
                       </div>
                       <div>
-                        <label htmlFor="deal-logoUrl" className={labelCls}>{cp.deal.logoUrl}</label>
-                        <input id="deal-logoUrl" type="url" placeholder={cp.deal.logoUrlPlaceholder} className={inputCls}
-                          value={deal.logoUrl} onChange={e => setDeal(p => ({ ...p, logoUrl: e.target.value }))} />
+                        <p id="deal-logo-label" className={labelCls}>{cp.deal.logoUrl}</p>
+                        <div role="group" aria-labelledby="deal-logo-label">
+                          <div className="flex rounded-xl overflow-hidden border border-(--glass-border-subtle) mb-2 w-fit">
+                            <button
+                              type="button"
+                              aria-pressed={deal.logoMode === 'url'}
+                              onClick={() => setDeal(p => ({ ...p, logoMode: 'url', logoUrl: '' }))}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                                deal.logoMode === 'url'
+                                  ? 'bg-(--glass-bg) text-foreground'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              <LinkIcon className="w-3.5 h-3.5" />
+                              {cp.deal.logoModeUrl}
+                            </button>
+                            <button
+                              type="button"
+                              aria-pressed={deal.logoMode === 'attach'}
+                              onClick={() => setDeal(p => ({ ...p, logoMode: 'attach', logoUrl: '' }))}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                                deal.logoMode === 'attach'
+                                  ? 'bg-(--glass-bg) text-foreground'
+                                  : 'text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              <Paperclip className="w-3.5 h-3.5" />
+                              {cp.deal.logoModeAttach}
+                            </button>
+                          </div>
+                          {deal.logoMode === 'url' ? (
+                            <input id="deal-logoUrl" type="url" placeholder={cp.deal.logoUrlPlaceholder} className={inputCls}
+                              value={deal.logoUrl} onChange={e => setDeal(p => ({ ...p, logoUrl: e.target.value }))} />
+                          ) : (
+                            <p className="text-xs text-muted-foreground py-3 px-4 rounded-xl border border-(--glass-border-subtle) bg-(--glass-bg-subtle)">
+                              {cp.deal.logoAttachHint}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

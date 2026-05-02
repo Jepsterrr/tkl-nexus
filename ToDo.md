@@ -143,15 +143,7 @@ Data visas alltid en gång, definitivt. Ingen tyst uppdatering efteråt.
 - [x] Uppdatera `getEvents`, `getCareerPosts`, `getDeals` i respektive service-fil att använda `source: 'cache'` eller `source: 'server'` baserat på versionskollet.
 - [x] Uppdatera alla admin write-funktioner (`createEvent`, `updateEvent`, `deleteEvent` osv.) att bumpa relevant fält i `settings/cacheVersion` med `serverTimestamp()`.
 
-## Mikro-interaktioner & Skeleton-övergångar
-
-### Planen är att göra Skeleton loading på allt då det ger en bättre upplevelse
-
-- [ ] Få alla sidor som faktiskt behöver det ett snyggt skeleton medan själva datan hämtas eller laddas.
-- [ ] Många appar blinkar till fult när datan laddas klart. En mjuk animation där skeleton-korten tonar över i riktiga kort skriker "välbyggd app" och minskar stressen i UI:t.
-- [ ] Se till att övergången mellan Skeleton --> Faktisk data är "buttery smooth" med en mjuk cross-fade.
-
 ## Bilder
 
 - [ ] Utforska alternativ att använda bilder på sidan där det skulle passa och se snyggt ut.
-- [ ] Utforska användningen av bilder på Firebase Spark-plan i där det finns (Kan man ladda upp från datorn? Kräver det högre betalplan eller finns det snyggt workaround?).
+- [x] Utforska användningen av bilder på Firebase Spark-plan i där det finns (Kan man ladda upp från datorn? Kräver det högre betalplan eller finns det snyggt workaround?).

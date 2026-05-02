@@ -4,6 +4,7 @@ export const DealSchema = z.object({
   id: z.string(),
   company: z.string().min(1),
   logoUrl: z.string().url().optional().or(z.literal('')),
+  cloudinaryPublicId: z.string().optional(),
   title: z.string().min(1),
   titleEn: z.string().optional(),
   description: z.string().min(1),

@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { inputCls, labelCls, errorCls, sectionHdCls } from '@/components/admin/shared/formStyles';
+import { ImageUploadField } from '@/components/admin/shared/ImageUploadField';
 import { createDeal, updateDeal } from '@/lib/services/deals';
+import { getCloudinarySecrets } from '@/lib/services/secrets';
+import { deleteFromCloudinary } from '@/lib/services/cloudinary';
 import { DealFormSchema } from '@/lib/schemas/deal';
 import type { TKLDeal, DealFormData } from '@/lib/schemas/deal';
 
@@ -22,6 +25,7 @@ export function DealForm({ mode, initialData }: DealFormProps) {
   const [title, setTitle]                 = useState(initialData?.title ?? '');
   const [titleEn, setTitleEn]             = useState(initialData?.titleEn ?? '');
   const [logoUrl, setLogoUrl]             = useState(initialData?.logoUrl ?? '');
+  const [cloudinaryPublicId, setCloudinaryPublicId] = useState(initialData?.cloudinaryPublicId ?? '');
   const [description, setDescription]     = useState(initialData?.description ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initialData?.descriptionEn ?? '');
   const [link, setLink]                   = useState(initialData?.link ?? '');
@@ -47,6 +51,7 @@ export function DealForm({ mode, initialData }: DealFormProps) {
       title,
       titleEn: titleEn || undefined,
       logoUrl: logoUrl || undefined,
+      cloudinaryPublicId: cloudinaryPublicId || undefined,
       description,
       descriptionEn: descriptionEn || undefined,
       link: link || undefined,
@@ -69,6 +74,18 @@ export function DealForm({ mode, initialData }: DealFormProps) {
     setErrors({});
     setSubmitting(true);
     try {
+      if (
+        mode === 'edit' &&
+        initialData?.cloudinaryPublicId &&
+        initialData.cloudinaryPublicId !== cloudinaryPublicId
+      ) {
+        try {
+          const secrets = await getCloudinarySecrets();
+          await deleteFromCloudinary(initialData.cloudinaryPublicId, secrets);
+        } catch {
+          console.warn('[cloudinary] Kunde inte radera gammal bild vid uppdatering av deal');
+        }
+      }
       if (mode === 'create') {
         await createDeal(result.data);
       } else {
@@ -145,14 +162,13 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                 {errors.company && <p className={errorCls}>{errors.company}</p>}
               </div>
               <div>
-                <label htmlFor="df-logo-url" className={labelCls}>Logotyp-URL (valfritt)</label>
-                <input
-                  id="df-logo-url"
-                  type="url"
+                <ImageUploadField
                   value={logoUrl}
-                  onChange={e => setLogoUrl(e.target.value)}
-                  placeholder="https://"
-                  className={inputCls}
+                  onChange={(url, publicId) => {
+                    setLogoUrl(url);
+                    setCloudinaryPublicId(publicId ?? '');
+                  }}
+                  label="Logotyp (valfritt)"
                 />
                 {errors.logoUrl && <p className={errorCls}>{errors.logoUrl}</p>}
               </div>
