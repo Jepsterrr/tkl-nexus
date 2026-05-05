@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="a" cx="1440" cy="130" r="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E30613" stop-opacity=".85"/>
+      <stop offset="55%" stop-color="#E30613" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#E30613" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b" cx="160" cy="950" r="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E30613" stop-opacity=".58"/>
+      <stop offset="100%" stop-color="#E30613" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="c" cx="960" cy="1200" r="680" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity=".32"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#a)"/>
+  <rect width="1920" height="1080" fill="url(#b)"/>
+  <rect width="1920" height="1080" fill="url(#c)"/>
+  <g fill="#fff">
+    <circle cx="95"   cy="65"  r="1.5" opacity=".55"/>
+    <circle cx="310"  cy="140" r="1"   opacity=".40"/>
+    <circle cx="540"  cy="48"  r="2"   opacity=".60"/>
+    <circle cx="720"  cy="190" r="1"   opacity=".35"/>
+    <circle cx="980"  cy="90"  r="1.5" opacity=".50"/>
+    <circle cx="1140" cy="155" r="1"   opacity=".45"/>
+    <circle cx="1360" cy="72"  r="2"   opacity=".55"/>
+    <circle cx="1580" cy="195" r="1"   opacity=".38"/>
+    <circle cx="1750" cy="55"  r="1.5" opacity=".60"/>
+    <circle cx="230"  cy="290" r="1"   opacity=".38"/>
+    <circle cx="460"  cy="340" r="1.5" opacity=".48"/>
+    <circle cx="820"  cy="265" r="1"   opacity=".42"/>
+    <circle cx="1090" cy="310" r="1.5" opacity=".40"/>
+    <circle cx="1420" cy="255" r="1"   opacity=".50"/>
+    <circle cx="1680" cy="370" r="1"   opacity=".35"/>
+    <circle cx="130"  cy="440" r="1.5" opacity=".45"/>
+    <circle cx="690"  cy="480" r="1"   opacity=".38"/>
+    <circle cx="1780" cy="420" r="1"   opacity=".42"/>
+  </g>
+</svg>

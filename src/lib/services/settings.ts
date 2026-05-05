@@ -6,14 +6,15 @@ import {
 import { db } from '@/lib/firebase';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import {
-  StatsSettingsSchema,    type StatsSettings,
-  ContactSettingsSchema,  type ContactSettings,
-  AboutSettingsSchema,    type AboutSettings,
-  ServicesSettingsSchema, type ServicesSettings,
-  LinksSettingsSchema,    type LinksSettings,
-  BannerSettingsSchema,   type BannerSettings,
-  TimelineItemSchema,     type TimelineItem,
-  TimelineItemDataSchema, type TimelineItemData,
+  StatsSettingsSchema,        type StatsSettings,
+  ContactSettingsSchema,      type ContactSettings,
+  AboutSettingsSchema,        type AboutSettings,
+  ServicesSettingsSchema,     type ServicesSettings,
+  LinksSettingsSchema,        type LinksSettings,
+  BannerSettingsSchema,       type BannerSettings,
+  HeroImagesSettingsSchema,   type HeroImagesSettings,
+  TimelineItemSchema,         type TimelineItem,
+  TimelineItemDataSchema,     type TimelineItemData,
 } from '@/lib/schemas/settings';
 
 function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
@@ -193,4 +194,23 @@ export async function saveTimelineItem(id: string, data: TimelineItemData): Prom
 export async function deleteTimelineItem(id: string): Promise<void> {
   if (!id) throw new Error('deleteTimelineItem: id saknas');
   await deleteDoc(doc(db, 'settings', 'timeline', 'items', id));
+}
+
+// Hero Images
+
+export async function getHeroImagesSettings(): Promise<HeroImagesSettings | null> {
+  const data = await getSettings('hero-images');
+  if (!data) return null;
+  const r = HeroImagesSettingsSchema.safeParse(data);
+  if (!r.success) {
+    if (process.env.NODE_ENV === 'development')
+      console.warn('[settings:hero-images] Parse-fel:', r.error.flatten());
+    return null;
+  }
+  return r.data;
+}
+
+export async function saveHeroImagesSettings(data: HeroImagesSettings): Promise<void> {
+  const validated = HeroImagesSettingsSchema.parse(data);
+  await saveSettings('hero-images', validated as Record<string, unknown>);
 }

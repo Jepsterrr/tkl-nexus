@@ -30,6 +30,8 @@ export const AboutSettingsSchema = z.object({
   whatIsP3En: z.string().max(2000).optional(),
   footerDescSv: z.string().max(2000).optional(),
   footerDescEn: z.string().max(2000).optional(),
+  campusPhotoUrl:          z.string().optional(),
+  campusPhotoCloudinaryId: z.string().optional(),
 });
 export type AboutSettings = z.infer<typeof AboutSettingsSchema>;
 
@@ -77,6 +79,22 @@ export const BannerSettingsSchema = z.object({
   color:  z.string().max(60).regex(/^(#[0-9a-fA-F]{3,8}|oklch\([\d.%\s]+\))$/, { message: 'Ogiltigt färgformat' }).optional(),
 });
 export type BannerSettings = z.infer<typeof BannerSettingsSchema>;
+
+export const HeroImagesSettingsSchema = z.object({
+  homeUrl:               z.string().max(500).optional(),
+  homeCloudinaryId:      z.string().max(256).optional(),
+  studentsUrl:           z.string().max(500).optional(),
+  studentsCloudinaryId:  z.string().max(256).optional(),
+  corporateUrl:          z.string().max(500).optional(),
+  corporateCloudinaryId: z.string().max(256).optional(),
+  eventsUrl:             z.string().max(500).optional(),
+  eventsCloudinaryId:    z.string().max(256).optional(),
+  careerUrl:             z.string().max(500).optional(),
+  careerCloudinaryId:    z.string().max(256).optional(),
+  aboutUrl:              z.string().max(500).optional(),
+  aboutCloudinaryId:     z.string().max(256).optional(),
+});
+export type HeroImagesSettings = z.infer<typeof HeroImagesSettingsSchema>;
 
 export const TimelineItemDataSchema = z.object({
   year:    z.string().max(120),

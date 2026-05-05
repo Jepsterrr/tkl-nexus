@@ -5,7 +5,10 @@ import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } fr
 import { CalendarDays, MapPin, Tag, Loader2, ExternalLink, Search, Sparkles, X, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { LuddCalendar } from '@/components/ui/LuddCalendar';
@@ -167,12 +170,12 @@ export function EventsContent() {
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
   const [luddError, setLuddError] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
   const shouldReduceMotion = useReducedMotion();
   const scrollContainer = useScrollContainer();
   const { scrollYProgress } = useScroll({
-    target: heroRef as React.RefObject<HTMLElement>,
+    target: heroRef,
     container: scrollContainer,
     offset: ['start start', 'end start'],
   });
@@ -181,6 +184,10 @@ export function EventsContent() {
     [0, 1],
     ['0%', shouldReduceMotion ? '0%' : '-10%']
   );
+
+  const { heroImages } = useSettings();
+  const bgUrl = heroImages?.eventsUrl || '/images/heroes/events.svg';
+  const imgLoaded = useImageLoad(bgUrl);
 
   // Fetch TKL Events
   useEffect(() => {
@@ -319,6 +326,8 @@ export function EventsContent() {
         />
       )}
       <section ref={heroRef} className="relative min-h-[60svh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-12 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Concentric circles bg */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
           <svg

@@ -10,6 +10,7 @@ import {
   getServicesSettings,
   getLinksSettings,
   getBannerSettings,
+  getHeroImagesSettings,
 } from '@/lib/services/settings';
 import {
   type StatsSettings,
@@ -18,15 +19,17 @@ import {
   type ServicesSettings,
   type LinksSettings,
   type BannerSettings,
+  type HeroImagesSettings,
 } from '@/lib/schemas/settings';
 
 interface SettingsContextValue {
-  stats:    StatsSettings    | null;
-  contact:  ContactSettings  | null;
-  about:    AboutSettings    | null;
-  services: ServicesSettings | null;
-  links:    LinksSettings    | null;
-  banner:   BannerSettings   | null;
+  stats:       StatsSettings       | null;
+  contact:     ContactSettings     | null;
+  about:       AboutSettings       | null;
+  services:    ServicesSettings    | null;
+  links:       LinksSettings       | null;
+  banner:      BannerSettings      | null;
+  heroImages:  HeroImagesSettings  | null;
 }
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
@@ -41,21 +44,23 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function fetchAll(): Promise<SettingsContextValue> {
-  const [stats, contact, about, services, links, banner] = await Promise.allSettled([
+  const [stats, contact, about, services, links, banner, heroImages] = await Promise.allSettled([
     getStatsSettings(),
     getContactSettings(),
     getAboutSettings(),
     getServicesSettings(),
     getLinksSettings(),
     getBannerSettings(),
+    getHeroImagesSettings(),
   ]);
   return {
-    stats:    stats.status    === 'fulfilled' ? stats.value    : null,
-    contact:  contact.status  === 'fulfilled' ? contact.value  : null,
-    about:    about.status    === 'fulfilled' ? about.value    : null,
-    services: services.status === 'fulfilled' ? services.value : null,
-    links:    links.status    === 'fulfilled' ? links.value    : null,
-    banner:   banner.status   === 'fulfilled' ? banner.value   : null,
+    stats:      stats.status      === 'fulfilled' ? stats.value      : null,
+    contact:    contact.status    === 'fulfilled' ? contact.value    : null,
+    about:      about.status      === 'fulfilled' ? about.value      : null,
+    services:   services.status   === 'fulfilled' ? services.value   : null,
+    links:      links.status      === 'fulfilled' ? links.value      : null,
+    banner:     banner.status     === 'fulfilled' ? banner.value     : null,
+    heroImages: heroImages.status === 'fulfilled' ? heroImages.value : null,
   };
 }
 
@@ -63,6 +68,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<SettingsContextValue>({
     stats: null, contact: null, about: null,
     services: null, links: null, banner: null,
+    heroImages: null,
   });
 
   useEffect(() => {

@@ -5,7 +5,10 @@ import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } fr
 import { Briefcase, Compass, Search, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { JobCard } from '@/components/ui/JobCard';
@@ -43,6 +46,10 @@ export function CareerContent() {
     offset: ['start start', 'end start'],
   });
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
+
+  const { heroImages } = useSettings();
+  const bgUrl = heroImages?.careerUrl || '/images/heroes/career.svg';
+  const imgLoaded = useImageLoad(bgUrl);
 
   useEffect(() => {
     let isMounted = true;
@@ -135,6 +142,8 @@ export function CareerContent() {
         className="relative min-h-[45svh] flex flex-col justify-center overflow-hidden pt-28 pb-8 px-4 sm:px-6 lg:px-8"
         aria-labelledby="career-hero-heading"
       >
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Blueprint grid (reinforced) */}
         <div
           className="absolute inset-0 pointer-events-none"

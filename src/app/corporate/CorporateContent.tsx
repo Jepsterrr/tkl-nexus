@@ -6,6 +6,8 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion
 import { CalendarDays, LayoutGrid, Handshake, Building2, Users, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { MegaStat } from '@/components/ui/MegaStat';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -22,7 +24,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 export function CorporateContent() {
   const { t, locale } = useLanguage();
   const { corporate } = t;
-  const { stats, services } = useSettings();
+  const { stats, services, heroImages } = useSettings();
   const shouldReduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const scrollContainer = useScrollContainer();
@@ -34,6 +36,8 @@ export function CorporateContent() {
     offset: ['start start', 'end start'],
   });
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
+  const bgUrl = heroImages?.corporateUrl || '/images/heroes/corporate.svg';
+  const imgLoaded = useImageLoad(bgUrl);
 
   const STATS: StatItem[] = [
     { value: stats?.members ?? '1 600+', label: corporate.stats.members },
@@ -67,6 +71,8 @@ export function CorporateContent() {
         className="relative flex flex-col lg:grid lg:grid-cols-2 min-h-svh overflow-hidden"
         aria-labelledby="corporate-hero-heading"
       >
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Background: diagonal cross-hatch (both panels) */}
         <div
           className="absolute inset-0 pointer-events-none"

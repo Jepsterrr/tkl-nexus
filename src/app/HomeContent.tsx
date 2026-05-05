@@ -3,6 +3,9 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { useSettings } from '@/components/providers/SettingsProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { GraduationCap, Building2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
@@ -79,6 +82,10 @@ export function HomeContent() {
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-15%']);
   const floatY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-25%']);
 
+  const { heroImages } = useSettings();
+  const bgUrl = heroImages?.homeUrl || '/images/heroes/home.svg';
+  const imgLoaded = useImageLoad(bgUrl);
+
   const FEATURES: BenefitCard[] = [
     {
       title: home.features.career.title,
@@ -115,6 +122,8 @@ export function HomeContent() {
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
         aria-labelledby="home-hero-heading"
       >
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Depth-0: Animated star field */}
         <StarField />
 

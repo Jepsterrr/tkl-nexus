@@ -8,6 +8,8 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { getTimelineItems } from '@/lib/services/settings';
 import type { TimelineItem } from '@/lib/schemas/settings';
 import { Timeline } from '@/components/ui/Timeline';
@@ -18,7 +20,7 @@ import { CONTACT_ITEMS } from '@/lib/types';
 export function AboutContent() {
   const { t, locale } = useLanguage();
   const { about } = t;
-  const { contact, about: about_settings } = useSettings();
+  const { contact, about: about_settings, heroImages } = useSettings();
 
   const [timelineItems, setTimelineItems] = useState<TimelineItem[] | null>(null);
   useEffect(() => {
@@ -83,6 +85,12 @@ export function AboutContent() {
   });
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-8%']);
 
+  const bgUrl = heroImages?.aboutUrl || '/images/heroes/about.svg';
+  const imgLoaded = useImageLoad(bgUrl);
+
+  const campusUrl = about_settings?.campusPhotoUrl || '/images/about/campus.png';
+  const campusLoaded = useImageLoad(campusUrl);
+
   const TIMELINE_ITEMS =
     timelineItems && timelineItems.length > 0
       ? timelineItems.map((item) => ({
@@ -106,6 +114,8 @@ export function AboutContent() {
         className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-20 px-4 sm:px-6 lg:px-8"
         aria-labelledby="about-hero-heading"
       >
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Depth-0: atmospheric radials */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -209,6 +219,49 @@ export function AboutContent() {
         >
           <div className="w-px h-10 mx-auto rounded-full" style={{ background: 'linear-gradient(to bottom, transparent, rgba(227,6,19,0.5))' }} />
         </motion.div>
+      </section>
+
+      {/* Campus photo */}
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-8" aria-labelledby="campus-photo-heading">
+        <div className="max-w-6xl mx-auto">
+          <StaggerReveal>
+            <RevealItem>
+              <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: '16/7' }}>
+                <motion.div
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: campusLoaded ? 1 : 0 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{
+                    backgroundImage: `url(${campusUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to bottom, transparent 40%, var(--cosmic-bg) 100%)' }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to right, var(--cosmic-bg), transparent 20%, transparent 80%, var(--cosmic-bg))' }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-10">
+                  <p
+                    id="campus-photo-heading"
+                    className="text-xs font-mono uppercase tracking-widest mb-1"
+                    style={{ color: 'rgba(255,255,255,0.45)' }}
+                  >
+                    {about.campusLabel}
+                  </p>
+                  <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    {about.campusSubtitle}
+                  </p>
+                </div>
+              </div>
+            </RevealItem>
+          </StaggerReveal>
+        </div>
       </section>
 
       {/* About + Contact cards */}

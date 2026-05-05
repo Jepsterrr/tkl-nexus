@@ -3,6 +3,9 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { useSettings } from '@/components/providers/SettingsProvider';
+import { useImageLoad } from '@/lib/hooks/useImageLoad';
+import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import {
   CalendarDays,
   Briefcase,
@@ -33,6 +36,10 @@ export function StudentsContent() {
     offset: ['start start', 'end start'],
   });
   const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', shouldReduceMotion ? '0%' : '-10%']);
+
+  const { heroImages } = useSettings();
+  const bgUrl = heroImages?.studentsUrl || '/images/heroes/students.svg';
+  const imgLoaded = useImageLoad(bgUrl);
 
   const BENEFITS: BenefitCard[] = [
     {
@@ -90,6 +97,8 @@ export function StudentsContent() {
         className="relative min-h-svh flex flex-col items-center justify-center overflow-hidden pt-28 pb-16 px-6 sm:px-8 lg:px-16"
         aria-labelledby="students-hero-heading"
       >
+        <HeroPhotoLayer url={bgUrl} isLoaded={imgLoaded} />
+
         {/* Depth-0: atmospheric radials */}
         <div
           className="absolute inset-0 pointer-events-none"

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="a" cx="1640" cy="155" r="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity=".85"/>
+      <stop offset="55%" stop-color="#3B82F6" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b" cx="280" cy="760" r="490" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22C55E" stop-opacity=".58"/>
+      <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="c" cx="960" cy="540" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0EA5E9" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#0EA5E9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#a)"/>
+  <rect width="1920" height="1080" fill="url(#b)"/>
+  <rect width="1920" height="1080" fill="url(#c)"/>
+  <g stroke="#3B82F6" opacity=".045" fill="none" stroke-width="1">
+    <line x1="480"  y1="0" x2="480"  y2="1080"/>
+    <line x1="960"  y1="0" x2="960"  y2="1080"/>
+    <line x1="1440" y1="0" x2="1440" y2="1080"/>
+    <line x1="0" y1="270" x2="1920" y2="270"/>
+    <line x1="0" y1="540" x2="1920" y2="540"/>
+    <line x1="0" y1="810" x2="1920" y2="810"/>
+  </g>
+  <g fill="#fff">
+    <circle cx="100"  cy="95"  r="1.5" opacity=".52"/>
+    <circle cx="330"  cy="155" r="1"   opacity=".42"/>
+    <circle cx="620"  cy="60"  r="2"   opacity=".58"/>
+    <circle cx="890"  cy="185" r="1"   opacity=".40"/>
+    <circle cx="1110" cy="75"  r="1.5" opacity=".50"/>
+    <circle cx="1370" cy="160" r="1"   opacity=".45"/>
+    <circle cx="1650" cy="50"  r="2"   opacity=".55"/>
+    <circle cx="1860" cy="195" r="1"   opacity=".40"/>
+    <circle cx="220"  cy="305" r="1"   opacity=".38"/>
+    <circle cx="750"  cy="270" r="1.5" opacity=".48"/>
+    <circle cx="1220" cy="345" r="1"   opacity=".40"/>
+    <circle cx="1750" cy="295" r="1.5" opacity=".42"/>
+    <circle cx="480"  cy="465" r="1"   opacity=".35"/>
+    <circle cx="1480" cy="440" r="1"   opacity=".38"/>
+    <circle cx="50"   cy="520" r="1"   opacity=".32"/>
+    <circle cx="1900" cy="480" r="1"   opacity=".35"/>
+  </g>
+</svg>

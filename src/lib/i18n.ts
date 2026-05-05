@@ -431,6 +431,8 @@ export const TRANSLATIONS = {
         org: 'Teknologkåren · LTU',
         sections: '4 sektioner · Luleå',
       },
+      campusLabel: 'Campus',
+      campusSubtitle: 'Luleå tekniska universitet',
     },
   },
 
@@ -860,6 +862,8 @@ export const TRANSLATIONS = {
         org: 'Teknologkåren · LTU',
         sections: '4 sections · Luleå',
       },
+      campusLabel: 'Campus',
+      campusSubtitle: 'Luleå University of Technology',
     },
   },
 } as const;

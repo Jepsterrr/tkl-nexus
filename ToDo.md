@@ -145,5 +145,9 @@ Data visas alltid en gång, definitivt. Ingen tyst uppdatering efteråt.
 
 ## Bilder
 
-- [ ] Utforska alternativ att använda bilder på sidan där det skulle passa och se snyggt ut.
+- [x] Utforska alternativ att använda bilder på sidan där det skulle passa och se snyggt ut. → Spec: `docs/superpowers/specs/2026-05-04-image-system-design.md`
 - [x] Utforska användningen av bilder på Firebase Spark-plan i där det finns (Kan man ladda upp från datorn? Kräver det högre betalplan eller finns det snyggt workaround?).
+
+### Framtida bilder i hemsidan:
+
+- [ ] **Teamfoto-sektion på About** — individuella porträtt per person (arbetsmarknadsutskottet). Varje person har eget namn, roll och Cloudinary-bild. Kräver CRUD i admin och subkollektion `settings/team/members` eller array i `settings/about`. Ska vara helt admin-hanterbart utan kod.

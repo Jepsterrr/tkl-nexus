@@ -11,6 +11,7 @@ const LINKS = [
   { href: '/admin/settings/links',    label: 'Länkar'     },
   { href: '/admin/settings/timeline', label: 'Tidslinje'  },
   { href: '/admin/settings/banner',   label: 'Banner'     },
+  { href: '/admin/settings/media',    label: 'Bilder'     },
 ];
 
 export function SettingsSidebar() {
