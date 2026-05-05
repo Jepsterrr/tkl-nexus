@@ -151,7 +151,7 @@ export function AboutContent() {
             lineHeight: 1,
             letterSpacing: '-0.06em',
             color: '#E30613',
-            opacity: 0.05,
+            opacity: 0.08,
             transform: 'translate(8%, 15%)',
           }}
           aria-hidden="true"
