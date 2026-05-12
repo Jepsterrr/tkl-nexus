@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { Loader2, Tag, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DealCard } from '@/components/ui/DealCard';
+import { DealDrawer } from '@/components/ui/DealDrawer';
 import type { TKLDeal } from '@/lib/schemas/deal';
-import { getPublishedDeals } from '@/lib/services/deals';
+import { getPublishedDeals, getDealById } from '@/lib/services/deals';
+import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 
 // Deals Page Content
@@ -32,6 +34,48 @@ export function DealsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
+
+  // Drawer state
+  const [selectedDeal, setSelectedDeal] = useState<TKLDeal | null>(null);
+  const previousFocusRef = useRef<HTMLButtonElement | null>(null);
+  const { pushId, clearId } = useDrawerUrl();
+
+  const handleCloseDrawer = useCallback(() => {
+    setSelectedDeal(null);
+    clearId();
+    previousFocusRef.current?.focus();
+  }, [clearId]);
+
+  const handleOpenDeal = useCallback(
+    (deal: TKLDeal, triggerEl?: HTMLButtonElement) => {
+      if (triggerEl) previousFocusRef.current = triggerEl;
+      setSelectedDeal(deal);
+      pushId(deal.id);
+    },
+    [pushId],
+  );
+
+  // Initial URL-check (direktnavigering till /students/deals?id=xxx)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) return;
+    void getDealById(id).then((d) => { if (d) setSelectedDeal(d); });
+  }, []); // kör bara vid mount
+
+  // Browser back/forward
+  useEffect(() => {
+    const handler = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) { setSelectedDeal(null); return; }
+      const cached = allDeals.find((d) => d.id === id);
+      if (cached) setSelectedDeal(cached);
+      else void getDealById(id).then((d) => { if (d) setSelectedDeal(d); });
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [allDeals]);
 
   // Hämta deals från Firestore (klientdriven)
   useEffect(() => {
@@ -127,7 +171,7 @@ export function DealsContent() {
                   style={{ color: '#F59E0B' }}
                   aria-hidden="true"
                 >
-                  {deals?.badge ?? 'Nexus Deals'}
+                  {deals?.badge ?? 'NEXUS Deals'}
                 </p>
               </RevealItem>
               <RevealItem>
@@ -258,13 +302,20 @@ export function DealsContent() {
             <div className="flex flex-col gap-3">
               <AnimatePresence mode="popLayout">
                 {allDeals.map((deal, idx) => (
-                  <DealCard key={deal.id} deal={deal} idx={idx} />
+                  <DealCard
+                    key={deal.id}
+                    deal={deal}
+                    idx={idx}
+                    onViewDetails={(e) => handleOpenDeal(deal, e.currentTarget)}
+                  />
                 ))}
               </AnimatePresence>
             </div>
           )}
         </div>
       </section>
+
+      <DealDrawer deal={selectedDeal} onClose={handleCloseDrawer} />
     </>
   );
 }

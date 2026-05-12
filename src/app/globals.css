@@ -129,6 +129,10 @@
   --about-card-bg: rgba(255, 255, 255, 0.03);
   --about-card-border: rgba(255, 255, 255, 0.07);
 
+  /* Drawer */
+  --drawer-bg: #160d2e;
+  --drawer-border: rgba(255, 255, 255, 0.09);
+
   /* CTA Banner */
   --cta-banner-bg: rgba(10, 1, 24, 0.8);
 }
@@ -182,6 +186,10 @@
   --glass-border: rgba(0, 0, 0, 0.1);
   --about-card-bg: rgba(255, 255, 255, 0.7);
   --about-card-border: rgba(0, 0, 0, 0.1);
+
+  /* Drawer */
+  --drawer-bg: #f5f4fd;
+  --drawer-border: rgba(0, 0, 0, 0.1);
 
   /* Glass utility vars — light overrides */
   --glass-bg-subtle: rgba(255, 255, 255, 0.55);
@@ -237,6 +245,10 @@
   --text-display: clamp(1.875rem, 3vw + 0.75rem, 3rem);
   --text-title:   clamp(1.5rem, 2vw + 0.5rem, 2rem);
   --text-heading: clamp(1.25rem, 1.5vw + 0.25rem, 1.5rem);
+
+  /* Drawer z-index — under navbar (z-50), ovan övrigt innehåll */
+  --z-44: 44;
+  --z-45: 45;
 }
 
 @layer base {
@@ -287,6 +299,11 @@
     font-size: var(--font-size);
     scroll-behavior: smooth;
     scroll-padding-top: var(--navbar-height, 72px);
+    scrollbar-width: none; /* Firefox */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
   }
 
   body {

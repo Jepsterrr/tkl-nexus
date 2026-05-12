@@ -167,6 +167,10 @@ export const TRANSLATIONS = {
       retry: 'Försök igen',
       filterAriaLabel: 'Filtrera events',
       searchPlaceholder: 'Sök på eventtitel eller plats…',
+      clearSearch: 'Rensa sökning',
+      nexusTab: 'TKL NEXUS Events',
+      campusTab: 'Campus Events',
+      luddPoweredBy: 'Powered by',
       allSections: 'Alla sektioner',
       sections: {
         data: 'Datasektionen',
@@ -180,6 +184,10 @@ export const TRANSLATIONS = {
         campus: 'Campus Events (LUDD)',
         sections: 'Data · Geo · I · Maskin',
       },
+      visaMer: 'Visa mer',
+      drawerClose: 'Stäng',
+      drawerAbout: 'Om eventet',
+      drawerAriaLabel: 'Eventdetaljer',
     },
 
     // --- Corporate page ---
@@ -362,12 +370,19 @@ export const TRANSLATIONS = {
       retry: 'Försök igen',
       resultsCount: '{count} annonser',
       searchPlaceholder: 'Sök på titel, företag eller ort…',
+      clearSearch: 'Rensa sökning',
       searchNoResults: 'Inga träffar för "{query}". Prova ett kortare sökord.',
       emptyStateCta: 'Är du företag? Publicera en annons',
       pills: {
         types: 'Exjobb · Jobb · Praktik · Trainee',
         ltu: 'LTU-anpassade möjligheter',
       },
+      visaMer: 'Visa mer',
+      drawerClose: 'Stäng',
+      drawerAbout: 'Om rollen',
+      drawerAriaLabel: 'Jobbdetaljer',
+      drawerApply: 'Ansök nu',
+      drawerDeadline: 'Sista ansökningsdag',
     },
 
     // --- Deals page ---
@@ -397,8 +412,15 @@ export const TRANSLATIONS = {
       pills: {
         exclusive: 'Exklusivt för kårmedlemmar',
         offers: 'Rabatter & Erbjudanden',
-        name: 'Nexus Deals',
+        name: 'NEXUS Deals',
       },
+      visaMer: 'Visa mer',
+      drawerClose: 'Stäng',
+      drawerAbout: 'Om erbjudandet',
+      drawerAriaLabel: 'Erbjudandedetaljer',
+      drawerVisit: 'Till erbjudandet',
+      drawerCopyCode: 'Kopiera kod',
+      drawerCopied: 'Kopierad!',
     },
 
     // --- About page ---
@@ -601,6 +623,10 @@ export const TRANSLATIONS = {
       retry: 'Try again',
       filterAriaLabel: 'Filter events',
       searchPlaceholder: 'Search by event title or location…',
+      clearSearch: 'Clear search',
+      nexusTab: 'TKL NEXUS Events',
+      campusTab: 'Campus Events',
+      luddPoweredBy: 'Powered by',
       allSections: 'All sections',
       sections: {
         data: 'Data Section',
@@ -614,6 +640,10 @@ export const TRANSLATIONS = {
         campus: 'Campus Events (LUDD)',
         sections: 'Data · Geo · I · Maskin',
       },
+      visaMer: 'View details',
+      drawerClose: 'Close',
+      drawerAbout: 'About this event',
+      drawerAriaLabel: 'Event details',
     },
 
     // --- Corporate page ---
@@ -793,12 +823,19 @@ export const TRANSLATIONS = {
       retry: 'Try again',
       resultsCount: '{count} listings',
       searchPlaceholder: 'Search by title, company or location…',
+      clearSearch: 'Clear search',
       searchNoResults: 'No results for "{query}". Try a shorter keyword.',
       emptyStateCta: 'Are you a company? Post a listing',
       pills: {
         types: 'Thesis · Jobs · Internship · Trainee',
         ltu: 'LTU-tailored opportunities',
       },
+      visaMer: 'View details',
+      drawerClose: 'Close',
+      drawerAbout: 'About this role',
+      drawerAriaLabel: 'Job details',
+      drawerApply: 'Apply now',
+      drawerDeadline: 'Application deadline',
     },
 
     // --- Deals page ---
@@ -830,6 +867,13 @@ export const TRANSLATIONS = {
         offers: 'Discounts & Offers',
         name: 'NEXUS Deals',
       },
+      visaMer: 'View details',
+      drawerClose: 'Close',
+      drawerAbout: 'About this offer',
+      drawerAriaLabel: 'Offer details',
+      drawerVisit: 'Visit offer',
+      drawerCopyCode: 'Copy code',
+      drawerCopied: 'Copied!',
     },
 
     // --- About page ---

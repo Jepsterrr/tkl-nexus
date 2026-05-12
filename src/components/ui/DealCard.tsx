@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { ExternalLink, Copy, Check } from 'lucide-react';
+import { ExternalLink, Copy, Check, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
@@ -12,9 +12,10 @@ const ORANGE = '#F59E0B';
 interface DealCardProps {
   deal: TKLDeal;
   idx?: number;
+  onViewDetails?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export function DealCard({ deal, idx = 0 }: DealCardProps) {
+export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
   const { t, locale } = useLanguage();
   const deals = t.deals;
   const shouldReduceMotion = useReducedMotion();
@@ -27,9 +28,10 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     if (!deal.discountCode) return;
-    navigator.clipboard.writeText(deal.discountCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(deal.discountCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => { /* tyst fail */ });
   };
 
   // Avatar: antingen logotyp eller initial
@@ -97,59 +99,57 @@ export function DealCard({ deal, idx = 0 }: DealCardProps) {
 
         {/* Botten: rabatt-info + CTA */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          {/* Rabatttext */}
-          {deal.discount && (
-            <span
-              className="text-xs font-bold"
-              style={{ color: ORANGE }}
-            >
-              {deal.discount}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Rabatttext */}
+            {deal.discount && (
+              <span className="text-xs font-bold" style={{ color: ORANGE }}>
+                {deal.discount}
+              </span>
+            )}
 
-          {/* Rabattkod - om tillgänglig */}
-          {deal.discountCode ? (
+            {/* Rabattkod - om tillgänglig */}
+            {deal.discountCode ? (
+              <button
+                onClick={handleCopy}
+                disabled={copied}
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
+                style={{ background: `${ORANGE}18`, border: `1px solid ${ORANGE}40`, color: ORANGE }}
+                aria-label={`Kopiera rabattkod: ${deal.discountCode}`}
+              >
+                {copied ? (
+                  <><Check className="w-3.5 h-3.5" />{deals?.codeCopied ?? 'Kopierat!'}</>
+                ) : (
+                  <><Copy className="w-3.5 h-3.5" />{deal.discountCode}</>
+                )}
+              </button>
+            ) : deal.link ? (
+              <a
+                href={deal.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
+                style={{ color: ORANGE }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {deals?.visit ?? 'Besök'}
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            ) : (
+              <span className="text-xs hero-text-subtle italic">
+                {deals?.showMembership ?? 'Visa kårlegitimation'}
+              </span>
+            )}
+          </div>
+
+          {onViewDetails && (
             <button
-              onClick={handleCopy}
-              disabled={copied}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
-              style={{
-                background: `${ORANGE}18`,
-                border: `1px solid ${ORANGE}40`,
-                color: ORANGE,
-              }}
-              aria-label={`Kopiera rabattkod: ${deal.discountCode}`}
+              onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
+              className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
+              style={{ color: ORANGE, background: `${ORANGE}12`, border: `1px solid ${ORANGE}28` }}
             >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  {deals?.codeCopied ?? 'Kopierat!'}
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  {deal.discountCode}
-                </>
-              )}
+              {deals?.visaMer ?? 'Visa mer'}
+              <ArrowRight className="w-3 h-3" aria-hidden="true" />
             </button>
-          ) : deal.link ? (
-            /* Automatisk deal (t.ex. STUK) - öppna länk */
-            <a
-              href={deal.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
-              style={{ color: ORANGE }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {deals?.visit ?? 'Besök'}
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          ) : (
-            /* Automatisk deal utan länk - visa kårlegitimation-info */
-            <span className="text-xs hero-text-subtle italic">
-              {deals?.showMembership ?? 'Visa kårlegitimation'}
-            </span>
           )}
         </div>
       </div>

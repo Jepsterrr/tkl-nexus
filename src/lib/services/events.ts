@@ -99,6 +99,8 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
+  if (data.published !== true) return null;
+
   const eventData = {
     id: docSnap.id,
     ...data,

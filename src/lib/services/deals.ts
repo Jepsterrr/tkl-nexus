@@ -101,6 +101,8 @@ export async function getDealById(id: string): Promise<TKLDeal | null> {
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
+  if (data.published !== true) return null;
+
   const parsed = DealSchema.safeParse({
     id: docSnap.id,
     ...data,

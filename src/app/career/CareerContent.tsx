@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Briefcase, Compass, Search, X, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -13,8 +13,10 @@ import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { JobCard } from '@/components/ui/JobCard';
 import { JobCardSkeleton } from '@/components/ui/JobCardSkeleton';
+import { CareerDrawer } from '@/components/ui/CareerDrawer';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
-import { getPublishedCareer } from '@/lib/services/career';
+import { getPublishedCareer, getCareerById } from '@/lib/services/career';
+import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 
 type FilterKey = CareerType | 'all';
 
@@ -38,6 +40,48 @@ export function CareerContent() {
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
+
+  // Drawer state
+  const [selectedJob, setSelectedJob] = useState<TKLCareer | null>(null);
+  const previousFocusRef = useRef<HTMLButtonElement | null>(null);
+  const { pushId, clearId } = useDrawerUrl();
+
+  const handleCloseDrawer = useCallback(() => {
+    setSelectedJob(null);
+    clearId();
+    previousFocusRef.current?.focus();
+  }, [clearId]);
+
+  const handleOpenJob = useCallback(
+    (job: TKLCareer, triggerEl?: HTMLButtonElement) => {
+      if (triggerEl) previousFocusRef.current = triggerEl;
+      setSelectedJob(job);
+      pushId(job.id);
+    },
+    [pushId],
+  );
+
+  // Initial URL-check (direktnavigering till /career?id=xxx)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) return;
+    void getCareerById(id).then((j) => { if (j) setSelectedJob(j); });
+  }, []); // kör bara vid mount
+
+  // Browser back/forward
+  useEffect(() => {
+    const handler = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) { setSelectedJob(null); return; }
+      const cached = careerItems.find((j) => j.id === id);
+      if (cached) setSelectedJob(cached);
+      else void getCareerById(id).then((j) => { if (j) setSelectedJob(j); });
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [careerItems]);
   const shouldReduceMotion = useReducedMotion();
   const scrollContainer = useScrollContainer();
   const { scrollYProgress } = useScroll({
@@ -251,7 +295,7 @@ export function CareerContent() {
                 <button
                   onClick={() => setSearch('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-opacity hover:opacity-70"
-                  aria-label="Rensa sökning"
+                  aria-label={opportunity.clearSearch}
                 >
                   <X className="w-3.5 h-3.5" style={{ color: 'var(--hero-text-subtle)' }} />
                 </button>
@@ -302,7 +346,13 @@ export function CareerContent() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {filteredItems.map((job, idx) => (
-                  <JobCard key={job.id} job={job} color={FILTER_COLORS[job.type]} entryDelay={idx * 0.03} />
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    color={FILTER_COLORS[job.type]}
+                    entryDelay={idx * 0.03}
+                    onViewDetails={(e) => handleOpenJob(job, e.currentTarget)}
+                  />
                 ))}
               </motion.div>
             ) : null}
@@ -363,6 +413,8 @@ export function CareerContent() {
 
         </div>
       </section>
+
+      <CareerDrawer job={selectedJob} onClose={handleCloseDrawer} />
     </>
   );
 }

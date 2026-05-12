@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, Loader2, ExternalLink, Search, Sparkles, X, PlusCircle } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, Loader2, Search, Sparkles, X, PlusCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
@@ -12,8 +12,10 @@ import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { LuddCalendar } from '@/components/ui/LuddCalendar';
+import { EventDrawer } from '@/components/ui/EventDrawer';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
-import { getPublishedEvents } from '@/lib/services/events';
+import { getPublishedEvents, getEventById } from '@/lib/services/events';
+import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
 // Section logo map
@@ -37,7 +39,15 @@ type FilterKey = Section | 'all';
 type ExtendedEvent = TKLEvent & { externalUrl?: string };
 
 // Event Card
-function EventCard({ event, entryDelay = 0 }: { event: ExtendedEvent; entryDelay?: number }) {
+function EventCard({
+  event,
+  entryDelay = 0,
+  onViewDetails,
+}: {
+  event: ExtendedEvent;
+  entryDelay?: number;
+  onViewDetails: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
   const { t, locale } = useLanguage();
   const ev = t.events;
   const shouldReduceMotion = useReducedMotion();
@@ -52,8 +62,6 @@ function EventCard({ event, entryDelay = 0 }: { event: ExtendedEvent; entryDelay
 
   const displayTitle = isEnglish && event.titleEn ? event.titleEn : event.title;
   const displayDesc = isEnglish && event.descriptionEn ? event.descriptionEn : event.description;
-
-  const isExternal = !!event.externalUrl;
 
   return (
     <motion.article
@@ -120,9 +128,9 @@ function EventCard({ event, entryDelay = 0 }: { event: ExtendedEvent; entryDelay
         </div>
       </div>
 
-      {/* FOOTER - z-20 säkerställer att länken ligger högst upp och alltid kan klickas */}
+      {/* FOOTER */}
       <div
-        className="flex items-center justify-between px-5 py-3 mt-1 relative"
+        className="flex items-center justify-between px-5 py-3 mt-1 relative z-20"
         style={{ borderTop: '1px solid var(--about-card-border)' }}
       >
         <span className="flex items-center gap-1.5 text-xs hero-text-subtle">
@@ -130,19 +138,15 @@ function EventCard({ event, entryDelay = 0 }: { event: ExtendedEvent; entryDelay
           {dateObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long' })}
         </span>
 
-        {/* Endast texten är klickbar som en helt vanlig länk */}
-        {isExternal && (
-          <a
-            href={event.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80 cursor-pointer"
-            style={{ color }}
-          >
-            {ev.readOnLudd}
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
+          aria-label={`${ev.visaMer}: ${displayTitle}`}
+          className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
+          style={{ color, background: `${color}12`, border: `1px solid ${color}28` }}
+        >
+          {ev.visaMer}
+          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
       </div>
     </motion.article>
   );
@@ -155,6 +159,58 @@ export function EventsContent() {
   const [allEvents, setAllEvents] = useState<ExtendedEvent[]>([]);
   const [filter, setFilter] = useState<FilterKey>('all');
   const [search, setSearch] = useState('');
+
+  // Drawer state
+  const [selectedEvent, setSelectedEvent] = useState<ExtendedEvent | null>(null);
+  const previousFocusRef = useRef<HTMLButtonElement | null>(null);
+  const { pushId, clearId } = useDrawerUrl();
+
+  const handleCloseDrawer = useCallback(() => {
+    setSelectedEvent(null);
+    clearId();
+    previousFocusRef.current?.focus();
+  }, [clearId]);
+
+  const handleOpenEvent = useCallback(
+    (event: ExtendedEvent, triggerEl?: HTMLButtonElement) => {
+      if (triggerEl) previousFocusRef.current = triggerEl;
+      setSelectedEvent(event);
+      pushId(event.id);
+    },
+    [pushId],
+  );
+
+  // Initial URL-check (direktnavigering till /events?id=xxx)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) return;
+    void getEventById(id).then((ev) => {
+      if (ev) setSelectedEvent(ev as ExtendedEvent);
+    });
+  }, []); // kör bara vid mount
+
+  // Browser back/forward
+  useEffect(() => {
+    const handler = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        setSelectedEvent(null);
+        return;
+      }
+      const cached = allEvents.find((e) => e.id === id);
+      if (cached) {
+        setSelectedEvent(cached);
+      } else {
+        void getEventById(id).then((ev) => {
+          if (ev) setSelectedEvent(ev as ExtendedEvent);
+        });
+      }
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [allEvents]);
 
   // State variables for LUDD Data
   const [calendarView, setCalendarView] = useState<'nexus' | 'ludd'>('nexus');
@@ -441,7 +497,7 @@ export function EventsContent() {
                   : { color: 'var(--hero-text-muted)' }}
               >
                 <Sparkles className="w-4 h-4" aria-hidden="true" />
-                TKL Nexus Events
+                {ev.nexusTab}
               </button>
               <button
                 onClick={() => setCalendarView('ludd')}
@@ -452,7 +508,7 @@ export function EventsContent() {
                   : { color: 'var(--hero-text-muted)' }}
               >
                 <CalendarDays className="w-4 h-4" aria-hidden="true" />
-                Campus Events
+                {ev.campusTab}
               </button>
             </div>
           </div>
@@ -486,7 +542,7 @@ export function EventsContent() {
                       <button
                         onClick={() => setSearch('')}
                         className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-opacity hover:opacity-70"
-                        aria-label="Rensa sökning"
+                        aria-label={ev.clearSearch}
                       >
                         <X className="w-3.5 h-3.5" style={{ color: 'var(--hero-text-subtle)' }} />
                       </button>
@@ -554,7 +610,14 @@ export function EventsContent() {
                       transition={{ duration: 0.08 }}
                       className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
                     >
-                      {filtered.map((event, idx) => <EventCard key={event.id} event={event} entryDelay={idx * 0.03} />)}
+                      {filtered.map((event, idx) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          entryDelay={idx * 0.03}
+                          onViewDetails={(e) => handleOpenEvent(event, e.currentTarget)}
+                        />
+                      ))}
                     </motion.div>
                   </AnimatePresence>
                 )}
@@ -578,7 +641,7 @@ export function EventsContent() {
                     rel="noopener noreferrer"
                     className="text-xs font-medium hero-text-subtle hover:text-[#60A5FA] transition-colors flex items-center gap-1.5"
                   >
-                    Powered by <span className="font-bold text-white tracking-wide">/LUDD/</span>
+                    {ev.luddPoweredBy} <span className="font-bold text-white tracking-wide">/LUDD/</span>
                   </a>
                 </div>
 
@@ -632,7 +695,12 @@ export function EventsContent() {
                           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6"
                         >
                           {filteredLuddEvents.map((event, idx) => (
-                            <EventCard key={`ludd-${event.id}`} event={event} entryDelay={idx * 0.03} />
+                            <EventCard
+                              key={`ludd-${event.id}`}
+                              event={event}
+                              entryDelay={idx * 0.03}
+                              onViewDetails={(e) => handleOpenEvent(event, e.currentTarget)}
+                            />
                           ))}
                         </motion.div>
                       </AnimatePresence>
@@ -644,6 +712,8 @@ export function EventsContent() {
           </AnimatePresence>
         </div>
       </section>
+
+      <EventDrawer event={selectedEvent} onClose={handleCloseDrawer} />
     </>
   );
 }
