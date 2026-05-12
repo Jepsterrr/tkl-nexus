@@ -130,6 +130,7 @@
   --about-card-border: rgba(255, 255, 255, 0.07);
 
   /* Drawer */
+  --navbar-bottom: 80px;
   --drawer-bg: #160d2e;
   --drawer-border: rgba(255, 255, 255, 0.09);
 
