@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'TKL NEXUS kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',
   openGraph: {
-    title: 'TKL Nexus – Karriärportal för LTU-studenter & Företag',
+    title: 'TKL NEXUS – Karriärportal för LTU-studenter & Företag',
     description:
       'TKL NEXUS kopplar LTU-studenter och företag via exjobb, praktik, events och förmåner. Teknologkårens officiella arbetsmarknadsportal vid LTU.',
     url: 'https://tklnexus.se',
