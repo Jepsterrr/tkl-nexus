@@ -73,7 +73,7 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
         ) : (
           <span
             className="text-2xl font-black select-none"
-            style={{ color: ORANGE, textShadow: `0 0 20px ${ORANGE}` }}
+            style={{ color: 'var(--text-orange)' }}
           >
             {avatarLetter}
           </span>
@@ -102,7 +102,7 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
           <div className="flex items-center gap-2">
             {/* Rabatttext */}
             {deal.discount && (
-              <span className="text-xs font-bold" style={{ color: ORANGE }}>
+              <span className="text-xs font-bold" style={{ color: 'var(--text-orange)' }}>
                 {deal.discount}
               </span>
             )}
@@ -113,7 +113,7 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
                 onClick={handleCopy}
                 disabled={copied}
                 className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
-                style={{ background: `${ORANGE}18`, border: `1px solid ${ORANGE}40`, color: ORANGE }}
+                style={{ background: `${ORANGE}18`, border: `1px solid ${ORANGE}40`, color: 'var(--text-orange)' }}
                 aria-label={`Kopiera rabattkod: ${deal.discountCode}`}
               >
                 {copied ? (
@@ -128,7 +128,7 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
-                style={{ color: ORANGE }}
+                style={{ color: 'var(--text-orange)' }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {deals?.visit ?? 'Besök'}
@@ -145,7 +145,7 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
             <button
               onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
               className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
-              style={{ color: ORANGE, background: `${ORANGE}12`, border: `1px solid ${ORANGE}28` }}
+              style={{ color: 'var(--text-orange)', background: `${ORANGE}12`, border: `1px solid ${ORANGE}28` }}
             >
               {deals?.visaMer ?? 'Visa mer'}
               <ArrowRight className="w-3 h-3" aria-hidden="true" />

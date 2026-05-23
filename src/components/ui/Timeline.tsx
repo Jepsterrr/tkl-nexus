@@ -18,7 +18,7 @@ export function Timeline({ items }: TimelineProps) {
       {/* Vertical center line */}
       <div
         className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-px"
-        style={{ background: "rgba(255 255 255 / 0.1)" }}
+        style={{ background: "var(--glass-border-subtle)" }}
         aria-hidden="true"
       />
 

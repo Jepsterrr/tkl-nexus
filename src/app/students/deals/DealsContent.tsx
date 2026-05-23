@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { Loader2, Tag, PlusCircle } from 'lucide-react';
+import { Loader2, Tag, PlusCircle, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -207,7 +207,7 @@ export function DealsContent() {
                   <span
                     key={label}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                    style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.22)', color: '#F59E0B' }}
+                    style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.22)', color: 'var(--text-orange)' }}
                   >
                     <span className="w-1 h-1 rounded-full bg-[#F59E0B] shrink-0" aria-hidden="true" />
                     {label}
@@ -289,7 +289,7 @@ export function DealsContent() {
               <Link
                 href="/corporate/post"
                 className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
+                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: 'var(--text-orange)' }}
               >
                 <PlusCircle className="w-4 h-4" aria-hidden="true" />
                 {deals?.emptyStateCta ?? 'Är du företag? Publicera ett erbjudande'}
@@ -314,6 +314,34 @@ export function DealsContent() {
           )}
         </div>
       </section>
+
+      {/* Corporate CTA banner — visas bara när det finns deals */}
+      {!loading && !error && allDeals.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-12 pb-24">
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="rounded-2xl px-6 py-8 flex flex-col sm:flex-row items-center gap-6"
+            style={{
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.04))',
+              border: '1px solid rgba(139,92,246,0.22)',
+            }}
+          >
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.28)' }}>
+              <Building2 className="w-6 h-6" style={{ color: '#8B5CF6' }} aria-hidden="true" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-bold hero-text text-base">{t.corporateCta.title}</p>
+              <p className="hero-text-muted text-sm mt-1">{t.corporateCta.desc}</p>
+            </div>
+            <Link
+              href="/corporate/post"
+              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.35)', color: '#8B5CF6' }}
+            >
+              {t.corporateCta.btn}
+            </Link>
+          </div>
+        </div>
+      </section>}
 
       <DealDrawer deal={selectedDeal} onClose={handleCloseDrawer} />
     </>

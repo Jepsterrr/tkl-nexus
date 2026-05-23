@@ -36,7 +36,7 @@ export function GradientOrb({
   return (
     <div
       aria-hidden="true"
-      className={`absolute pointer-events-none rounded-full ${animClass}`}
+      className={`absolute pointer-events-none rounded-full gradient-orb ${animClass}`}
       style={{
         width: size,
         height: size,

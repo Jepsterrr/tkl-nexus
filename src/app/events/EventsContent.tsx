@@ -429,7 +429,7 @@ export function EventsContent() {
             <motion.div style={{ y: heroTextY }} className="flex flex-col justify-center">
               <StaggerReveal delay={0.25}>
                 <RevealItem className="mb-6">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: 'var(--text-purple)' }}>
                     <CalendarDays className="w-4 h-4" aria-hidden="true" />
                     {ev.badge}
                   </span>
@@ -439,7 +439,7 @@ export function EventsContent() {
                 </RevealItem>
                 <RevealItem className="flex flex-wrap gap-2 mb-8">
                   {[ev.pills.nexus, ev.pills.campus, ev.pills.sections].map((label) => (
-                    <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                    <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}>
                       <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />{label}
                     </span>
                   ))}
@@ -452,7 +452,7 @@ export function EventsContent() {
           <motion.div style={{ y: heroTextY }} className="lg:hidden">
             <StaggerReveal className="text-center" delay={0.1}>
               <RevealItem className="flex justify-center mb-6">
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: 'var(--text-purple)' }}>
                   <CalendarDays className="w-4 h-4" aria-hidden="true" />
                   {ev.badge}
                 </span>
@@ -467,7 +467,7 @@ export function EventsContent() {
               </RevealItem>
               <RevealItem className="flex flex-wrap justify-center gap-2 mt-4">
                 {[ev.pills.nexus, ev.pills.campus, ev.pills.sections].map((label) => (
-                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}>
                     <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />{label}
                   </span>
                 ))}
@@ -493,7 +493,7 @@ export function EventsContent() {
                 aria-pressed={calendarView === 'nexus'}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
                 style={calendarView === 'nexus'
-                  ? { background: 'rgba(139,92,246,0.20)', color: '#8B5CF6', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
+                  ? { background: 'rgba(139,92,246,0.20)', color: 'var(--text-purple)', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
                   : { color: 'var(--hero-text-muted)' }}
               >
                 <Sparkles className="w-4 h-4" aria-hidden="true" />
@@ -504,7 +504,7 @@ export function EventsContent() {
                 aria-pressed={calendarView === 'ludd'}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
                 style={calendarView === 'ludd'
-                  ? { background: 'rgba(139,92,246,0.20)', color: '#8B5CF6', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
+                  ? { background: 'rgba(139,92,246,0.20)', color: 'var(--text-purple)', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
                   : { color: 'var(--hero-text-muted)' }}
               >
                 <CalendarDays className="w-4 h-4" aria-hidden="true" />
@@ -593,7 +593,7 @@ export function EventsContent() {
                       <Link
                         href="/corporate/post"
                         className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                        style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}
+                        style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: 'var(--text-purple)' }}
                       >
                         <PlusCircle className="w-4 h-4" aria-hidden="true" />
                         {ev.emptyStateCta}

@@ -12,33 +12,36 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
-  const [resolved, setResolved] = useState<'dark' | 'light'>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
+  const [resolved, setResolved] = useState<'dark' | 'light'>('light');
+  const [mounted, setMounted] = useState(false);
 
+  // Read localStorage once on mount — batched with setMounted so class-effect
+  // never fires with the wrong default value.
   useEffect(() => {
     const stored = localStorage.getItem('tkl-theme') as Theme | null;
     if (stored && ['dark', 'light', 'system'].includes(stored)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(stored);
     }
+    setMounted(true);
   }, []);
 
+  // Apply class only after localStorage has been read (mounted = true).
+  // The blocking inline script in <head> already set the correct class before
+  // first paint, so skipping this effect on the initial render causes no flash.
   useEffect(() => {
+    if (!mounted) return;
     const root = document.documentElement;
-    let actual: 'dark' | 'light';
+    const actual: 'dark' | 'light' =
+      theme === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        : theme;
 
-    if (theme === 'system') {
-      actual = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    } else {
-      actual = theme;
-    }
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResolved(actual);
     root.classList.toggle('dark', actual === 'dark');
     root.classList.toggle('light', actual === 'light');
     localStorage.setItem('tkl-theme', theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const setTheme = (t: Theme) => setThemeState(t);
 

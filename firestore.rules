@@ -41,6 +41,12 @@ service cloud.firestore {
       allow write: if request.auth != null && isAdmin();
     }
 
+    // Products: publik läsning av publicerade, admin kan läsa alla
+    match /products/{productId} {
+      allow read: if resource.data.published == true || (request.auth != null && isAdmin());
+      allow write: if request.auth != null && isAdmin();
+    }
+
     // Settings: publik läsning, admin-skrivning
     match /settings/{docId} {
       allow read: if true;
@@ -49,6 +55,12 @@ service cloud.firestore {
 
     match /settings/timeline/items/{itemId} {
       allow read: if true;
+      allow write: if request.auth != null && isAdmin();
+    }
+
+    // EventTypes (settings-subkollektion): publik läsning av publicerade, admin kan läsa alla
+    match /settings/eventTypes/items/{itemId} {
+      allow read: if resource.data.published == true || (request.auth != null && isAdmin());
       allow write: if request.auth != null && isAdmin();
     }
 

@@ -9,6 +9,7 @@ import {
   Tag,
   Briefcase,
   Handshake,
+  Package,
   Settings,
   Shield,
   ArrowLeft,
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { label: 'Deals',          icon: Tag,             href: '/admin/deals' },
   { label: 'Jobb & Exjobb',  icon: Briefcase,       href: '/admin/career' },
   { label: 'Partners',       icon: Handshake,       href: '/admin/partners' },
+  { label: 'Produktportfölj', icon: Package,        href: '/admin/products' },
   { label: 'Inställningar',  icon: Settings,        href: '/admin/settings' },
   { label: 'Adminhantering', icon: Shield,          href: '/admin/admins' },
 ] as const;

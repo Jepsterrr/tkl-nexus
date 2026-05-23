@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { Briefcase, Compass, Search, X, Plus } from 'lucide-react';
+import { Briefcase, Building2, Compass, Search, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
@@ -208,7 +208,7 @@ export function CareerContent() {
                 style={{
                   background: 'rgba(59,130,246,0.15)',
                   border: '1px solid rgba(59,130,246,0.3)',
-                  color: '#3B82F6',
+                  color: 'var(--text-blue)',
                 }}
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
@@ -243,7 +243,7 @@ export function CareerContent() {
             {/* Trust chips — visible on all sizes */}
             <RevealItem className="flex flex-wrap justify-start gap-2 mt-4">
               {[opportunity.pills.types, opportunity.pills.ltu].map((label) => (
-                <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)', color: '#3B82F6' }}>
+                <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)', color: 'var(--text-blue)' }}>
                   <span className="w-1 h-1 rounded-full bg-[#3B82F6] shrink-0" />
                   {label}
                 </span>
@@ -395,7 +395,7 @@ export function CareerContent() {
                 <Link
                   href="/corporate/post"
                   className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#3B82F6' }}
+                  style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: 'var(--text-blue)' }}
                 >
                   <Plus className="w-4 h-4" aria-hidden="true" />
                   {opportunity.emptyStateCta}
@@ -413,6 +413,34 @@ export function CareerContent() {
 
         </div>
       </section>
+
+      {/* Corporate CTA banner — visas bara när det finns jobb */}
+      {!loading && !error && careerItems.length > 0 && <section className="px-4 sm:px-6 lg:px-8 py-12 pb-24">
+        <div className="max-w-3xl mx-auto">
+          <div
+            className="rounded-2xl px-6 py-8 flex flex-col sm:flex-row items-center gap-6"
+            style={{
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.10), rgba(139,92,246,0.04))',
+              border: '1px solid rgba(139,92,246,0.22)',
+            }}
+          >
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.28)' }}>
+              <Building2 className="w-6 h-6" style={{ color: '#8B5CF6' }} aria-hidden="true" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="font-bold hero-text text-base">{t.corporateCta.title}</p>
+              <p className="hero-text-muted text-sm mt-1">{t.corporateCta.desc}</p>
+            </div>
+            <Link
+              href="/corporate/post"
+              className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.35)', color: 'var(--text-purple)' }}
+            >
+              {t.corporateCta.btn}
+            </Link>
+          </div>
+        </div>
+      </section>}
 
       <CareerDrawer job={selectedJob} onClose={handleCloseDrawer} />
     </>

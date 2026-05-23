@@ -20,6 +20,12 @@ export const TRANSLATIONS = {
       mainNav: 'Huvudnavigation',
       mobileNav: 'Mobilnavigation',
       chooseTheme: 'Välj tema',
+      corporateSubAbout: 'Huvudsida',
+      corporateSubPost: 'Annonsera',
+      corporateSubServices: 'Tjänster',
+      studentsSubCareer: 'Karriär',
+      studentsSubEvents: 'Events',
+      studentsSubDeals: 'NEXUS Deals',
     },
 
     // --- Footer ---
@@ -57,6 +63,18 @@ export const TRANSLATIONS = {
       ctaBannerTitle: 'Redo att komma igång?',
       ctaBannerSubtitle: 'Kontakta oss så berättar vi hur ett samarbete kan se ut.',
       ctaBannerBtn: 'Kontakta oss',
+      subCareerLabel: 'Karriär',
+      subCareerDesc: 'Exjobb, praktik och traineemöjligheter.',
+      subEventsLabel: 'Events',
+      subEventsDesc: 'Arbetsmarknadsdagar och sektionsaktiviteter.',
+      subDealsLabel: 'NEXUS Deals',
+      subDealsDesc: 'Exklusiva rabatter för kårmedlemmar.',
+      subCorporateLabel: 'Kontakt',
+      subCorporateDesc: 'Kontakta Teknologkåren direkt.',
+      subPostLabel: 'Annonsera',
+      subPostDesc: 'Publicera jobb, event och deals.',
+      subServicesLabel: 'Tjänster',
+      subServicesDesc: 'Se hela produktportföljen.',
       features: {
         career: {
           title: 'Karriär & Exjobb',
@@ -227,6 +245,12 @@ export const TRANSLATIONS = {
             'Vi hjälper dig att synas på webben, sociala kanaler, på campus och via NEXUS Deals.',
           linkLabel: 'Läs om samarbete',
         },
+        portfolio: {
+          title: 'Produktportfölj',
+          description:
+            'Aktiviteter, tjänster och marknadsföringspaket — allt samlat. Se vad ett samarbete med TKL konkret kan innebära.',
+          linkLabel: 'Se produktportföljen',
+        },
       },
       pills: {
         members: '1 600+ studenter',
@@ -338,8 +362,42 @@ export const TRANSLATIONS = {
       sendAnother: 'Skicka in ett nytt',
       infoBanner: 'Förfrågan skickas till ao@teknologkaren.se. Vi hör av oss så snart vi kan.',
       requiredNote: '* Obligatoriska fält',
+      eventTypeLabel: 'Eventtyp',
+      eventTypePlaceholder: 'Välj eventtyp',
+      eventTypeInfoTitle: 'Om denna eventtyp',
+      eventTypeNone: 'Välj en eventtyp för att se mer information.',
+      eventTypeLoading: 'Laddar eventtyper…',
       validation: { required: 'Obligatoriskt fält', invalidEmail: 'Ange en giltig e-postadress' },
       charCount: '{count}/2000 tecken',
+    },
+
+    corporateCta: {
+      title: 'Representerar du ett företag?',
+      desc: 'Annonsera exjobb, events och deals direkt hos TKL NEXUS.',
+      btn: 'Annonsera hos oss',
+    },
+
+    services: {
+      badge: 'Produktportfölj',
+      heading: 'Vad vi',
+      headingAccent: 'erbjuder',
+      description:
+        'TKL NEXUS erbjuder ett brett utbud av aktiviteter, tjänster och marknadsföring för företag som vill nå LTU:s studenter.',
+      downloadBtn: 'Ladda ner produktblad (PDF)',
+      contactBtn: 'Kontakta oss',
+      costLabel: 'Kostnad:',
+      categoriesActivities: 'Aktiviteter & Event',
+      categoriesServices: 'Övriga tjänster',
+      categoriesMarketing: 'Marknadsföring',
+      loading: 'Hämtar tjänster…',
+      error: 'Kunde inte hämta tjänster.',
+      empty: 'Inga publicerade tjänster just nu.',
+      retry: 'Försök igen',
+      pills: {
+        members: '1 600+ studenter',
+        corporate: 'LTU · Luleå',
+        portfolio: 'Aktiviteter · Tjänster · Marknadsföring',
+      },
     },
 
     opportunities: {
@@ -477,6 +535,12 @@ export const TRANSLATIONS = {
       mainNav: 'Main navigation',
       mobileNav: 'Mobile navigation',
       chooseTheme: 'Choose theme',
+      corporateSubAbout: 'Main page',
+      corporateSubPost: 'Advertise',
+      corporateSubServices: 'Services',
+      studentsSubCareer: 'Career',
+      studentsSubEvents: 'Events',
+      studentsSubDeals: 'NEXUS Deals',
     },
 
     // --- Footer ---
@@ -514,6 +578,18 @@ export const TRANSLATIONS = {
       ctaBannerTitle: 'Ready to get started?',
       ctaBannerSubtitle: 'Contact us and we will explain how a collaboration could look.',
       ctaBannerBtn: 'Contact us',
+      subCareerLabel: 'Career',
+      subCareerDesc: 'Thesis, internship and trainee positions.',
+      subEventsLabel: 'Events',
+      subEventsDesc: 'Career fairs and section activities.',
+      subDealsLabel: 'NEXUS Deals',
+      subDealsDesc: 'Exclusive discounts for union members.',
+      subCorporateLabel: 'Contact',
+      subCorporateDesc: 'Get in touch with Teknologkåren.',
+      subPostLabel: 'Advertise',
+      subPostDesc: 'Post jobs, events and deals.',
+      subServicesLabel: 'Services',
+      subServicesDesc: 'View the full product portfolio.',
       features: {
         career: {
           title: 'Career & Thesis',
@@ -680,6 +756,12 @@ export const TRANSLATIONS = {
           description: 'We help you get visibility online, on social media, on campus and through NEXUS Deals.',
           linkLabel: 'Read about partnership',
         },
+        portfolio: {
+          title: 'Product Portfolio',
+          description:
+            'Activities, services and marketing packages — all in one place. See what a collaboration with TKL can involve.',
+          linkLabel: 'View product portfolio',
+        },
       },
       pills: {
         members: '1,600+ students',
@@ -791,8 +873,42 @@ export const TRANSLATIONS = {
       sendAnother: 'Submit another',
       infoBanner: 'Your request will be sent to ao@teknologkaren.se. We will get back to you as soon as we can.',
       requiredNote: '* Required fields',
+      eventTypeLabel: 'Event type',
+      eventTypePlaceholder: 'Select event type',
+      eventTypeInfoTitle: 'About this event type',
+      eventTypeNone: 'Select an event type to see more information.',
+      eventTypeLoading: 'Loading event types…',
       validation: { required: 'Required field', invalidEmail: 'Enter a valid email address' },
       charCount: '{count}/2000 characters',
+    },
+
+    corporateCta: {
+      title: 'Representing a company?',
+      desc: 'Post thesis projects, events and deals directly with TKL NEXUS.',
+      btn: 'Advertise with us',
+    },
+
+    services: {
+      badge: 'Product Portfolio',
+      heading: 'What we',
+      headingAccent: 'offer',
+      description:
+        'TKL NEXUS offers a wide range of activities, services and marketing for companies looking to reach LTU students.',
+      downloadBtn: 'Download product sheet (PDF)',
+      contactBtn: 'Contact us',
+      costLabel: 'Cost:',
+      categoriesActivities: 'Activities & Events',
+      categoriesServices: 'Other Services',
+      categoriesMarketing: 'Marketing',
+      loading: 'Fetching services…',
+      error: 'Could not fetch services.',
+      empty: 'No published services right now.',
+      retry: 'Try again',
+      pills: {
+        members: '1 600+ students',
+        corporate: 'LTU · Luleå',
+        portfolio: 'Activities · Services · Marketing',
+      },
     },
 
     opportunities: {

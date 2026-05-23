@@ -69,6 +69,7 @@ export function StudentsContent() {
       description: students.destinations.events.description,
       Icon: CalendarDays,
       accentColor: '#8B5CF6',
+      ctaTextColor: 'var(--text-purple)',
       cta: students.destinations.events.cta,
     },
     {
@@ -77,6 +78,7 @@ export function StudentsContent() {
       description: students.destinations.career.description,
       Icon: Briefcase,
       accentColor: '#3B82F6',
+      ctaTextColor: 'var(--text-blue)',
       cta: students.destinations.career.cta,
     },
     {
@@ -85,6 +87,7 @@ export function StudentsContent() {
       description: students.destinations.deals.description,
       Icon: GraduationCap,
       accentColor: '#F59E0B',
+      ctaTextColor: 'var(--text-orange)',
       cta: students.destinations.deals.cta,
     },
   ];
@@ -180,8 +183,8 @@ export function StudentsContent() {
               {/* Trust chips — all sizes */}
               <RevealItem className="flex flex-wrap gap-2 mb-8">
                 {[students.pills.jobs, students.pills.events, students.pills.deals].map((label) => (
-                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.22)', color: '#10B981' }}>
-                    <span className="w-1 h-1 rounded-full bg-[#10B981] shrink-0" />
+                  <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.22)', color: 'var(--text-green)' }}>
+                    <span className="w-1 h-1 rounded-full bg-[#10B981] shrink-0" aria-hidden="true" />
                     {label}
                   </span>
                 ))}
@@ -197,8 +200,8 @@ export function StudentsContent() {
                 </Link>
                 <Link
                   href="/events"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm hover:hero-text hover:bg-white/8 active:scale-95"
-                  style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm hover:hero-text active:scale-95"
+                  style={{ border: '1px solid var(--glass-border-strong)' }}
                 >
                   {students.ctaEvents}
                 </Link>

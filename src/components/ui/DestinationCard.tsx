@@ -9,7 +9,8 @@ interface DestinationCardProps {
   label: string;
   description: string;
   Icon: LucideIcon;
-  accentColor: string; // hex
+  accentColor: string; // hex — used for bg/border/icon
+  ctaTextColor?: string; // WCAG-safe text color — defaults to accentColor
   cta: string;
   index?: number;
 }
@@ -20,9 +21,11 @@ export function DestinationCard({
   description,
   Icon,
   accentColor,
+  ctaTextColor,
   cta,
   index = 0,
 }: DestinationCardProps) {
+  const ctaColor = ctaTextColor ?? accentColor;
 
   return (
     <motion.div
@@ -36,8 +39,8 @@ export function DestinationCard({
         href={href}
         className="block relative rounded-2xl overflow-hidden p-6 transition-transform duration-300 group-hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-2"
         style={{
-          background: `${accentColor}0a`,
-          border: `1px solid ${accentColor}22`,
+          background: `${accentColor}1a`,
+          border: `1px solid ${accentColor}38`,
           boxShadow: `0 0 0 0 ${accentColor}00`,
           // Focus ring uses accent
           outlineColor: accentColor,
@@ -45,7 +48,7 @@ export function DestinationCard({
         aria-label={label}
       >
         {/* Light mode: white glass overlay for visual substance */}
-        <div className="absolute inset-0 light:bg-white/50 pointer-events-none rounded-2xl" aria-hidden="true" />
+        <div className="absolute inset-0 light:bg-white/15 pointer-events-none rounded-2xl" aria-hidden="true" />
 
         {/* Hover glow overlay */}
         <div
@@ -78,12 +81,12 @@ export function DestinationCard({
         >
           {label}
         </h3>
-        <p className="text-sm hero-text-muted leading-relaxed">{description}</p>
+        <p className="text-sm hero-text leading-relaxed">{description}</p>
 
         {/* Arrow */}
         <div
           className="flex items-center gap-1.5 mt-4 text-sm font-semibold transition-all duration-300 group-hover:gap-3"
-          style={{ color: accentColor }}
+          style={{ color: ctaColor }}
         >
           <span>{cta}</span>
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip } from 'lucide-react';
+import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip, Info, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { getPublishedEventTypes } from '@/lib/services/eventTypes';
+import type { TKLEventType } from '@/lib/schemas/eventType';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -200,7 +202,7 @@ const labelCls = 'block text-xs font-semibold tracking-wide text-(--hero-text-mu
 // Component
 
 export function PostContent() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const cp = t.corporatePost;
   const colors = ACCENT_COLOR_MAP['blue'];
   const { contact } = useSettings();
@@ -214,6 +216,17 @@ export function PostContent() {
   const [contactEmail, setContactEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [eventTypes, setEventTypes] = useState<TKLEventType[]>([]);
+  const [eventTypesLoading, setEventTypesLoading] = useState(true);
+  const [selectedEventTypeId, setSelectedEventTypeId] = useState('');
+
+  useEffect(() => {
+    if (activeTab !== 'event') return;
+    setEventTypesLoading(true);
+    getPublishedEventTypes()
+      .then((types) => { setEventTypes(types); setEventTypesLoading(false); })
+      .catch(() => setEventTypesLoading(false));
+  }, [activeTab]);
 
   function touch(id: string) {
     setTouched(prev => new Set([...prev, id]));
@@ -281,6 +294,8 @@ export function PostContent() {
   ];
 
   const requiredDot = <span className="text-[#3B82F6] ml-0.5">*</span>;
+
+  const selectedEventType = eventTypes.find((et) => et.id === selectedEventTypeId) ?? null;
 
   return (
     <>
@@ -387,7 +402,7 @@ export function PostContent() {
                   id={`tab-${id}`}
                   onClick={() => switchTab(id)}
                   onKeyDown={(e) => handleTabKeyDown(e, id)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px]"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-11"
                   style={
                     isActive
                       ? {
@@ -583,7 +598,7 @@ export function PostContent() {
                         </span>
                       </label>
                       <textarea id="opp-desc" rows={5} maxLength={2000} placeholder={cp.opportunity.descriptionPlaceholder}
-                        className={`${inputCls} resize-y min-h-[120px]`}
+                        className={`${inputCls} resize-y min-h-30`}
                         value={opp.description} onChange={e => setOpp(p => ({ ...p, description: e.target.value }))} />
                     </div>
 
@@ -595,7 +610,7 @@ export function PostContent() {
                         </span>
                       </label>
                       <textarea id="opp-descEn" rows={4} maxLength={2000} placeholder={cp.opportunity.descriptionEnPlaceholder}
-                        className={`${inputCls} resize-y min-h-[100px]`}
+                        className={`${inputCls} resize-y min-h-25`}
                         value={opp.descriptionEn} onChange={e => setOpp(p => ({ ...p, descriptionEn: e.target.value }))} />
                     </div>
                   </div>
@@ -612,6 +627,64 @@ export function PostContent() {
                     {cp.event.sectionTitle}
                   </legend>
                   <div className="space-y-4">
+                    {/* Step 1: Select event type */}
+                    <div>
+                      <label htmlFor="evt-type" className={labelCls}>
+                        {cp.eventTypeLabel}{requiredDot}
+                      </label>
+                      {eventTypesLoading ? (
+                        <p className="text-xs hero-text-muted">{cp.eventTypeLoading}</p>
+                      ) : (
+                        <select
+                          id="evt-type"
+                          className={inputCls}
+                          value={selectedEventTypeId}
+                          onChange={(e) => setSelectedEventTypeId(e.target.value)}
+                        >
+                          <option value="" disabled>{cp.eventTypePlaceholder}</option>
+                          {eventTypes.map((et) => (
+                            <option key={et.id} value={et.id}>
+                              {locale === 'en' && et.nameEn ? et.nameEn : et.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+
+                    {/* Info panel for selected event type */}
+                    {selectedEventType && (
+                      <div
+                        className="rounded-xl px-5 py-4 space-y-3"
+                        style={{
+                          background: 'rgba(59,130,246,0.07)',
+                          border: '1px solid rgba(59,130,246,0.18)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Info className="w-4 h-4 shrink-0" style={{ color: '#3B82F6' }} aria-hidden="true" />
+                          <span className="text-sm font-semibold hero-text">{cp.eventTypeInfoTitle}</span>
+                        </div>
+                        <p className="text-sm hero-text-muted leading-relaxed">
+                          {locale === 'en' && selectedEventType.descriptionEn
+                            ? selectedEventType.descriptionEn
+                            : selectedEventType.description}
+                        </p>
+                        {(locale === 'en' ? selectedEventType.highlightsEn : selectedEventType.highlights).length > 0 && (
+                          <ul className="space-y-1.5 pt-1">
+                            {(locale === 'en' ? selectedEventType.highlightsEn : selectedEventType.highlights).map((point, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs hero-text-muted">
+                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: '#3B82F6' }} aria-hidden="true" />
+                                <span>{point}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                    {!selectedEventType && !eventTypesLoading && (
+                      <p className="text-xs hero-text-subtle">{cp.eventTypeNone}</p>
+                    )}
+
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
@@ -700,7 +773,7 @@ export function PostContent() {
                         aria-invalid={hasFieldErr('evt-desc', evt.description) || undefined}
                         aria-describedby={hasFieldErr('evt-desc', evt.description) ? 'error-evt-desc' : undefined}
                         placeholder={cp.event.descriptionPlaceholder}
-                        className={`${inputCls} resize-y min-h-[120px]`}
+                        className={`${inputCls} resize-y min-h-30`}
                         value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))}
                         onBlur={() => touch('evt-desc')} />
                       {fieldErr('evt-desc', evt.description)}
@@ -714,7 +787,7 @@ export function PostContent() {
                         </span>
                       </label>
                       <textarea id="evt-descEn" rows={4} maxLength={2000} placeholder={cp.event.descriptionEnPlaceholder}
-                        className={`${inputCls} resize-y min-h-[100px]`}
+                        className={`${inputCls} resize-y min-h-25`}
                         value={evt.descriptionEn} onChange={e => setEvt(p => ({ ...p, descriptionEn: e.target.value }))} />
                     </div>
                   </div>
@@ -771,7 +844,7 @@ export function PostContent() {
                         aria-invalid={hasFieldErr('deal-desc', deal.description) || undefined}
                         aria-describedby={hasFieldErr('deal-desc', deal.description) ? 'error-deal-desc' : undefined}
                         placeholder={cp.deal.descriptionPlaceholder}
-                        className={`${inputCls} resize-y min-h-[100px]`}
+                        className={`${inputCls} resize-y min-h-25`}
                         value={deal.description} onChange={e => setDeal(p => ({ ...p, description: e.target.value }))}
                         onBlur={() => touch('deal-desc')} />
                       {fieldErr('deal-desc', deal.description)}
@@ -785,7 +858,7 @@ export function PostContent() {
                         </span>
                       </label>
                       <textarea id="deal-descEn" rows={3} maxLength={2000} placeholder={cp.deal.descriptionEnPlaceholder}
-                        className={`${inputCls} resize-y min-h-[80px]`}
+                        className={`${inputCls} resize-y min-h-20`}
                         value={deal.descriptionEn} onChange={e => setDeal(p => ({ ...p, descriptionEn: e.target.value }))} />
                     </div>
 
@@ -872,11 +945,11 @@ export function PostContent() {
                       aria-live="polite"
                     >
                       <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#10B981' }} aria-hidden="true" />
-                      <p className="text-sm font-medium" style={{ color: '#10B981' }}>{cp.submitSuccess}</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-green)' }}>{cp.submitSuccess}</p>
                       <button
                         onClick={() => setSubmitted(false)}
                         className="sm:ml-auto text-xs underline transition-opacity hover:opacity-70 shrink-0"
-                        style={{ color: '#10B981' }}
+                        style={{ color: 'var(--text-green)' }}
                       >
                         {cp.sendAnother}
                       </button>

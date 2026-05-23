@@ -20,11 +20,23 @@ const TYPE_COLORS: Record<CareerType, string> = {
   trainee: '#F59E0B',
 };
 
+// Maps accent hex → WCAG-safe text CSS variable (light: darker shade, dark: same hex)
+const ACCENT_TEXT: Record<string, string> = {
+  '#8B5CF6': 'var(--text-purple)',
+  '#3B82F6': 'var(--text-blue)',
+  '#10B981': 'var(--text-green)',
+  '#F59E0B': 'var(--text-orange)',
+  '#6366F1': 'var(--text-purple)',
+  '#0EA5E9': 'var(--text-blue)',
+  '#06B6D4': 'var(--text-blue)',
+};
+
 export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardProps) {
   const { t, locale } = useLanguage();
   const opp = t.opportunities;
   const shouldReduceMotion = useReducedMotion();
   const cardColor = color ?? '#3B82F6';
+  const cardTextColor = ACCENT_TEXT[cardColor] ?? cardColor;
   const badgeColor = TYPE_COLORS[job.type];
 
   const isEnglish = locale === 'en';
@@ -114,7 +126,7 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
               onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
               aria-label={`${opp.visaMer}: ${displayTitle}`}
               className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
-              style={{ color: cardColor, background: `${cardColor}12`, border: `1px solid ${cardColor}28` }}
+              style={{ color: cardTextColor, background: `${cardColor}12`, border: `1px solid ${cardColor}28` }}
             >
               {opp.visaMer}
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -126,7 +138,7 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-xs font-semibold transition-opacity duration-200 hover:opacity-80"
-              style={{ color: cardColor }}
+              style={{ color: cardTextColor }}
               onClick={(e) => e.stopPropagation()}
               aria-label={`${displayTitle} — ${job.company}`}
             >

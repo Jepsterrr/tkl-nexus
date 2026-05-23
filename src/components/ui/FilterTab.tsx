@@ -3,6 +3,17 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
+// Maps accent hex → WCAG-safe text CSS variable (light: darker shade, dark: same hex)
+const ACCENT_TEXT: Record<string, string> = {
+  '#8B5CF6': 'var(--text-purple)',
+  '#3B82F6': 'var(--text-blue)',
+  '#10B981': 'var(--text-green)',
+  '#F59E0B': 'var(--text-orange)',
+  '#6366F1': 'var(--text-purple)',
+  '#0EA5E9': 'var(--text-blue)',
+  '#06B6D4': 'var(--text-blue)',
+};
+
 interface FilterTabProps {
   active: boolean;
   onClick: () => void;
@@ -15,6 +26,7 @@ interface FilterTabProps {
 }
 
 export function FilterTab({ active, onClick, label, color, logo, showActiveIcon }: FilterTabProps) {
+  const textColor = ACCENT_TEXT[color] ?? color;
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -27,7 +39,7 @@ export function FilterTab({ active, onClick, label, color, logo, showActiveIcon 
       style={{
         background: active ? `${color}22` : 'var(--glass-bg-subtle)',
         border: `1px solid ${active ? color + '55' : 'var(--glass-border-subtle)'}`,
-        color: active ? color : 'var(--hero-text-muted)',
+        color: active ? textColor : 'var(--hero-text-muted)',
         boxShadow: active ? `0 0 20px ${color}15` : 'none',
       }}
       aria-pressed={active}
@@ -38,7 +50,7 @@ export function FilterTab({ active, onClick, label, color, logo, showActiveIcon 
       {showActiveIcon && (
         <Sparkles
           className="w-4 h-4 transition-opacity duration-200"
-          style={{ color, opacity: active ? 1 : 0.35 }}
+          style={{ color: textColor, opacity: active ? 1 : 0.35 }}
           aria-hidden="true"
         />
       )}

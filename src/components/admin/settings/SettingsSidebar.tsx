@@ -9,8 +9,9 @@ const LINKS = [
   { href: '/admin/settings/about',    label: 'Om oss'     },
   { href: '/admin/settings/services', label: 'Tjänster'   },
   { href: '/admin/settings/links',    label: 'Länkar'     },
-  { href: '/admin/settings/timeline', label: 'Tidslinje'  },
-  { href: '/admin/settings/banner',   label: 'Banner'     },
+  { href: '/admin/settings/timeline',     label: 'Tidslinje'   },
+  { href: '/admin/settings/event-types', label: 'Eventtyper'  },
+  { href: '/admin/settings/banner',      label: 'Banner'      },
   { href: '/admin/settings/media',    label: 'Bilder'     },
 ];
 

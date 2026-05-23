@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { CalendarDays, LayoutGrid, Handshake, Building2, Users, type LucideIcon } from 'lucide-react';
+import { CalendarDays, LayoutGrid, Handshake, Package, Building2, ArrowRight, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useImageLoad } from '@/lib/hooks/useImageLoad';
@@ -19,6 +19,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   CalendarDays,
   LayoutGrid,
   Handshake,
+  Package,
 };
 
 export function CorporateContent() {
@@ -60,6 +61,11 @@ export function CorporateContent() {
       title: (locale === 'sv' ? services?.partnershipTitleSv : services?.partnershipTitleEn) ?? corporate.services.partnership.title,
       description: (locale === 'sv' ? services?.partnershipDescSv : services?.partnershipDescEn) ?? corporate.services.partnership.description,
       linkLabel: corporate.services.partnership.linkLabel, iconName: 'Handshake', linkHref: '/about#kontakt', accentColor: 'purple' as const,
+    },
+    {
+      title: corporate.services.portfolio.title,
+      description: corporate.services.portfolio.description,
+      linkLabel: corporate.services.portfolio.linkLabel, iconName: 'Package', linkHref: '/corporate/services', accentColor: 'purple' as const,
     },
   ];
 
@@ -213,50 +219,36 @@ export function CorporateContent() {
               </h2>
             </RevealItem>
           </StaggerReveal>
-          <div className="relative">
-            <div
-              className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
-              style={{ borderLeft: 'dashed 1px var(--border)' }}
-              aria-hidden="true"
-            />
-
-            <div className="space-y-10 lg:space-y-16">
-              {SERVICES.map((service, i) => {
-                const Icon = ICON_MAP[service.iconName] ?? LayoutGrid;
-                const isReversed = i % 2 !== 0;
-                return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            {SERVICES.map((service) => {
+              const Icon = ICON_MAP[service.iconName] ?? LayoutGrid;
+              return (
+                <div
+                  key={service.title}
+                  className="rounded-2xl p-6 flex flex-col gap-4"
+                  style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
+                >
                   <div
-                    key={service.title}
-                    className={`flex flex-col lg:flex-row items-start gap-6 lg:gap-12 ${isReversed ? 'lg:flex-row-reverse' : ''}`}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+                    aria-hidden="true"
                   >
-                    <div className={`lg:w-1/2 flex items-start gap-4 ${isReversed ? 'lg:pl-12' : 'lg:pr-12 lg:justify-end lg:text-right'}`}>
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isReversed ? '' : 'lg:order-last'}`}
-                        style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
-                        aria-hidden="true"
-                      >
-                        <Icon className="w-5 h-5" style={{ color: colors.hex }} strokeWidth={1.5} />
-                      </div>
-                      <div>
-                        <h3 className="text-foreground font-display font-semibold text-lg">{service.title}</h3>
-                        <Link
-                          href={service.linkHref}
-                          className="inline-block mt-2 text-sm font-mono font-medium tracking-wide transition-colors duration-150"
-                          style={{ color: colors.hex }}
-                        >
-                          {service.linkLabel}
-                        </Link>
-                      </div>
-                    </div>
-                    <div className={`lg:w-1/2 ${isReversed ? 'lg:pr-12 lg:text-right' : 'lg:pl-12'}`}>
-                      <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-                        {service.description}
-                      </p>
-                    </div>
+                    <Icon className="w-5 h-5" style={{ color: colors.hex }} strokeWidth={1.5} />
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex-1">
+                    <h3 className="hero-text font-semibold text-base mb-2">{service.title}</h3>
+                    <p className="hero-text-muted text-sm leading-relaxed">{service.description}</p>
+                  </div>
+                  <Link
+                    href={service.linkHref}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold hero-text-muted hover:hero-text transition-colors duration-150 group"
+                  >
+                    {service.linkLabel}
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5" style={{ color: colors.hex }} aria-hidden="true" />
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

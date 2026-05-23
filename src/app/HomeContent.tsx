@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useImageLoad } from '@/lib/hooks/useImageLoad';
 import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
-import { GraduationCap, Building2, ArrowRight } from 'lucide-react';
+import { RootNetwork } from '@/components/ui/RootNetwork';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { BenefitCardComponent } from '@/components/ui/BenefitCard';
@@ -42,28 +42,6 @@ const BADGE_STYLE: React.CSSProperties = {
   border: '1px solid rgba(227,6,19,0.28)',
   color: '#E30613',
   boxShadow: '0 0 20px rgba(227,6,19,0.10)',
-};
-const CTA_STUDENT_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg, rgba(16,185,129,0.16), rgba(16,185,129,0.07))',
-  border: '1px solid rgba(16,185,129,0.32)',
-  color: '#10B981',
-  boxShadow: '0 0 28px rgba(16,185,129,0.10)',
-  minWidth: '240px',
-};
-const CTA_CORPORATE_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg, rgba(139,92,246,0.16), rgba(139,92,246,0.07))',
-  border: '1px solid rgba(139,92,246,0.32)',
-  color: '#8B5CF6',
-  boxShadow: '0 0 28px rgba(139,92,246,0.10)',
-  minWidth: '240px',
-};
-const CTA_STUDENT_ICON_STYLE: React.CSSProperties = {
-  background: 'rgba(16,185,129,0.15)',
-  border: '1px solid rgba(16,185,129,0.28)',
-};
-const CTA_CORPORATE_ICON_STYLE: React.CSSProperties = {
-  background: 'rgba(139,92,246,0.15)',
-  border: '1px solid rgba(139,92,246,0.28)',
 };
 
 export function HomeContent() {
@@ -254,70 +232,21 @@ export function HomeContent() {
             {/* Mobile trust chips — multi-colour matching feature card accents */}
             <RevealItem className="flex flex-wrap justify-center gap-2 mt-4 lg:hidden">
               {([
-                { label: home.pills.students,  color: '#3B82F6', bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.22)'  },
-                { label: home.pills.companies, color: '#8B5CF6', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.22)' },
-                { label: home.pills.types,     color: '#F59E0B', bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.22)'  },
-              ] as const).map(({ label, color, bg, border }) => (
+                { label: home.pills.students,  textColor: 'var(--text-blue)',   dotColor: '#3B82F6', bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.22)'  },
+                { label: home.pills.companies, textColor: 'var(--text-purple)', dotColor: '#8B5CF6', bg: 'rgba(139,92,246,0.10)', border: 'rgba(139,92,246,0.22)' },
+                { label: home.pills.types,     textColor: 'var(--text-orange)', dotColor: '#F59E0B', bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.22)'  },
+              ] as const).map(({ label, textColor, dotColor, bg, border }) => (
                 <span
                   key={label}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: bg, border: `1px solid ${border}`, color }}
+                  style={{ background: bg, border: `1px solid ${border}`, color: textColor }}
                 >
-                  <span className="w-1 h-1 rounded-full shrink-0" style={{ background: color }} />
+                  <span className="w-1 h-1 rounded-full shrink-0" style={{ background: dotColor }} aria-hidden="true" />
                   {label}
                 </span>
               ))}
             </RevealItem>
 
-            {/* Dual-audience CTAs */}
-            <RevealItem className="mt-12">
-              <p className="text-xs font-semibold uppercase tracking-widest hero-text-subtle mb-5">
-                {home.ctaLabel}
-              </p>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 max-w-md mx-auto sm:max-w-none">
-                <Link
-                  href="/students"
-                  className="group flex items-center justify-between gap-4 px-6 py-4 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981] w-full sm:w-auto"
-                  style={CTA_STUDENT_STYLE}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={CTA_STUDENT_ICON_STYLE}
-                      aria-hidden="true"
-                    >
-                      <GraduationCap className="w-4.5 h-4.5" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-sm font-bold leading-tight">{home.ctaStudents}</div>
-                      <div className="text-xs leading-tight mt-0.5" style={{ color: 'rgba(16,185,129,0.65)' }}>{home.ctaStudentsSub}</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 shrink-0" aria-hidden="true" />
-                </Link>
-
-                <Link
-                  href="/corporate"
-                  className="group flex items-center justify-between gap-4 px-6 py-4 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] w-full sm:w-auto"
-                  style={CTA_CORPORATE_STYLE}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={CTA_CORPORATE_ICON_STYLE}
-                      aria-hidden="true"
-                    >
-                      <Building2 className="w-4.5 h-4.5" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-sm font-bold leading-tight">{home.ctaCorporate}</div>
-                      <div className="text-xs leading-tight mt-0.5" style={{ color: 'rgba(139,92,246,0.65)' }}>{home.ctaCorporateSub}</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 shrink-0" aria-hidden="true" />
-                </Link>
-              </div>
-            </RevealItem>
 
           </StaggerReveal>
         </motion.div>
@@ -339,6 +268,42 @@ export function HomeContent() {
             style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.35))' }}
           />
         </motion.div>
+      </section>
+
+      {/* RootNetwork — dual-audience tree navigator */}
+      <section
+        className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        aria-labelledby="rootnetwork-heading"
+      >
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(227,6,19,0.04) 0%, transparent 70%)',
+          }}
+        />
+        <div className="relative max-w-5xl mx-auto">
+          <RootNetwork
+            ctaLabel={home.ctaLabel}
+            ctaStudents={home.ctaStudents}
+            ctaStudentsSub={home.ctaStudentsSub}
+            ctaCorporate={home.ctaCorporate}
+            ctaCorporateSub={home.ctaCorporateSub}
+            subCareerLabel={home.subCareerLabel}
+            subCareerDesc={home.subCareerDesc}
+            subEventsLabel={home.subEventsLabel}
+            subEventsDesc={home.subEventsDesc}
+            subDealsLabel={home.subDealsLabel}
+            subDealsDesc={home.subDealsDesc}
+            subCorporateLabel={home.subCorporateLabel}
+            subCorporateDesc={home.subCorporateDesc}
+            subPostLabel={home.subPostLabel}
+            subPostDesc={home.subPostDesc}
+            subServicesLabel={home.subServicesLabel}
+            subServicesDesc={home.subServicesDesc}
+          />
+        </div>
       </section>
 
       {/* Feature Cards */}

@@ -7,6 +7,11 @@
   --font-size: 16px;
   --navbar-height: 72px;
 
+  /* Hero text — light-mode defaults (safe before ThemeProvider hydrates) */
+  --hero-text: #0d0b1a;
+  --hero-text-muted: #2a2840;
+  --hero-text-subtle: #4e4b68;
+
   /* Spacing scale — 4pt base */
   --space-1:   0.25rem;   /* 4px  */
   --space-2:   0.5rem;    /* 8px  */
@@ -116,18 +121,39 @@
   --nav-control-active-text: rgba(255, 255, 255, 1);
 
   /* Hero / Page text */
-  --hero-text: rgba(255, 255, 255, 1);
-  --hero-text-muted: rgba(255, 255, 255, 0.6);
-  --hero-text-subtle: rgba(255, 255, 255, 0.4);
+  --hero-text: #ffffff;
+  --hero-text-muted: #d4d2e2;
+  --hero-text-subtle: #9896ac;
 
   /* Footer */
   --footer-text: rgba(255, 255, 255, 1);
-  --footer-text-muted: rgba(255, 255, 255, 0.5);
-  --footer-text-subtle: rgba(255, 255, 255, 0.3);
+  --footer-text-muted: rgba(255, 255, 255, 0.65);
+  --footer-text-subtle: rgba(255, 255, 255, 0.45);
 
   /* Cards / Glass */
-  --about-card-bg: rgba(255, 255, 255, 0.03);
-  --about-card-border: rgba(255, 255, 255, 0.07);
+  --about-card-bg: rgba(255, 255, 255, 0.08);
+  --about-card-border: rgba(255, 255, 255, 0.09);
+
+  /* Card text — neutral greys, no purple tint, work on any accent background */
+  --card-text:        #f5f4fd;
+  --card-text-muted:  #c4c2d8;
+  --card-text-subtle: #8e8ca4;
+
+  /* Accent glass — dark mode (low opacity, dark base carries the weight) */
+  --glass-green-bg:     rgba(16, 185, 129, 0.07);
+  --glass-green-border: rgba(16, 185, 129, 0.30);
+  --glass-purple-bg:    rgba(139, 92, 246, 0.07);
+  --glass-purple-border:rgba(139, 92, 246, 0.30);
+
+  /* RootNetwork tree — dark mode defaults */
+  --rn-green:               #10B981;
+  --rn-purple:              #8B5CF6;
+  --rn-red:                 #E30613;
+  --rn-red-glow:            rgba(227, 6, 19, 0.13);
+  --rn-line-opacity:        0.78;
+  --rn-bloom-opacity:       0.14;
+  --rn-bloom-opacity-stub:  0.10;
+  --rn-child-bg:            rgba(255, 255, 255, 0.08);
 
   /* Drawer */
   --navbar-bottom: 80px;
@@ -136,6 +162,12 @@
 
   /* CTA Banner */
   --cta-banner-bg: rgba(10, 1, 24, 0.8);
+
+  /* Themed accent text — WCAG AA on dark backgrounds */
+  --text-green: #10B981;
+  --text-orange: #F59E0B;
+  --text-blue: #3B82F6;
+  --text-purple: #8B5CF6;
 }
 
 /* Light */
@@ -174,8 +206,8 @@
 
   /* Hero / Page text */
   --hero-text: #0d0b1a;
-  --hero-text-muted: rgba(13, 11, 26, 0.72);
-  --hero-text-subtle: rgba(13, 11, 26, 0.65);
+  --hero-text-muted: #2a2840;
+  --hero-text-subtle: #4e4b68;
 
   /* Footer */
   --footer-text: #0d0b1a;
@@ -185,8 +217,32 @@
   /* Cards / Glass */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(0, 0, 0, 0.1);
-  --about-card-bg: rgba(255, 255, 255, 0.7);
-  --about-card-border: rgba(0, 0, 0, 0.1);
+  --about-card-bg: #ffffff;
+  --about-card-border: rgba(0, 0, 0, 0.10);
+
+  /* Card text — neutral, no purple tint, work on any accent background */
+  --card-text:        #1a1832;
+  --card-text-muted:  #3d3a56;
+  --card-text-subtle: #65627a;
+
+  /* Accent glass — light mode (higher opacity, light base needs more punch) */
+  --glass-green-bg:     rgba(16, 185, 129, 0.12);
+  --glass-green-border: rgba(16, 185, 129, 0.38);
+  --glass-purple-bg:    rgba(139, 92, 246, 0.12);
+  --glass-purple-border:rgba(139, 92, 246, 0.38);
+
+  /* RootNetwork tree — light mode overrides */
+  --rn-green:               #047857;
+  --rn-purple:              #6D28D9;
+  --rn-red:                 #B90010;
+  --rn-red-glow:            rgba(185, 0, 16, 0.13);
+  --rn-line-opacity:        0.90;
+  --rn-bloom-opacity:       0.22;
+  --rn-bloom-opacity-stub:  0.16;
+  --rn-child-bg:            rgba(255, 255, 255, 0.62);
+
+  /* RootNetwork crisp path drop-shadow in light mode */
+  .rn-path-crisp { filter: drop-shadow(0 0 3px currentColor); }
 
   /* Drawer */
   --drawer-bg: #f5f4fd;
@@ -204,6 +260,12 @@
 
   /* CTA Banner */
   --cta-banner-bg: rgba(245, 243, 255, 0.9);
+
+  /* Themed accent text — WCAG AA on light backgrounds */
+  --text-green: #047857;
+  --text-orange: #92400E;
+  --text-blue: #1d4ed8;
+  --text-purple: #5b21b6;
 }
 
 
@@ -380,6 +442,11 @@
   border: 1px solid var(--glass-border-subtle);
 }
 
+/* Light mode: reduce orb opacity */
+.light .gradient-orb {
+  opacity: 0.25 !important;
+}
+
 .glass-strong {
   background: var(--glass-bg-strong);
   backdrop-filter: blur(24px);
@@ -420,9 +487,14 @@
 }
 
 /* Hero / Page */
-.hero-text        { color: var(--hero-text, rgba(255,255,255,1)); }
-.hero-text-muted  { color: var(--hero-text-muted, rgba(255,255,255,0.6)); }
-.hero-text-subtle { color: var(--hero-text-subtle, rgba(255,255,255,0.4)); }
+.hero-text        { color: var(--hero-text, #0d0b1a); }
+.hero-text-muted  { color: var(--hero-text-muted, #2a2840); }
+.hero-text-subtle { color: var(--hero-text-subtle, #4e4b68); }
+
+/* Card text — neutral greys, no purple tint, readable on any accent background */
+.card-text        { color: var(--card-text, #1a1832); }
+.card-text-muted  { color: var(--card-text-muted, #3d3a56); }
+.card-text-subtle { color: var(--card-text-subtle, #65627a); }
 
 /* Footer */
 .footer-theme       { background: var(--nav-bg, rgba(0,0,0,0.30)); }
@@ -451,8 +523,8 @@
 /* Hero heading — Unbounded at display sizes: aggressive tracking, tight leading */
 .hero-heading {
   font-family: var(--font-heading), system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
   line-height: 1.05;
   text-wrap: balance;
 }

@@ -46,7 +46,7 @@ export function BenefitCardComponent({
         }}
       >
         {/* Light mode: white glass overlay for visual substance */}
-        <div className="absolute inset-0 light:bg-white/50 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 light:bg-white/15 pointer-events-none" aria-hidden="true" />
 
         {/* Bakgrundssiffra — featured, dramatiskt stor */}
         <span
@@ -95,7 +95,7 @@ export function BenefitCardComponent({
             >
               {title}
             </h3>
-            <p className="hero-text-muted text-sm leading-relaxed mb-4 max-w-prose">
+            <p className="hero-text text-sm leading-relaxed mb-4 max-w-prose">
               {description}
             </p>
 
@@ -103,7 +103,7 @@ export function BenefitCardComponent({
               <Link
                 href={linkHref}
                 className="inline-flex items-center gap-2 text-sm font-semibold transition-all duration-150 group/link"
-                style={{ color: colors.hex }}
+                style={{ color: colors.textColor }}
               >
                 {linkLabel}
                 <ArrowRight
@@ -132,13 +132,13 @@ export function BenefitCardComponent({
       }}
     >
       {/* Light mode: white glass overlay for visual substance */}
-      <div className="absolute inset-0 light:bg-white/50 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 light:bg-white/15 pointer-events-none" aria-hidden="true" />
 
       {/* Ikon — neutral bakgrund för tydlig kontrast */}
       <div
         className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-5"
         style={{
-          background: 'rgba(255,255,255,0.06)',
+          background: 'var(--glass-bg-subtle)',
           border: `1px solid ${colors.border}`,
         }}
         aria-hidden="true"
@@ -147,13 +147,13 @@ export function BenefitCardComponent({
       </div>
 
       <h3 className="hero-text font-semibold text-base mb-2 leading-snug">{title}</h3>
-      <p className="hero-text-muted text-sm leading-relaxed">{description}</p>
+      <p className="hero-text text-sm leading-relaxed">{description}</p>
 
       {linkLabel && linkHref && (
         <Link
           href={linkHref}
           className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium transition-colors duration-150"
-          style={{ color: colors.hex }}
+          style={{ color: colors.textColor }}
         >
           {linkLabel} →
         </Link>

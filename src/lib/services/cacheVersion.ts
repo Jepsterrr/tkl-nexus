@@ -2,7 +2,7 @@ import { doc, getDocFromServer, setDoc, serverTimestamp } from 'firebase/firesto
 import { db } from '@/lib/firebase';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 
-export type CacheKey = 'events' | 'career' | 'deals';
+export type CacheKey = 'events' | 'career' | 'deals' | 'products';
 
 /**
  * Hämtar settings/cacheVersion från server, jämför mot localStorage.

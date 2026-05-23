@@ -2,37 +2,36 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays } from 'lucide-react';
+import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays, Briefcase, Gift, PenLine, LayoutGrid, ChevronDown } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import type { Locale } from '@/lib/i18n';
 
+type NavChild = { href: string; label: string; Icon: LucideIcon };
+type NavLinkItem = { href: string; label: string; Icon: LucideIcon; children?: NavChild[] };
+
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleMouseEnter(href: string) {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setHoveredHref(href);
+  }
+  function handleMouseLeave() {
+    closeTimer.current = setTimeout(() => setHoveredHref(null), 150);
+  }
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useLanguage();
   const scrollContainer = useScrollContainer();
-
-  if (pathname.startsWith('/admin')) return null;
-
-  const NAV_LINKS = [
-    { href: '/', label: t.nav.home, Icon: Home },
-    { href: '/corporate', label: t.nav.corporate, Icon: Building2 },
-    { href: '/students', label: t.nav.students, Icon: GraduationCap },
-    { href: '/events', label: t.nav.events, Icon: CalendarDays },
-    { href: '/about', label: t.nav.about, Icon: Info },
-  ] as const;
-
-  const themeIcons = [
-    { value: 'dark' as const, Icon: Moon, label: t.nav.themedark },
-    { value: 'light' as const, Icon: Sun, label: t.nav.themelight },
-    { value: 'system' as const, Icon: Monitor, label: t.nav.themesystem },
-  ];
 
   useEffect(() => {
     const container = scrollContainer.current;
@@ -47,6 +46,42 @@ export function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  if (pathname.startsWith('/admin')) return null;
+
+  const NAV_LINKS: NavLinkItem[] = [
+    { href: '/', label: t.nav.home, Icon: Home },
+    {
+      href: '/corporate', label: t.nav.corporate, Icon: Building2,
+      children: [
+        { href: '/corporate', label: t.nav.corporateSubAbout, Icon: Building2 },
+        { href: '/corporate/post', label: t.nav.corporateSubPost, Icon: PenLine },
+        { href: '/corporate/services', label: t.nav.corporateSubServices, Icon: LayoutGrid },
+      ],
+    },
+    {
+      href: '/students', label: t.nav.students, Icon: GraduationCap,
+      children: [
+        { href: '/career', label: t.nav.studentsSubCareer, Icon: Briefcase },
+        { href: '/events', label: t.nav.studentsSubEvents, Icon: CalendarDays },
+        { href: '/students/deals', label: t.nav.studentsSubDeals, Icon: Gift },
+      ],
+    },
+    { href: '/events', label: t.nav.events, Icon: CalendarDays },
+    { href: '/about', label: t.nav.about, Icon: Info },
+  ];
+
+  const themeIcons = [
+    { value: 'dark' as const, Icon: Moon, label: t.nav.themedark },
+    { value: 'light' as const, Icon: Sun, label: t.nav.themelight },
+    { value: 'system' as const, Icon: Monitor, label: t.nav.themesystem },
+  ];
+
   return (
     <>
       <motion.nav
@@ -57,9 +92,9 @@ export function Navbar() {
         role="navigation"
         aria-label={t.nav.mainNav}
       >
-        <div className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/30' : ''}`}>
-          {/* Glassmorphism background */}
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-[#0a0118]/30 light:bg-white/80" />
+        <div className={`relative transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/30' : ''}`}>
+          {/* Glassmorphism background — overflow-hidden here so blur clips to rounded corners without clipping dropdowns */}
+          <div className="absolute inset-0 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-[#0a0118]/30 light:bg-white/80" />
 
           <div className="relative px-5 py-3.5 flex items-center justify-between gap-4">
             {/* Logo */}
@@ -79,28 +114,68 @@ export function Navbar() {
 
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
-              {NAV_LINKS.map(({ href, label, Icon }) => {
+              {NAV_LINKS.map(({ href, label, Icon, children }) => {
                 const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                const isOpen = hoveredHref === href && !!children;
                 return (
-                  <Link
+                  <div
                     key={href}
-                    href={href}
-                    className={`relative px-4 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
-                      isActive
-                        ? 'nav-text'
-                        : 'nav-text-muted hover:nav-text hover:bg-white/5'
-                    }`}
+                    className="relative"
+                    onMouseEnter={() => { if (children) handleMouseEnter(href); }}
+                    onMouseLeave={() => { if (children) handleMouseLeave(); }}
                   >
-                    <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                    {label}
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-active"
-                        className="absolute inset-0 rounded-xl bg-linear-to-r from-[#E30613]/20 to-[#E30613]/10 border border-[#E30613]/30"
-                        style={{ boxShadow: '0 0 16px rgba(227,6,19,0.25)' }}
-                      />
-                    )}
-                  </Link>
+                    <Link
+                      href={href}
+                      className={`relative px-4 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
+                        isActive ? 'nav-text' : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      {label}
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-active"
+                          className="absolute inset-0 rounded-xl bg-linear-to-r from-[#E30613]/20 to-[#E30613]/10 border border-[#E30613]/30"
+                          style={{ boxShadow: '0 0 16px rgba(227,6,19,0.25)' }}
+                        />
+                      )}
+                    </Link>
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full left-0 mt-2 min-w-50 z-50"
+                          onMouseEnter={() => handleMouseEnter(href)}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <div
+                            className="rounded-xl overflow-hidden py-1"
+                            style={{
+                              background: 'var(--about-card-bg)',
+                              border: '1px solid var(--about-card-border)',
+                              backdropFilter: 'blur(20px)',
+                              WebkitBackdropFilter: 'blur(20px)',
+                            }}
+                          >
+                            {children.map((child) => (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                onClick={() => setHoveredHref(null)}
+                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium nav-text-muted hover:nav-text hover:bg-white/5 transition-colors"
+                              >
+                                <child.Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                                {child.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 );
               })}
             </div>
@@ -119,7 +194,7 @@ export function Navbar() {
                     onClick={() => setTheme(value)}
                     aria-label={label}
                     aria-pressed={theme === value}
-                    className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-200 ${
+                    className={`p-2 rounded-lg min-h-11 min-w-11 flex items-center justify-center transition-all duration-200 ${
                       theme === value
                         ? 'nav-control-active'
                         : 'nav-text-subtle hover:nav-text-muted'
@@ -138,7 +213,7 @@ export function Navbar() {
                     onClick={() => setLocale(lang)}
                     aria-pressed={locale === lang}
                     aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
-                    className={`px-3 min-h-[44px] flex items-center justify-center transition-all duration-200 ${
+                    className={`px-3 min-h-11 flex items-center justify-center transition-all duration-200 ${
                       locale === lang
                         ? 'nav-control-active'
                         : 'nav-text-subtle hover:nav-text-muted'
@@ -195,22 +270,75 @@ export function Navbar() {
           >
             <div className="rounded-2xl border border-white/10 dark:border-white/10 light:border-black/10 backdrop-blur-2xl dark:bg-[#0a0118]/85 light:bg-white/92">
               <nav className="relative p-3 space-y-1" aria-label={t.nav.mobileNav}>
-                {NAV_LINKS.map(({ href, label, Icon }) => {
+                {NAV_LINKS.map(({ href, label, Icon, children }) => {
                   const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                  const isExpanded = mobileExpanded === href;
                   return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'bg-[#E30613]/15 nav-text border border-[#E30613]/30'
-                          : 'nav-text-muted hover:nav-text hover:bg-white/5'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-                      {label}
-                    </Link>
+                    <div key={href}>
+                      <div className="flex items-center gap-1">
+                        <Link
+                          href={href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                            isActive
+                              ? 'bg-[#E30613]/15 nav-text border border-[#E30613]/30'
+                              : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          {label}
+                        </Link>
+                        {children && (
+                          <button
+                            onClick={() => setMobileExpanded(isExpanded ? null : href)}
+                            aria-expanded={isExpanded}
+                            aria-label={isExpanded ? 'Dölj undermeny' : 'Visa undermeny'}
+                            className="p-2.5 rounded-xl nav-text-muted hover:nav-text hover:bg-white/5 transition-all duration-200"
+                          >
+                            <motion.span
+                              animate={{ rotate: isExpanded ? 180 : 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="block"
+                            >
+                              <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                            </motion.span>
+                          </button>
+                        )}
+                      </div>
+                      <AnimatePresence initial={false}>
+                        {children && isExpanded && (
+                          <motion.div
+                            key="children"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: 'easeInOut' }}
+                            className="overflow-hidden"
+                          >
+                            <div className="ml-4 mt-0.5 pb-0.5 space-y-0.5">
+                              {children.map((child) => {
+                                const childActive = pathname === child.href;
+                                return (
+                                  <Link
+                                    key={child.href}
+                                    href={child.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
+                                      childActive
+                                        ? 'nav-text bg-white/8'
+                                        : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <child.Icon className="w-3 h-3 shrink-0" aria-hidden="true" />
+                                    {child.label}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   );
                 })}
 
@@ -223,7 +351,7 @@ export function Navbar() {
                         onClick={() => setTheme(value)}
                         aria-label={label}
                         aria-pressed={theme === value}
-                        className={`p-2.5 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-medium transition-all ${
+                        className={`p-2.5 rounded-lg min-h-11 min-w-11 flex items-center justify-center text-xs font-medium transition-all ${
                           theme === value ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
                         }`}
                       >
@@ -239,7 +367,7 @@ export function Navbar() {
                         onClick={() => setLocale(lang)}
                         aria-pressed={locale === lang}
                         aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
-                        className={`px-3 min-h-[44px] flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
+                        className={`px-3 min-h-11 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
                           locale === lang ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
                         }`}
                       >

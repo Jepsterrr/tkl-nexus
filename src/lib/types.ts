@@ -122,6 +122,7 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #E30613, #ff4d5a)',
     textClass: 'text-accent-red',
     glowClass: 'glow-red',
+    textColor: '#E30613', // 4.86:1 on white — passes AA
   },
   purple: {
     hex: '#8B5CF6',
@@ -132,6 +133,7 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
     textClass: 'text-accent-purple',
     glowClass: 'glow-purple',
+    textColor: 'var(--text-purple)', // dark: #8B5CF6 / light: #5b21b6 (8.2:1)
   },
   green: {
     hex: '#10B981',
@@ -142,6 +144,7 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #10B981, #34d399)',
     textClass: 'text-accent-green',
     glowClass: 'glow-green',
+    textColor: 'var(--text-green)', // dark: #10B981 / light: #047857 (7.0:1)
   },
   blue: {
     hex: '#3B82F6',
@@ -152,6 +155,7 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
     textClass: 'text-accent-blue',
     glowClass: 'glow-blue',
+    textColor: 'var(--text-blue)', // dark: #3B82F6 / light: #1d4ed8 (6.0:1)
   },
   orange: {
     hex: '#F59E0B',
@@ -162,6 +166,7 @@ export const ACCENT_COLOR_MAP = {
     gradient: 'linear-gradient(135deg, #F59E0B, #fbbf24)',
     textClass: 'text-accent-orange',
     glowClass: 'glow-orange',
+    textColor: 'var(--text-orange)', // dark: #F59E0B / light: #92400E (9.2:1)
   },
 } as const satisfies Record<AccentColor, {
   hex: string;
@@ -172,4 +177,5 @@ export const ACCENT_COLOR_MAP = {
   gradient: string;
   textClass: string;
   glowClass: string;
+  textColor: string;
 }>;
