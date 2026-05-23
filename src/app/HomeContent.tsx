@@ -136,7 +136,7 @@ export function HomeContent() {
         <motion.div style={{ y: floatY }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
           {/* Large hexagon — top right */}
           <motion.span
-            className="absolute top-[20%] right-[10%] text-5xl select-none"
+            className="absolute top-[30%] right-[10%] text-5xl select-none"
             style={{ color: '#E30613', opacity: 0.14, textShadow: '0 0 24px rgba(227,6,19,0.6)' }}
             animate={shouldReduceMotion ? {} : { y: [0, -16, 0], rotate: [0, 12, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}

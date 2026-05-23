@@ -185,7 +185,7 @@ function MobileChildCard({ d, elRef, delay, isInView, reduceMotion }: ChildCardP
         href={d.href}
         className="flex items-center gap-2.5 px-3 rounded-xl transition-all duration-200
                    hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-none
-                   focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+                   focus-visible:ring-2 focus-visible:ring-offset-2 min-h-11"
         style={{
           background: 'var(--rn-child-bg)',
           border: `1px solid ${d.hex}38`,
@@ -746,7 +746,7 @@ export function RootNetwork({
       </div>
 
       {/* Mobile */}
-      <div ref={mContainerRef} className="relative sm:hidden">
+      <div ref={mContainerRef} className="relative sm:hidden overflow-hidden">
 
         {/* SVG overlay — mobile */}
         {mobileGeo && (
@@ -762,12 +762,6 @@ export function RootNetwork({
                 <feGaussianBlur stdDeviation="6" result="b" />
                 <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
               </filter>
-              <clipPath id={`${filterId}-mcs`}>
-                <rect x={0} y={mobileGeo.mSPBY} width={mobileGeo.svgW} height={mobileGeo.svgH} />
-              </clipPath>
-              <clipPath id={`${filterId}-mcc`}>
-                <rect x={0} y={mobileGeo.mCPBY} width={mobileGeo.svgW} height={mobileGeo.svgH} />
-              </clipPath>
             </defs>
 
             {/* Main trunk */}
@@ -806,88 +800,6 @@ export function RootNetwork({
               {...dotAnim(0.53)}
               style={{ fill: RED, transformOrigin: `${mobileGeo.mainJunc.x}px ${mobileGeo.mainJunc.y}px` }}
             />
-
-            {/* Student trunk */}
-            <motion.path d={mobileGeo.mSTrunk} fill="none" strokeWidth={7} strokeLinecap="round"
-              filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
-              clipPath={`url(#${filterId}-mcs)`}
-              {...pathAnim(0.75, 0.28, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={mobileGeo.mSTrunk} fill="none" strokeWidth={2} strokeLinecap="round"
-                style={{ stroke: GREEN }}
-                {...pathAnim(0.75, 0.28, lineO)} />
-            </g>
-
-            {/* Corporate trunk */}
-            <motion.path d={mobileGeo.mCTrunk} fill="none" strokeWidth={7} strokeLinecap="round"
-              filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
-              clipPath={`url(#${filterId}-mcc)`}
-              {...pathAnim(0.85, 0.28, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={mobileGeo.mCTrunk} fill="none" strokeWidth={2} strokeLinecap="round"
-                style={{ stroke: PURPLE }}
-                {...pathAnim(0.85, 0.28, lineO)} />
-            </g>
-
-            {/* Student sub-junction dot */}
-            <motion.circle cx={mobileGeo.mSJunc.x} cy={mobileGeo.mSJunc.y} r={3.5}
-              filter={`url(#${filterId}-m)`}
-              {...dotAnim(0.74)}
-              style={{ fill: GREEN, transformOrigin: `${mobileGeo.mSJunc.x}px ${mobileGeo.mSJunc.y}px` }}
-            />
-
-            {/* Corporate sub-junction dot */}
-            <motion.circle cx={mobileGeo.mCJunc.x} cy={mobileGeo.mCJunc.y} r={3.5}
-              filter={`url(#${filterId}-m)`}
-              {...dotAnim(0.84)}
-              style={{ fill: PURPLE, transformOrigin: `${mobileGeo.mCJunc.x}px ${mobileGeo.mCJunc.y}px` }}
-            />
-
-            {/* Student sub-branches */}
-            {mobileGeo.mSBranches.map((d, i) => (
-              <g key={`msb${i}`}>
-                <motion.path d={d} fill="none" strokeWidth={5} strokeLinecap="round"
-                  filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
-                  {...pathAnim(0.90 + i * 0.08, 0.48, bloomO)} />
-                <g className="rn-path-crisp">
-                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
-                    style={{ stroke: GREEN }}
-                    {...pathAnim(0.90 + i * 0.08, 0.48, lineO)} />
-                </g>
-              </g>
-            ))}
-
-            {/* Corporate sub-branches */}
-            {mobileGeo.mCBranches.map((d, i) => (
-              <g key={`mcb${i}`}>
-                <motion.path d={d} fill="none" strokeWidth={5} strokeLinecap="round"
-                  filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
-                  {...pathAnim(1.08 + i * 0.08, 0.48, bloomO)} />
-                <g className="rn-path-crisp">
-                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
-                    style={{ stroke: PURPLE }}
-                    {...pathAnim(1.08 + i * 0.08, 0.48, lineO)} />
-                </g>
-              </g>
-            ))}
-
-            {/* Endpoint circles — student leaves */}
-            {mobileGeo.mSChildTops.map((pos, i) => (
-              <motion.circle key={`mscd${i}`}
-                cx={pos.x} cy={pos.y} r={2.5}
-                {...dotAnim(1.08 + i * 0.10)}
-                style={{ fill: STUDENT_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
-              />
-            ))}
-
-            {/* Endpoint circles — corporate leaves */}
-            {mobileGeo.mCChildTops.map((pos, i) => (
-              <motion.circle key={`mccd${i}`}
-                cx={pos.x} cy={pos.y} r={2.5}
-                {...dotAnim(1.28 + i * 0.10)}
-                style={{ fill: CORPORATE_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
-              />
-            ))}
           </svg>
         )}
 
@@ -926,7 +838,7 @@ export function RootNetwork({
         <div className="flex gap-3 items-start">
 
           {/* Students column */}
-          <div className="flex-1 flex flex-col gap-2">
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
             <motion.div
               ref={mSParentRef}
               initial={{ opacity: 0, y: -8 }}
@@ -937,7 +849,7 @@ export function RootNetwork({
                 href="/students"
                 className="flex flex-col gap-1.5 rounded-2xl px-3 py-3 transition-all duration-200
                            hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none
-                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-11"
                 style={{ background: 'var(--glass-green-bg)', border: '1px solid var(--glass-green-border)' }}
               >
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -950,13 +862,25 @@ export function RootNetwork({
                 </div>
               </Link>
             </motion.div>
-            <MobileChildCard d={STUDENT_DESTS[0]} elRef={mSC0} delay={0.80} isInView={isInView} reduceMotion={reduceMotion} />
-            <MobileChildCard d={STUDENT_DESTS[1]} elRef={mSC1} delay={0.90} isInView={isInView} reduceMotion={reduceMotion} />
-            <MobileChildCard d={STUDENT_DESTS[2]} elRef={mSC2} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+            <div className="relative pl-3 mt-1">
+              <motion.div
+                className="absolute left-0 top-0 bottom-0 w-px rounded-full"
+                style={{ background: `linear-gradient(to bottom, ${GREEN}70, ${GREEN}10)` }}
+                initial={{ scaleY: 0, originY: '0%' }}
+                animate={isInView ? { scaleY: 1 } : {}}
+                transition={{ duration: reduceMotion ? 0 : 0.40, delay: 0.72, ease: 'easeOut' }}
+                aria-hidden="true"
+              />
+              <div className="flex flex-col gap-2">
+                <MobileChildCard d={STUDENT_DESTS[0]} elRef={mSC0} delay={0.80} isInView={isInView} reduceMotion={reduceMotion} />
+                <MobileChildCard d={STUDENT_DESTS[1]} elRef={mSC1} delay={0.90} isInView={isInView} reduceMotion={reduceMotion} />
+                <MobileChildCard d={STUDENT_DESTS[2]} elRef={mSC2} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+              </div>
+            </div>
           </div>
 
           {/* Corporate column */}
-          <div className="flex-1 flex flex-col gap-2">
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
             <motion.div
               ref={mCParentRef}
               initial={{ opacity: 0, y: -8 }}
@@ -967,7 +891,7 @@ export function RootNetwork({
                 href="/corporate"
                 className="flex flex-col gap-1.5 rounded-2xl px-3 py-3 transition-all duration-200
                            hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none
-                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-11"
                 style={{ background: 'var(--glass-purple-bg)', border: '1px solid var(--glass-purple-border)' }}
               >
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -980,9 +904,21 @@ export function RootNetwork({
                 </div>
               </Link>
             </motion.div>
-            <MobileChildCard d={CORPORATE_DESTS[0]} elRef={mCC0} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
-            <MobileChildCard d={CORPORATE_DESTS[1]} elRef={mCC1} delay={1.10} isInView={isInView} reduceMotion={reduceMotion} />
-            <MobileChildCard d={CORPORATE_DESTS[2]} elRef={mCC2} delay={1.20} isInView={isInView} reduceMotion={reduceMotion} />
+            <div className="relative pl-3 mt-1">
+              <motion.div
+                className="absolute left-0 top-0 bottom-0 w-px rounded-full"
+                style={{ background: `linear-gradient(to bottom, ${PURPLE}70, ${PURPLE}10)` }}
+                initial={{ scaleY: 0, originY: '0%' }}
+                animate={isInView ? { scaleY: 1 } : {}}
+                transition={{ duration: reduceMotion ? 0 : 0.40, delay: 0.82, ease: 'easeOut' }}
+                aria-hidden="true"
+              />
+              <div className="flex flex-col gap-2">
+                <MobileChildCard d={CORPORATE_DESTS[0]} elRef={mCC0} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+                <MobileChildCard d={CORPORATE_DESTS[1]} elRef={mCC1} delay={1.10} isInView={isInView} reduceMotion={reduceMotion} />
+                <MobileChildCard d={CORPORATE_DESTS[2]} elRef={mCC2} delay={1.20} isInView={isInView} reduceMotion={reduceMotion} />
+              </div>
+            </div>
           </div>
 
         </div>
