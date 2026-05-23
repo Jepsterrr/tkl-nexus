@@ -99,6 +99,19 @@ interface Geometry {
   cStubs: Stub[];
 }
 
+interface MobileGeometry {
+  svgW: number; svgH: number;
+  hubBottom: Vec;
+  mainJunc: Vec;
+  mainTrunk: string;
+  mainLeft: string;
+  mainRight: string;
+  mSTrunk: string; mSJunc: Vec; mSPBY: number;
+  mCTrunk: string; mCJunc: Vec; mCPBY: number;
+  mSBranches: string[]; mSChildTops: Vec[];
+  mCBranches: string[]; mCChildTops: Vec[];
+}
+
 export interface RootNetworkStrings {
   ctaLabel: string;
   ctaStudents: string; ctaStudentsSub: string;
@@ -160,6 +173,39 @@ function ChildCard({ d, elRef, delay, isInView, reduceMotion }: ChildCardProps) 
   );
 }
 
+function MobileChildCard({ d, elRef, delay, isInView, reduceMotion }: ChildCardProps) {
+  return (
+    <motion.div
+      ref={elRef}
+      initial={{ opacity: 0, y: 8 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: reduceMotion ? 0 : 0.30, delay, ease: E }}
+    >
+      <Link
+        href={d.href}
+        className="flex items-center gap-2.5 px-3 rounded-xl transition-all duration-200
+                   hover:scale-[1.02] active:scale-[0.97] focus-visible:outline-none
+                   focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+        style={{
+          background: 'var(--rn-child-bg)',
+          border: `1px solid ${d.hex}38`,
+        }}
+      >
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+          style={{ background: `${d.hex}18`, border: `1px solid ${d.hex}35` }}
+        >
+          <d.Icon className="w-3.5 h-3.5" style={{ color: d.hex }} aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-xs font-bold hero-text leading-tight">{d.label}</div>
+          <div className="text-xs leading-snug hero-text-muted line-clamp-2">{d.desc}</div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
 // Component
 
 export function RootNetwork({
@@ -195,8 +241,21 @@ export function RootNetwork({
   const cC2 = useRef<HTMLDivElement>(null);
   const inViewRef = useRef<HTMLDivElement>(null);
 
+  // Mobile refs
+  const mContainerRef = useRef<HTMLDivElement>(null);
+  const mHubRef       = useRef<HTMLDivElement>(null);
+  const mSParentRef   = useRef<HTMLDivElement>(null);
+  const mCParentRef   = useRef<HTMLDivElement>(null);
+  const mSC0 = useRef<HTMLDivElement>(null);
+  const mSC1 = useRef<HTMLDivElement>(null);
+  const mSC2 = useRef<HTMLDivElement>(null);
+  const mCC0 = useRef<HTMLDivElement>(null);
+  const mCC1 = useRef<HTMLDivElement>(null);
+  const mCC2 = useRef<HTMLDivElement>(null);
+
   // State
   const [geo, setGeo]      = useState<Geometry | null>(null);
+  const [mobileGeo, setMobileGeo] = useState<MobileGeometry | null>(null);
   const isInView           = useInView(inViewRef, { once: true, margin: '-50px' });
   const reduceMotion       = useReducedMotion();
   const filterId           = useId();
@@ -278,6 +337,68 @@ export function RootNetwork({
 
   // Re-measure on theme change so geometry reflects new layout if anything shifts
   useEffect(() => { measure(); }, [isLight, measure]);
+
+  // Mobile measurement
+  const measureMobile = useCallback(() => {
+    const c = mContainerRef.current;
+    if (!c) return;
+
+    const hub = mHubRef.current;
+    const sp  = mSParentRef.current;
+    const cp  = mCParentRef.current;
+    const scs = [mSC0.current, mSC1.current, mSC2.current];
+    const ccs = [mCC0.current, mCC1.current, mCC2.current];
+    if (!hub || !sp || !cp || scs.some(r => !r) || ccs.some(r => !r)) return;
+
+    const hubB  = getBottomCenter(hub, c);
+    const sPT   = getTopCenter(sp, c);
+    const cPT   = getTopCenter(cp, c);
+    const sPB   = getBottomCenter(sp, c);
+    const cPB   = getBottomCenter(cp, c);
+    const sTops = (scs as HTMLDivElement[]).map(r => getTopCenter(r, c));
+    const cTops = (ccs as HTMLDivElement[]).map(r => getTopCenter(r, c));
+
+    const ENTER_PARENT = 9;
+    const ENTER_SUB    = 5;
+    const sPT_in = { x: sPT.x, y: sPT.y + ENTER_PARENT };
+    const cPT_in = { x: cPT.x, y: cPT.y + ENTER_PARENT };
+    const sTops_in = sTops.map(t => ({ x: t.x, y: t.y + ENTER_SUB }));
+    const cTops_in = cTops.map(t => ({ x: t.x, y: t.y + ENTER_SUB }));
+
+    const midParentY = (sPT.y + cPT.y) / 2;
+    const mainJunc: Vec = { x: hubB.x, y: hubB.y + (midParentY - hubB.y) * 0.55 };
+
+    const sAvgY = sTops_in.reduce((s, v) => s + v.y, 0) / 3;
+    const cAvgY = cTops_in.reduce((s, v) => s + v.y, 0) / 3;
+    const mSJunc: Vec = { x: sPB.x, y: sPB.y + (sAvgY - sPB.y) * 0.40 };
+    const mCJunc: Vec = { x: cPB.x, y: cPB.y + (cAvgY - cPB.y) * 0.40 };
+
+    const cr = c.getBoundingClientRect();
+    if (cr.width === 0) return; // container is CSS-hidden on desktop (sm:hidden)
+    setMobileGeo({
+      svgW: cr.width, svgH: cr.height,
+      hubBottom: hubB,
+      mainJunc,
+      mainTrunk: trunkD(hubB, mainJunc),
+      mainLeft:  mainBranchD(mainJunc, sPT_in),
+      mainRight: mainBranchD(mainJunc, cPT_in),
+      mSTrunk: trunkD(sPB, mSJunc), mSJunc, mSPBY: sPB.y,
+      mCTrunk: trunkD(cPB, mCJunc), mCJunc, mCPBY: cPB.y,
+      mSBranches: sTops_in.map(t => branchD(mSJunc, t)), mSChildTops: sTops_in,
+      mCBranches: cTops_in.map(t => branchD(mCJunc, t)), mCChildTops: cTops_in,
+    });
+  }, []);
+
+  useEffect(() => {
+    const c = mContainerRef.current;
+    if (!c) return;
+    const t = setTimeout(measureMobile, 80);
+    const ro = new ResizeObserver(measureMobile);
+    ro.observe(c);
+    return () => { clearTimeout(t); ro.disconnect(); };
+  }, [measureMobile]);
+
+  useEffect(() => { measureMobile(); }, [isLight, measureMobile]);
 
   // Destination data
   const STUDENT_DESTS = useMemo<Dest[]>(() => [
@@ -625,71 +746,245 @@ export function RootNetwork({
       </div>
 
       {/* Mobile */}
-      <div className="sm:hidden space-y-3">
-        {/* Students */}
-        <div
-          className="rounded-2xl p-4 flex flex-col gap-1.5"
-          style={{ background: 'var(--about-card-bg)', border: '1px solid var(--glass-green-border)' }}
-        >
-          <Link
-            href="/students"
-            className="group flex items-center gap-3 pb-2.5 min-h-13"
-            style={{ borderBottom: '1px solid var(--glass-border-subtle)' }}
+      <div ref={mContainerRef} className="relative sm:hidden">
+
+        {/* SVG overlay — mobile */}
+        {mobileGeo && (
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            width={mobileGeo.svgW}
+            height={mobileGeo.svgH}
+            aria-hidden="true"
+            style={{ overflow: 'visible' }}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'var(--glass-green-bg)' }}>
-              <GraduationCap className="w-4 h-4" style={{ color: 'var(--rn-green)' }} aria-hidden="true" />
-            </div>
-            <span className="text-sm font-bold hero-text flex-1">{ctaStudents}</span>
-            <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity shrink-0"
-              style={{ color: 'var(--rn-green)' }} aria-hidden="true" />
-          </Link>
-          {STUDENT_DESTS.map(({ href, label, desc, Icon, hex }) => (
-            <Link key={href} href={href}
-              className="group flex items-center gap-3 px-2 py-3 rounded-xl min-h-12 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            <defs>
+              <filter id={`${filterId}-m`} x="-150%" y="-150%" width="400%" height="400%">
+                <feGaussianBlur stdDeviation="6" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+              <clipPath id={`${filterId}-mcs`}>
+                <rect x={0} y={mobileGeo.mSPBY} width={mobileGeo.svgW} height={mobileGeo.svgH} />
+              </clipPath>
+              <clipPath id={`${filterId}-mcc`}>
+                <rect x={0} y={mobileGeo.mCPBY} width={mobileGeo.svgW} height={mobileGeo.svgH} />
+              </clipPath>
+            </defs>
+
+            {/* Main trunk */}
+            <motion.path d={mobileGeo.mainTrunk} fill="none" strokeWidth={10} strokeLinecap="round"
+              filter={`url(#${filterId}-m)`} style={{ stroke: RED }}
+              {...pathAnim(0.15, 0.25, bloomO)} />
+            <g className="rn-path-crisp">
+              <motion.path d={mobileGeo.mainTrunk} fill="none" strokeWidth={3} strokeLinecap="round"
+                style={{ stroke: RED }}
+                {...pathAnim(0.15, 0.25, lineO)} />
+            </g>
+
+            {/* Main left branch → students */}
+            <motion.path d={mobileGeo.mainLeft} fill="none" strokeWidth={7} strokeLinecap="round"
+              filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
+              {...pathAnim(0.35, 0.38, bloomO)} />
+            <g className="rn-path-crisp">
+              <motion.path d={mobileGeo.mainLeft} fill="none" strokeWidth={2.5} strokeLinecap="round"
+                style={{ stroke: GREEN }}
+                {...pathAnim(0.35, 0.38, lineO)} />
+            </g>
+
+            {/* Main right branch → corporate */}
+            <motion.path d={mobileGeo.mainRight} fill="none" strokeWidth={7} strokeLinecap="round"
+              filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
+              {...pathAnim(0.35, 0.38, bloomO)} />
+            <g className="rn-path-crisp">
+              <motion.path d={mobileGeo.mainRight} fill="none" strokeWidth={2.5} strokeLinecap="round"
+                style={{ stroke: PURPLE }}
+                {...pathAnim(0.35, 0.38, lineO)} />
+            </g>
+
+            {/* Central junction dot */}
+            <motion.circle cx={mobileGeo.mainJunc.x} cy={mobileGeo.mainJunc.y} r={4.5}
+              filter={`url(#${filterId}-m)`}
+              {...dotAnim(0.53)}
+              style={{ fill: RED, transformOrigin: `${mobileGeo.mainJunc.x}px ${mobileGeo.mainJunc.y}px` }}
+            />
+
+            {/* Student trunk */}
+            <motion.path d={mobileGeo.mSTrunk} fill="none" strokeWidth={7} strokeLinecap="round"
+              filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
+              clipPath={`url(#${filterId}-mcs)`}
+              {...pathAnim(0.75, 0.28, bloomO)} />
+            <g className="rn-path-crisp">
+              <motion.path d={mobileGeo.mSTrunk} fill="none" strokeWidth={2} strokeLinecap="round"
+                style={{ stroke: GREEN }}
+                {...pathAnim(0.75, 0.28, lineO)} />
+            </g>
+
+            {/* Corporate trunk */}
+            <motion.path d={mobileGeo.mCTrunk} fill="none" strokeWidth={7} strokeLinecap="round"
+              filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
+              clipPath={`url(#${filterId}-mcc)`}
+              {...pathAnim(0.85, 0.28, bloomO)} />
+            <g className="rn-path-crisp">
+              <motion.path d={mobileGeo.mCTrunk} fill="none" strokeWidth={2} strokeLinecap="round"
+                style={{ stroke: PURPLE }}
+                {...pathAnim(0.85, 0.28, lineO)} />
+            </g>
+
+            {/* Student sub-junction dot */}
+            <motion.circle cx={mobileGeo.mSJunc.x} cy={mobileGeo.mSJunc.y} r={3.5}
+              filter={`url(#${filterId}-m)`}
+              {...dotAnim(0.74)}
+              style={{ fill: GREEN, transformOrigin: `${mobileGeo.mSJunc.x}px ${mobileGeo.mSJunc.y}px` }}
+            />
+
+            {/* Corporate sub-junction dot */}
+            <motion.circle cx={mobileGeo.mCJunc.x} cy={mobileGeo.mCJunc.y} r={3.5}
+              filter={`url(#${filterId}-m)`}
+              {...dotAnim(0.84)}
+              style={{ fill: PURPLE, transformOrigin: `${mobileGeo.mCJunc.x}px ${mobileGeo.mCJunc.y}px` }}
+            />
+
+            {/* Student sub-branches */}
+            {mobileGeo.mSBranches.map((d, i) => (
+              <g key={`msb${i}`}>
+                <motion.path d={d} fill="none" strokeWidth={5} strokeLinecap="round"
+                  filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
+                  {...pathAnim(0.90 + i * 0.08, 0.48, bloomO)} />
+                <g className="rn-path-crisp">
+                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
+                    style={{ stroke: GREEN }}
+                    {...pathAnim(0.90 + i * 0.08, 0.48, lineO)} />
+                </g>
+              </g>
+            ))}
+
+            {/* Corporate sub-branches */}
+            {mobileGeo.mCBranches.map((d, i) => (
+              <g key={`mcb${i}`}>
+                <motion.path d={d} fill="none" strokeWidth={5} strokeLinecap="round"
+                  filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
+                  {...pathAnim(1.08 + i * 0.08, 0.48, bloomO)} />
+                <g className="rn-path-crisp">
+                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
+                    style={{ stroke: PURPLE }}
+                    {...pathAnim(1.08 + i * 0.08, 0.48, lineO)} />
+                </g>
+              </g>
+            ))}
+
+            {/* Endpoint circles — student leaves */}
+            {mobileGeo.mSChildTops.map((pos, i) => (
+              <motion.circle key={`mscd${i}`}
+                cx={pos.x} cy={pos.y} r={2.5}
+                {...dotAnim(1.08 + i * 0.10)}
+                style={{ fill: STUDENT_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
+              />
+            ))}
+
+            {/* Endpoint circles — corporate leaves */}
+            {mobileGeo.mCChildTops.map((pos, i) => (
+              <motion.circle key={`mccd${i}`}
+                cx={pos.x} cy={pos.y} r={2.5}
+                {...dotAnim(1.28 + i * 0.10)}
+                style={{ fill: CORPORATE_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
+              />
+            ))}
+          </svg>
+        )}
+
+        {/* NEXUS hub — mobile */}
+        <div className="flex justify-center mb-6">
+          <motion.div
+            ref={mHubRef}
+            initial={{ opacity: 0, scale: 0.88 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.40, ease: E }}
+            className="relative inline-flex items-center gap-2 px-5 py-3 rounded-2xl"
+            style={{
+              background: 'var(--about-card-bg)',
+              border: '1px solid var(--rn-red)',
+              boxShadow: '0 0 18px var(--rn-red-glow)',
+            }}
+          >
+            <motion.span
+              className="absolute inset-0 rounded-2xl pointer-events-none"
+              style={{ border: '1px solid var(--rn-red)', opacity: 0 }}
+              animate={reduceMotion ? { scale: 1, opacity: 0 } : { scale: [1, 1.20], opacity: [0.45, 0] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+              aria-hidden="true"
+            />
+            <span aria-hidden="true" style={{ color: 'var(--rn-red)', fontSize: '16px' }}>⬡</span>
+            <span
+              className="text-xs font-black tracking-widest uppercase"
+              style={{ color: 'var(--rn-red)', fontFamily: 'var(--font-heading)' }}
             >
-              <Icon className="w-5 h-5 shrink-0" style={{ color: hex }} aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold hero-text">{label}</div>
-                <div className="text-xs hero-text-muted truncate">{desc}</div>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-0 group-hover:opacity-50 transition-opacity"
-                style={{ color: hex }} aria-hidden="true" />
-            </Link>
-          ))}
+              NEXUS
+            </span>
+          </motion.div>
         </div>
 
-        {/* Corporate */}
-        <div
-          className="rounded-2xl p-4 flex flex-col gap-1.5"
-          style={{ background: 'var(--about-card-bg)', border: '1px solid var(--glass-purple-border)' }}
-        >
-          <Link
-            href="/corporate"
-            className="group flex items-center gap-3 pb-2.5 min-h-13"
-            style={{ borderBottom: '1px solid var(--glass-border-subtle)' }}
-          >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: 'var(--glass-purple-bg)' }}>
-              <Building2 className="w-4 h-4" style={{ color: 'var(--rn-purple)' }} aria-hidden="true" />
-            </div>
-            <span className="text-sm font-bold hero-text flex-1">{ctaCorporate}</span>
-            <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity shrink-0"
-              style={{ color: 'var(--rn-purple)' }} aria-hidden="true" />
-          </Link>
-          {CORPORATE_DESTS.map(({ href, label, desc, Icon, hex }) => (
-            <Link key={href} href={href}
-              className="group flex items-center gap-3 px-2 py-3 rounded-xl min-h-12 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+        {/* Two-column layout: Students (left) + Corporate (right) */}
+        <div className="flex gap-3 items-start">
+
+          {/* Students column */}
+          <div className="flex-1 flex flex-col gap-2">
+            <motion.div
+              ref={mSParentRef}
+              initial={{ opacity: 0, y: -8 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: 0.30, ease: E }}
             >
-              <Icon className="w-5 h-5 shrink-0" style={{ color: hex }} aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold hero-text">{label}</div>
-                <div className="text-xs hero-text-muted truncate">{desc}</div>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-0 group-hover:opacity-50 transition-opacity"
-                style={{ color: hex }} aria-hidden="true" />
-            </Link>
-          ))}
+              <Link
+                href="/students"
+                className="flex flex-col gap-1.5 rounded-2xl px-3 py-3 transition-all duration-200
+                           hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none
+                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+                style={{ background: 'var(--glass-green-bg)', border: '1px solid var(--glass-green-border)' }}
+              >
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: `${GREEN}18`, border: `1px solid ${GREEN}35` }}>
+                  <GraduationCap className="w-4 h-4" style={{ color: 'var(--rn-green)' }} aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold hero-text leading-tight">{ctaStudents}</div>
+                  <div className="text-xs hero-text-muted leading-snug line-clamp-2">{ctaStudentsSub}</div>
+                </div>
+              </Link>
+            </motion.div>
+            <MobileChildCard d={STUDENT_DESTS[0]} elRef={mSC0} delay={0.80} isInView={isInView} reduceMotion={reduceMotion} />
+            <MobileChildCard d={STUDENT_DESTS[1]} elRef={mSC1} delay={0.90} isInView={isInView} reduceMotion={reduceMotion} />
+            <MobileChildCard d={STUDENT_DESTS[2]} elRef={mSC2} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+          </div>
+
+          {/* Corporate column */}
+          <div className="flex-1 flex flex-col gap-2">
+            <motion.div
+              ref={mCParentRef}
+              initial={{ opacity: 0, y: -8 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: 0.40, ease: E }}
+            >
+              <Link
+                href="/corporate"
+                className="flex flex-col gap-1.5 rounded-2xl px-3 py-3 transition-all duration-200
+                           hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none
+                           focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px]"
+                style={{ background: 'var(--glass-purple-bg)', border: '1px solid var(--glass-purple-border)' }}
+              >
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: `${PURPLE}18`, border: `1px solid ${PURPLE}35` }}>
+                  <Building2 className="w-4 h-4" style={{ color: 'var(--rn-purple)' }} aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold hero-text leading-tight">{ctaCorporate}</div>
+                  <div className="text-xs hero-text-muted leading-snug line-clamp-2">{ctaCorporateSub}</div>
+                </div>
+              </Link>
+            </motion.div>
+            <MobileChildCard d={CORPORATE_DESTS[0]} elRef={mCC0} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+            <MobileChildCard d={CORPORATE_DESTS[1]} elRef={mCC1} delay={1.10} isInView={isInView} reduceMotion={reduceMotion} />
+            <MobileChildCard d={CORPORATE_DESTS[2]} elRef={mCC2} delay={1.20} isInView={isInView} reduceMotion={reduceMotion} />
+          </div>
+
         </div>
       </div>
     </div>
