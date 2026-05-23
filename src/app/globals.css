@@ -239,7 +239,7 @@
   --rn-line-opacity:        0.90;
   --rn-bloom-opacity:       0.22;
   --rn-bloom-opacity-stub:  0.16;
-  --rn-child-bg:            rgba(255, 255, 255, 0.62);
+  --rn-child-bg:            rgba(255, 255, 255, 0.08);
 
   /* RootNetwork crisp path drop-shadow in light mode */
   .rn-path-crisp { filter: drop-shadow(0 0 3px currentColor); }
