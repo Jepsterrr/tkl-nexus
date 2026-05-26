@@ -514,6 +514,31 @@ export const TRANSLATIONS = {
       campusLabel: 'Campus',
       campusSubtitle: 'Luleå tekniska universitet',
     },
+
+    // --- Cookie Consent ---
+    cookieConsent: {
+      text: 'Vi använder cookies för att förbättra din upplevelse på TKL NEXUS.',
+      link: 'Integritetspolicy',
+      accept: 'Acceptera',
+      decline: 'Neka',
+    },
+
+    // --- Privacy page ---
+    privacy: {
+      title: 'Integritetspolicy',
+      intro: 'Här beskriver vi hur TKL NEXUS hanterar dina uppgifter och cookies.',
+      dataTitle: 'Vad vi samlar in',
+      dataBody: 'Vi samlar in anonyma besöksdata — sidvisningar, klick och scroll-djup — via PostHog (EU-region). Ingen personlig information samlas in och ingen data säljs till tredje part.',
+      purposeTitle: 'Ändamål',
+      purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och för att förbättra upplevelsen för studenter och företag.',
+      retentionTitle: 'Lagringstid',
+      retentionBody: 'Data lagras i PostHog EU i maximalt 1 år, varefter den raderas automatiskt.',
+      rightsTitle: 'Dina rättigheter',
+      rightsBody: 'Du kan när som helst återkalla ditt samtycke: rensa nyckeln tkl-cookie-consent i din webbläsares localStorage och ladda om sidan. Du kan också kontakta oss så hjälper vi dig.',
+      contactTitle: 'Kontakt',
+      contactBody: 'Har du frågor om hur vi hanterar dina uppgifter? Hör av dig till',
+      back: 'Tillbaka',
+    },
   },
 
   en: {
@@ -1024,6 +1049,31 @@ export const TRANSLATIONS = {
       },
       campusLabel: 'Campus',
       campusSubtitle: 'Luleå University of Technology',
+    },
+
+    // --- Cookie Consent ---
+    cookieConsent: {
+      text: 'We use cookies to improve your experience on TKL NEXUS.',
+      link: 'Privacy policy',
+      accept: 'Accept',
+      decline: 'Decline',
+    },
+
+    // --- Privacy page ---
+    privacy: {
+      title: 'Privacy Policy',
+      intro: 'This page describes how TKL NEXUS handles your data and cookies.',
+      dataTitle: 'What we collect',
+      dataBody: 'We collect anonymous visit data — page views, clicks and scroll depth — via PostHog (EU region). No personal information is collected and no data is sold to third parties.',
+      purposeTitle: 'Purpose',
+      purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies.',
+      retentionTitle: 'Retention',
+      retentionBody: 'Data is stored in PostHog EU for a maximum of 1 year, after which it is automatically deleted.',
+      rightsTitle: 'Your rights',
+      rightsBody: "You can withdraw your consent at any time: clear the tkl-cookie-consent key in your browser's localStorage and reload the page. You can also contact us and we'll help you.",
+      contactTitle: 'Contact',
+      contactBody: 'Questions about how we handle your data? Reach out to',
+      back: 'Back',
     },
   },
 } as const;
