@@ -526,15 +526,42 @@ export const TRANSLATIONS = {
     // --- Privacy page ---
     privacy: {
       title: 'Integritetspolicy',
-      intro: 'Här beskriver vi hur TKL NEXUS hanterar dina uppgifter och cookies.',
+      intro: 'Här beskriver vi hur Teknologkåren vid Luleå tekniska universitet hanterar dina uppgifter och cookies på TKL NEXUS.',
+
+      controllerTitle: 'Personuppgiftsansvarig',
+      controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org.nr 897000-5388, Kårhusvägen 5, 977 54 Luleå, är personuppgiftsansvarig för behandlingen av dina uppgifter på denna webbplats.',
+
       dataTitle: 'Vad vi samlar in',
-      dataBody: 'Vi samlar in anonyma besöksdata — sidvisningar, klick och scroll-djup — via PostHog (EU-region). Ingen personlig information samlas in och ingen data säljs till tredje part.',
+      dataBody: 'Med ditt samtycke samlar vi in pseudonyma besöksdata via PostHog: sidvisningar, klick, scroll-djup och webbläsartyp. En pseudonym identifierare (UUID) lagras i din webbläsares localStorage. IP-adresser behandlas tillfälligt av PostHog för regional statistik och lagras inte i sin helhet. Inga uppgifter som direkt identifierar dig — som namn eller e-post — samlas in.',
+
+      cookiesTitle: 'Cookies och lokal lagring',
+      cookiesBody: 'PostHog lagrar en pseudonym sessions-identifierare under nycklarna ph_* i localStorage. Vi lagrar även ditt samtyckesbeslut under nyckeln tkl-cookie-consent. Inga reklamcookies eller tredjepartscookies för profilering används.',
+
+      legalTitle: 'Rättslig grund',
+      legalBody: 'Behandlingen grundar sig uteslutande på ditt samtycke (GDPR artikel 6.1 a). Du kan när som helst återkalla samtycket utan att det påverkar lagligheten av behandling som skett dessförinnan.',
+
       purposeTitle: 'Ändamål',
-      purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och för att förbättra upplevelsen för studenter och företag.',
+      purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och förbättra upplevelsen för studenter och företag. Ingen data säljs eller delas med tredje part i marknadsföringssyfte.',
+
+      processorTitle: 'Personuppgiftsbiträde',
+      processorBody: 'Vi anlitar PostHog, Inc. (USA) som personuppgiftsbiträde. All data behandlas och lagras uteslutande på PostHogs EU-servrar (eu.posthog.com) och omfattas av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28.',
+      processorLinkLabel: 'PostHogs integritetspolicy',
+
       retentionTitle: 'Lagringstid',
-      retentionBody: 'Data lagras i PostHog EU i maximalt 1 år, varefter den raderas automatiskt.',
+      retentionBody: 'Data lagras hos PostHog EU i maximalt 1 år, varefter den raderas automatiskt.',
+
+      transferTitle: 'Internationell överföring',
+      transferBody: 'PostHog, Inc. är ett amerikanskt bolag, men dina data behandlas och lagras uteslutande på servrar inom EU/EES. Överföringen skyddas av standardavtalsklausuler (SCC) i enlighet med GDPR kapitel V.',
+
       rightsTitle: 'Dina rättigheter',
-      rightsBody: 'Du kan när som helst återkalla ditt samtycke: rensa nyckeln tkl-cookie-consent i din webbläsares localStorage och ladda om sidan. Du kan också kontakta oss så hjälper vi dig.',
+      rightsIntro: 'Under GDPR har du följande rättigheter:',
+      rightsList: 'Tillgång (art. 15) — begära en kopia av dina uppgifter\nRättelse (art. 16) — begära rättelse av felaktiga uppgifter\nRadering (art. 17) — begära radering ("rätten att bli glömd")\nBegränsning (art. 18) — begära begränsad behandling\nPortabilitet (art. 20) — få dina uppgifter i maskinläsbart format\nInvändning (art. 21) — invända mot behandlingen\nÅterkalla samtycke — när som helst, utan kostnad eller motivering',
+      rightsHow: 'Återkalla samtycke genom att rensa nyckeln tkl-cookie-consent i din webbläsares localStorage och ladda om sidan, eller kontakta oss.',
+
+      imyTitle: 'Klagomål till tillsynsmyndighet',
+      imyBody: 'Om du anser att behandlingen av dina uppgifter strider mot GDPR har du rätt att lämna klagomål till Integritetsskyddsmyndigheten (IMY).',
+      imyLinkLabel: 'Besök imy.se',
+
       contactTitle: 'Kontakt',
       contactBody: 'Har du frågor om hur vi hanterar dina uppgifter? Hör av dig till',
       back: 'Tillbaka',
@@ -1062,15 +1089,42 @@ export const TRANSLATIONS = {
     // --- Privacy page ---
     privacy: {
       title: 'Privacy Policy',
-      intro: 'This page describes how TKL NEXUS handles your data and cookies.',
+      intro: 'This page describes how Teknologkåren at Luleå University of Technology handles your data and cookies on TKL NEXUS.',
+
+      controllerTitle: 'Data Controller',
+      controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org. no. 897000-5388, Kårhusvägen 5, 977 54 Luleå, Sweden, is the data controller for the processing of your personal data on this website.',
+
       dataTitle: 'What we collect',
-      dataBody: 'We collect anonymous visit data — page views, clicks and scroll depth — via PostHog (EU region). No personal information is collected and no data is sold to third parties.',
+      dataBody: "With your consent, we collect pseudonymous visit data via PostHog: page views, clicks, scroll depth and browser type. A pseudonymous identifier (UUID) is stored in your browser's localStorage. IP addresses are temporarily processed by PostHog for regional statistics and are not stored in full. No data that directly identifies you — such as name or email — is collected.",
+
+      cookiesTitle: 'Cookies and local storage',
+      cookiesBody: 'PostHog stores a pseudonymous session identifier under the keys ph_* in localStorage. We also store your consent decision under the key tkl-cookie-consent. No advertising cookies or third-party profiling cookies are used.',
+
+      legalTitle: 'Legal basis',
+      legalBody: 'Processing is based solely on your consent (GDPR Article 6.1 a). You may withdraw your consent at any time without affecting the lawfulness of processing carried out before withdrawal.',
+
       purposeTitle: 'Purpose',
-      purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies.',
+      purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies. No data is sold or shared with third parties for marketing purposes.',
+
+      processorTitle: 'Data Processor',
+      processorBody: "We use PostHog, Inc. (USA) as a data processor. All data is processed and stored exclusively on PostHog's EU servers (eu.posthog.com) and is covered by a Data Processing Agreement (DPA) in accordance with GDPR Article 28.",
+      processorLinkLabel: 'PostHog Privacy Policy',
+
       retentionTitle: 'Retention',
-      retentionBody: 'Data is stored in PostHog EU for a maximum of 1 year, after which it is automatically deleted.',
+      retentionBody: 'Data is stored at PostHog EU for a maximum of 1 year, after which it is automatically deleted.',
+
+      transferTitle: 'International transfers',
+      transferBody: 'PostHog, Inc. is a US company, but your data is processed and stored exclusively on servers within the EU/EEA. The transfer is protected by Standard Contractual Clauses (SCC) in accordance with GDPR Chapter V.',
+
       rightsTitle: 'Your rights',
-      rightsBody: "You can withdraw your consent at any time: clear the tkl-cookie-consent key in your browser's localStorage and reload the page. You can also contact us and we'll help you.",
+      rightsIntro: 'Under GDPR, you have the following rights:',
+      rightsList: 'Access (Art. 15) — request a copy of your data\nRectification (Art. 16) — request correction of inaccurate data\nErasure (Art. 17) — request deletion ("right to be forgotten")\nRestriction (Art. 18) — request restricted processing\nPortability (Art. 20) — receive your data in machine-readable format\nObject (Art. 21) — object to the processing\nWithdraw consent — at any time, at no cost and without giving reasons',
+      rightsHow: "To withdraw consent, clear the tkl-cookie-consent key from your browser's localStorage and reload the page, or contact us.",
+
+      imyTitle: 'Right to complain',
+      imyBody: 'If you believe that our processing of your personal data violates GDPR, you have the right to lodge a complaint with the Swedish Authority for Privacy Protection (IMY).',
+      imyLinkLabel: 'Visit imy.se',
+
       contactTitle: 'Contact',
       contactBody: 'Questions about how we handle your data? Reach out to',
       back: 'Back',
