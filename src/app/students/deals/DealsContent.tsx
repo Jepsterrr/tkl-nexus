@@ -12,6 +12,7 @@ import type { TKLDeal } from '@/lib/schemas/deal';
 import { getPublishedDeals, getDealById } from '@/lib/services/deals';
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import posthog from 'posthog-js';
 
 // Deals Page Content
 export function DealsContent() {
@@ -51,6 +52,11 @@ export function DealsContent() {
       if (triggerEl) previousFocusRef.current = triggerEl;
       setSelectedDeal(deal);
       pushId(deal.id);
+      posthog.capture('deal_details_viewed', {
+        deal_id: deal.id,
+        company: deal.company,
+        discount: deal.discount,
+      });
     },
     [pushId],
   );

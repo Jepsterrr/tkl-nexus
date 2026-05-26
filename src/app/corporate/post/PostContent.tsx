@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import posthog from 'posthog-js';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip, Info, CheckCircle2 } from 'lucide-react';
@@ -235,6 +236,7 @@ export function PostContent() {
   function switchTab(id: ActiveTab) {
     setActiveTab(id);
     setTouched(new Set());
+    posthog.capture('corporate_tab_changed', { tab: id });
   }
 
   function hasFieldErr(id: string, value: string): boolean {
@@ -265,6 +267,10 @@ export function PostContent() {
     if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
     else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail }, recipientEmail);
     else url = buildDealMailto({ ...deal, contactName, contactEmail }, recipientEmail);
+    posthog.capture('corporate_form_submitted', {
+      tab_type: activeTab,
+      company: activeTab === 'opportunity' ? opp.company : activeTab === 'deal' ? deal.company : evt.title,
+    });
     window.location.href = url;
     setSubmitted(true);
   }
