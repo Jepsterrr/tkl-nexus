@@ -11,6 +11,8 @@ import { ScrollProvider } from '@/components/providers/ScrollProvider';
 import { ScrollContainer } from '@/components/providers/ScrollContainer';
 import { ScrollResetter } from '@/components/providers/ScrollResetter';
 import { GlobalBanner } from '@/components/layout/GlobalBanner';
+import { PHProvider } from '@/components/providers/PostHogProvider';
+import { CookieConsent } from '@/components/ui/CookieConsent';
 
 const unbounded = Unbounded({
   variable: '--font-heading',
@@ -105,27 +107,30 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       </head>
       <body className="antialiased bg-cosmic-bg overflow-x-hidden">
-        <LanguageProvider>
-          <HtmlLangSync />
-          <SettingsProvider>
-            <ThemeProvider>
-              <ScrollProvider>
-                <ScrollResetter />
-                <GlobalBanner />
-                <a href="#main-content" className="skip-nav">
-                  Hoppa till innehåll
-                </a>
-                <Navbar />
-                <ScrollContainer>
-                  <main id="main-content" className="relative overflow-x-hidden">
-                    {children}
-                  </main>
-                  <Footer />
-                </ScrollContainer>
-              </ScrollProvider>
-            </ThemeProvider>
-          </SettingsProvider>
-        </LanguageProvider>
+        <PHProvider>
+          <LanguageProvider>
+            <HtmlLangSync />
+            <SettingsProvider>
+              <ThemeProvider>
+                <ScrollProvider>
+                  <ScrollResetter />
+                  <GlobalBanner />
+                  <CookieConsent />
+                  <a href="#main-content" className="skip-nav">
+                    Hoppa till innehåll
+                  </a>
+                  <Navbar />
+                  <ScrollContainer>
+                    <main id="main-content" className="relative overflow-x-hidden">
+                      {children}
+                    </main>
+                    <Footer />
+                  </ScrollContainer>
+                </ScrollProvider>
+              </ThemeProvider>
+            </SettingsProvider>
+          </LanguageProvider>
+        </PHProvider>
       </body>
     </html>
   );
