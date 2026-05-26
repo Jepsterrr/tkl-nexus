@@ -151,3 +151,26 @@ Data visas alltid en gång, definitivt. Ingen tyst uppdatering efteråt.
 ### Framtida bilder i hemsidan:
 
 - [ ] **Teamfoto-sektion på About** — individuella porträtt per person (arbetsmarknadsutskottet). Varje person har eget namn, roll och Cloudinary-bild. Kräver CRUD i admin och subkollektion `settings/team/members` eller array i `settings/about`. Ska vara helt admin-hanterbart utan kod.
+
+---
+
+## GDPR & Cookie-samtycke (PostHog)
+
+PostHog trackar besökare via `localStorage`/cookies direkt vid sidladdning. Under GDPR och svensk ePrivacy-lag krävs aktivt samtycke innan analytics-cookies sätts.
+
+**Vad som ska implementeras:**
+
+- [ ] Samtyckesbanderoll — visas vid första besöket, knapparna "Acceptera" och "Neka".
+- [ ] PostHog initialiseras med `opt_out_capturing_by_default: true` — ingen tracking sker förrän användaren accepterar.
+- [ ] Vid "Acceptera": anropa `posthog.opt_in_capturing()` och spara val i `localStorage` (`tkl-cookie-consent: accepted`).
+- [ ] Vid "Neka": spara val i `localStorage` (`tkl-cookie-consent: declined`), PostHog förblir inaktivt.
+- [ ] Vid återbesök: läs `localStorage` och återställ PostHog-state utan att visa bannern igen.
+- [ ] Länk till integritetspolicy i bannern (integritetspolicy-sida saknas ännu — kan vara en enkel statisk sida).
+- [ ] Samtyckesbannern ska följa design-systemet (glassmorphism, CSS-variabler, `prefers-reduced-motion`).
+- [ ] i18n: alla strängar via `TRANSLATIONS` i `src/lib/i18n.ts`.
+
+**Teknisk approach:**
+1. Lägg till `opt_out_capturing_by_default: true` i `instrumentation-client.ts`.
+2. Skapa `src/components/ui/CookieConsent.tsx` — klientkomponent med bannern.
+3. Montera `<CookieConsent />` i `src/app/layout.tsx` inuti `<PHProvider>`.
+4. Dölj bannern på `/admin/*`-rutter.
