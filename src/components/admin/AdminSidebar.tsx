@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
+  BarChart2,
   Calendar,
   Tag,
   Briefcase,
@@ -19,6 +20,7 @@ import {
 
 const NAV_ITEMS = [
   { label: 'Dashboard',      icon: LayoutDashboard, href: '/admin/dashboard' },
+  { label: 'Analytics',      icon: BarChart2,       href: '/admin/analytics' },
   { label: 'Events',         icon: Calendar,        href: '/admin/events' },
   { label: 'Deals',          icon: Tag,             href: '/admin/deals' },
   { label: 'Jobb & Exjobb',  icon: Briefcase,       href: '/admin/career' },
