@@ -18,7 +18,7 @@ const CSP = [
   "font-src 'self' https://fonts.gstatic.com",
   // Bilder: egna + data-URI:er + Cloudinary
   "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://res.cloudinary.com",
-  // API-anrop: Firebase services + LUDD Events API
+  // API-anrop: Firebase services + LUDD Events API + PostHog
   [
     "connect-src 'self'",
     "https://*.googleapis.com",
@@ -29,6 +29,8 @@ const CSP = [
     "https://events.ludd.ltu.se",
     "https://www.google-analytics.com",
     "https://api.cloudinary.com",
+    "https://eu.i.posthog.com",
+    "https://eu-assets.i.posthog.com",
   ].join(" "),
   // Frames: ingen inbäddning tillåten
   "frame-src 'none'",
@@ -43,8 +45,24 @@ const CSP = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  skipTrailingSlashRedirect: true,
   async headers() {
     return [
+      {
+        // Admin routes: allow PostHog iframe
+        source: "/admin/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: CSP.replace("frame-src 'none'", "frame-src https://eu.posthog.com"),
+          },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+        ],
+      },
       {
         // Applicera på alla routes
         source: "/(.*)",
