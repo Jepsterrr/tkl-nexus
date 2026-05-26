@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useImageLoad } from '@/lib/hooks/useImageLoad';
@@ -347,6 +348,7 @@ export function HomeContent() {
               <Link
                 href="/about#kontakt"
                 className="shrink-0 px-8 py-3.5 rounded-2xl bg-linear-to-r from-[#E30613] to-[#c00510] text-white font-semibold text-sm sm:text-base hover:scale-105 hover:shadow-lg hover:shadow-[#E30613]/30 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]"
+                onClick={() => posthog.capture('home_cta_clicked', { destination: '/about#kontakt' })}
               >
                 {home.ctaBannerBtn}
               </Link>

@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { ExternalLink, Copy, Check, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import posthog from 'posthog-js';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
@@ -31,6 +32,11 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
     navigator.clipboard.writeText(deal.discountCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      posthog.capture('deal_code_copied', {
+        deal_id: deal.id,
+        company: deal.company,
+        discount: deal.discount,
+      });
     }).catch(() => { /* tyst fail */ });
   };
 
@@ -129,7 +135,13 @@ export function DealCard({ deal, idx = 0, onViewDetails }: DealCardProps) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs font-semibold transition-all duration-200 group-hover:gap-2 hover:opacity-80"
                 style={{ color: 'var(--text-orange)' }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  posthog.capture('deal_link_visited', {
+                    deal_id: deal.id,
+                    company: deal.company,
+                  });
+                }}
               >
                 {deals?.visit ?? 'Besök'}
                 <ExternalLink className="w-3 h-3" />

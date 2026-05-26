@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo, useId } from 'react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -157,6 +158,7 @@ function ChildCard({ d, elRef, delay, isInView, reduceMotion }: ChildCardProps) 
           border: `1px solid ${d.hex}38`,
           minHeight: '150px',
         }}
+        onClick={() => posthog.capture('home_network_clicked', { destination: d.href, label: d.label })}
       >
         <div
           className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
@@ -190,6 +192,7 @@ function MobileChildCard({ d, elRef, delay, isInView, reduceMotion }: ChildCardP
           background: 'var(--rn-child-bg)',
           border: `1px solid ${d.hex}38`,
         }}
+        onClick={() => posthog.capture('home_network_clicked', { destination: d.href, label: d.label })}
       >
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"

@@ -17,6 +17,7 @@ import type { TKLEvent, Section } from '@/lib/schemas/event';
 import { getPublishedEvents, getEventById } from '@/lib/services/events';
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { EASE_OUT_EXPO } from '@/lib/motion';
+import posthog from 'posthog-js';
 
 // Section logo map
 const SECTION_LOGOS: Record<Section, string | null> = {
@@ -176,6 +177,12 @@ export function EventsContent() {
       if (triggerEl) previousFocusRef.current = triggerEl;
       setSelectedEvent(event);
       pushId(event.id);
+      posthog.capture('event_details_viewed', {
+        event_id: event.id,
+        title: event.title,
+        section: event.section,
+        date: event.date,
+      });
     },
     [pushId],
   );
@@ -500,7 +507,7 @@ export function EventsContent() {
                 {ev.nexusTab}
               </button>
               <button
-                onClick={() => setCalendarView('ludd')}
+                onClick={() => { setCalendarView('ludd'); posthog.capture('campus_calendar_viewed'); }}
                 aria-pressed={calendarView === 'ludd'}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
                 style={calendarView === 'ludd'
@@ -554,7 +561,12 @@ export function EventsContent() {
                     aria-label={ev.filterAriaLabel}
                   >
                     {FILTERS.map((f) => (
-                      <FilterTab key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)} logo={f.logo} label={f.label} color={f.color} />
+                      <FilterTab key={f.key} active={filter === f.key} onClick={() => {
+                        setFilter(f.key);
+                        if (f.key !== filter) {
+                          posthog.capture('event_filter_applied', { filter: f.key });
+                        }
+                      }} logo={f.logo} label={f.label} color={f.color} />
                     ))}
                   </div>
                 </div>
