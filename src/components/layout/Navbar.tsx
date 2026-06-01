@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays, Briefcase, Gift, PenLine, LayoutGrid, ChevronDown } from 'lucide-react';
+import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays, Briefcase, Gift, PenLine, LayoutGrid, ChevronDown, Phone, SlidersHorizontal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
+import { useNavbarState } from '@/components/providers/NavbarStateProvider';
 import type { Locale } from '@/lib/i18n';
 
 type NavChild = { href: string; label: string; Icon: LucideIcon };
@@ -20,7 +21,9 @@ export function Navbar() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
 
   function handleMouseEnter(href: string) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -32,6 +35,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useLanguage();
   const scrollContainer = useScrollContainer();
+  const { isDrawerOpen } = useNavbarState();
 
   useEffect(() => {
     const container = scrollContainer.current;
@@ -44,6 +48,7 @@ export function Navbar() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
+    setSettingsOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -52,6 +57,17 @@ export function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [settingsOpen]);
+
   if (pathname.startsWith('/admin')) return null;
 
   const NAV_LINKS: NavLinkItem[] = [
@@ -59,7 +75,7 @@ export function Navbar() {
     {
       href: '/corporate', label: t.nav.corporate, Icon: Building2,
       children: [
-        { href: '/corporate', label: t.nav.corporateSubAbout, Icon: Building2 },
+        { href: '/about#kontakt', label: t.nav.corporateSubAbout, Icon: Phone },
         { href: '/corporate/post', label: t.nav.corporateSubPost, Icon: PenLine },
         { href: '/corporate/services', label: t.nav.corporateSubServices, Icon: LayoutGrid },
       ],
@@ -86,15 +102,17 @@ export function Navbar() {
     <>
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3/4"
+        animate={{ y: isDrawerOpen ? '-140%' : 0, opacity: isDrawerOpen ? 0 : 1 }}
+        transition={{ duration: isDrawerOpen ? 0.22 : 0.4, ease: isDrawerOpen ? 'easeIn' : 'easeOut' }}
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3/4 lg:max-w-[min(95vw,1500px)]"
+        style={{ pointerEvents: isDrawerOpen ? 'none' : 'auto' }}
         role="navigation"
         aria-label={t.nav.mainNav}
+        aria-hidden={isDrawerOpen ? true : undefined}
       >
-        <div className={`relative transition-all duration-300 ${scrolled ? 'shadow-lg shadow-black/30' : ''}`}>
+        <div className={`relative transition-all duration-300 rounded-2xl ${scrolled ? 'shadow-lg shadow-black/30 light:shadow-black/5' : ''}`}>
           {/* Glassmorphism background — overflow-hidden here so blur clips to rounded corners without clipping dropdowns */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-[#0a0118]/30 light:bg-white/80" />
+          <div className="absolute inset-0 rounded-2xl overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 dark:bg-[#0a0118]/30 light:bg-white/50" />
 
           <div className="relative px-5 py-3.5 flex items-center justify-between gap-4">
             {/* Logo */}
@@ -113,7 +131,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop nav links */}
-            <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
               {NAV_LINKS.map(({ href, label, Icon, children }) => {
                 const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
                 const isOpen = hoveredHref === href && !!children;
@@ -127,7 +145,7 @@ export function Navbar() {
                     <Link
                       href={href}
                       className={`relative px-4 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
-                        isActive ? 'nav-text' : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                        isActive ? 'nav-text' : 'nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -154,8 +172,8 @@ export function Navbar() {
                           <div
                             className="rounded-xl overflow-hidden py-1"
                             style={{
-                              background: 'var(--about-card-bg)',
-                              border: '1px solid var(--about-card-border)',
+                              background: 'var(--nav-dropdown-bg)',
+                              border: '1px solid var(--nav-dropdown-border)',
                               backdropFilter: 'blur(20px)',
                               WebkitBackdropFilter: 'blur(20px)',
                             }}
@@ -165,7 +183,7 @@ export function Navbar() {
                                 key={child.href}
                                 href={child.href}
                                 onClick={() => setHoveredHref(null)}
-                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium nav-text-muted hover:nav-text hover:bg-white/5 transition-colors"
+                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5 transition-colors"
                               >
                                 <child.Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                                 {child.label}
@@ -180,8 +198,103 @@ export function Navbar() {
               })}
             </div>
 
-            {/* Right side: theme toggle + lang + cta */}
-            <div className="hidden md:flex items-center gap-2 shrink-0">
+            {/* Compact controls: settings icon + contact (lg–xl) */}
+            <div className="hidden lg:flex xl:hidden items-center gap-2 shrink-0">
+              <div ref={settingsRef} className="relative">
+                <button
+                  onClick={() => setSettingsOpen((v) => !v)}
+                  aria-expanded={settingsOpen}
+                  aria-haspopup="true"
+                  aria-label={t.nav.settings}
+                  className={`p-2 rounded-xl min-h-11 min-w-11 flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
+                    settingsOpen ? 'nav-control-active' : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+                </button>
+
+                <AnimatePresence>
+                  {settingsOpen && (
+                    <motion.div
+                      key="settings-popover"
+                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 min-w-52 z-50"
+                    >
+                      <div
+                        className="rounded-xl p-3 flex flex-col gap-3"
+                        style={{
+                          background: 'var(--nav-dropdown-bg)',
+                          border: '1px solid var(--nav-dropdown-border)',
+                          backdropFilter: 'blur(20px)',
+                          WebkitBackdropFilter: 'blur(20px)',
+                        }}
+                      >
+                        {/* Tema */}
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest nav-text-subtle mb-2">
+                            {t.nav.chooseTheme}
+                          </p>
+                          <div
+                            role="group"
+                            aria-label={t.nav.chooseTheme}
+                            className="flex items-center gap-0.5 px-1 py-1 rounded-xl nav-control-bg border nav-control-border"
+                          >
+                            {themeIcons.map(({ value, Icon, label }) => (
+                              <button
+                                key={value}
+                                onClick={() => setTheme(value)}
+                                aria-label={label}
+                                aria-pressed={theme === value}
+                                className={`flex-1 p-2 rounded-lg min-h-9 flex items-center justify-center transition-all duration-200 ${
+                                  theme === value ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
+                                }`}
+                              >
+                                <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Språk */}
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest nav-text-subtle mb-2">
+                            {t.nav.chooseLang}
+                          </p>
+                          <div className="flex items-center gap-0 rounded-xl nav-control-border border overflow-hidden text-xs font-semibold">
+                            {(['sv', 'en'] as Locale[]).map((lang) => (
+                              <button
+                                key={lang}
+                                onClick={() => setLocale(lang)}
+                                aria-pressed={locale === lang}
+                                aria-label={lang === 'sv' ? t.nav.langSv : t.nav.langEn}
+                                className={`flex-1 min-h-9 flex items-center justify-center transition-all duration-200 ${
+                                  locale === lang ? 'nav-control-active' : 'nav-text-subtle hover:nav-text-muted'
+                                }`}
+                              >
+                                {lang.toUpperCase()}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <Link
+                href="/about#kontakt"
+                className="px-4 py-2 rounded-xl bg-linear-to-r from-[#E30613] to-[#c00510] text-white text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-[#E30613]/30 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]"
+              >
+                {t.nav.contact}
+              </Link>
+            </div>
+
+            {/* Right side: theme toggle + lang + cta (xl+) */}
+            <div className="hidden xl:flex items-center gap-2 shrink-0">
               {/* Theme toggle */}
               <div
                 role="group"
@@ -236,7 +349,7 @@ export function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden p-2 nav-text rounded-xl hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]"
+              className="lg:hidden p-2 nav-text rounded-xl hover:bg-white/10 light:hover:bg-black/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]"
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
               aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
@@ -266,7 +379,7 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.97 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed top-22 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-sm md:hidden"
+            className="fixed top-22 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-sm lg:hidden"
           >
             <div className="rounded-2xl border border-white/10 dark:border-white/10 light:border-black/10 backdrop-blur-2xl dark:bg-[#0a0118]/85 light:bg-white/92">
               <nav className="relative p-3 space-y-1" aria-label={t.nav.mobileNav}>
@@ -282,7 +395,7 @@ export function Navbar() {
                           className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                             isActive
                               ? 'bg-[#E30613]/15 nav-text border border-[#E30613]/30'
-                              : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                              : 'nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5'
                           }`}
                         >
                           <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -293,7 +406,7 @@ export function Navbar() {
                             onClick={() => setMobileExpanded(isExpanded ? null : href)}
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? 'Dölj undermeny' : 'Visa undermeny'}
-                            className="p-2.5 rounded-xl nav-text-muted hover:nav-text hover:bg-white/5 transition-all duration-200"
+                            className="p-2.5 rounded-xl nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5 transition-all duration-200"
                           >
                             <motion.span
                               animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -326,7 +439,7 @@ export function Navbar() {
                                     className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
                                       childActive
                                         ? 'nav-text bg-white/8'
-                                        : 'nav-text-muted hover:nav-text hover:bg-white/5'
+                                        : 'nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5'
                                     }`}
                                   >
                                     <child.Icon className="w-3 h-3 shrink-0" aria-hidden="true" />

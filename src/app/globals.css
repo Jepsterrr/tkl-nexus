@@ -119,6 +119,8 @@
   --nav-control-border: rgba(255, 255, 255, 0.1);
   --nav-control-active-bg: rgba(255, 255, 255, 0.15);
   --nav-control-active-text: rgba(255, 255, 255, 1);
+  --nav-dropdown-bg: rgba(18, 8, 40, 0.90);
+  --nav-dropdown-border: rgba(255, 255, 255, 0.10);
 
   /* Hero / Page text */
   --hero-text: #ffffff;
@@ -203,6 +205,8 @@
   --nav-control-border: rgba(0, 0, 0, 0.12);
   --nav-control-active-bg: rgba(0, 0, 0, 0.1);
   --nav-control-active-text: #0d0b1a;
+  --nav-dropdown-bg: rgba(255, 255, 255, 0.75);
+  --nav-dropdown-border: rgba(0, 0, 0, 0.08);
 
   /* Hero / Page text */
   --hero-text: #0d0b1a;

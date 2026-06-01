@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion, LayoutGroup } from 'framer-motion';
 import { Loader2, Tag, PlusCircle, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -13,6 +13,8 @@ import { getPublishedDeals, getDealById } from '@/lib/services/deals';
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import posthog from 'posthog-js';
+
+type ViewMode = 'icon' | 'detail';
 
 // Deals Page Content
 export function DealsContent() {
@@ -35,6 +37,20 @@ export function DealsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    try {
+      const saved = localStorage.getItem('tkl-deals-view');
+      if (saved === 'icon' || saved === 'detail') return saved;
+    } catch {}
+    return 'icon';
+  });
+
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('tkl-deals-view', mode);
+    } catch {}
+  };
 
   // Drawer state
   const [selectedDeal, setSelectedDeal] = useState<TKLDeal | null>(null);
@@ -241,8 +257,53 @@ export function DealsContent() {
       </section>
 
       {/* DEALS-LISTA */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label="NEXUS Deals">
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label={deals?.badge ?? 'NEXUS Deals'}>
         <div className="max-w-4xl mx-auto">
+
+          {/* View toggle */}
+          {!loading && !error && allDeals.length > 0 && (
+            <div className="flex justify-end mb-5">
+              <LayoutGroup id="deals-view-toggle">
+                <div
+                  className="flex items-center gap-0.5 p-1 rounded-xl"
+                  style={{
+                    background: 'var(--about-card-bg)',
+                    border: '1px solid var(--about-card-border)',
+                  }}
+                  role="group"
+                  aria-label={deals?.viewToggleAriaLabel ?? 'Välj visningsläge'}
+                >
+                  {(['icon', 'detail'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => handleViewChange(mode)}
+                      aria-pressed={viewMode === mode}
+                      className="relative px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-200 z-10"
+                      style={{
+                        color: viewMode === mode ? '#0a0a0a' : 'var(--text-muted, #6b7280)',
+                      }}
+                    >
+                      {viewMode === mode && (
+                        <motion.span
+                          layoutId="deals-view-indicator"
+                          className="absolute inset-0 rounded-lg"
+                          style={{ background: '#F59E0B' }}
+                          transition={{ type: 'spring', bounce: 0.18, duration: 0.38 }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="relative">
+                        {mode === 'icon'
+                          ? (deals?.viewIcons ?? 'Ikoner')
+                          : (deals?.viewDetails ?? 'Detaljer')}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </LayoutGroup>
+            </div>
+          )}
 
           {/* Laddning */}
           {loading && (
@@ -305,18 +366,26 @@ export function DealsContent() {
 
           {/* Deals-lista */}
           {!loading && !error && allDeals.length > 0 && (
-            <div className="flex flex-col gap-3">
+            <motion.div
+              layout
+              className={
+                viewMode === 'icon'
+                  ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
+              }
+            >
               <AnimatePresence mode="popLayout">
                 {allDeals.map((deal, idx) => (
                   <DealCard
                     key={deal.id}
                     deal={deal}
                     idx={idx}
+                    variant={viewMode}
                     onViewDetails={(e) => handleOpenDeal(deal, e.currentTarget)}
                   />
                 ))}
               </AnimatePresence>
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

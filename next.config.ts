@@ -11,7 +11,7 @@ import type { NextConfig } from "next";
 const CSP = [
   "default-src 'self'",
   // Scripts: egna + Next.js inline hattar (unsafe-inline behövs för Next.js hydration)
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://eu-assets.i.posthog.com",
   // Styles: egna + Google Fonts CDN
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Fonter: Google Fonts statiska tillgångar

@@ -13,6 +13,7 @@ import { ScrollResetter } from '@/components/providers/ScrollResetter';
 import { GlobalBanner } from '@/components/layout/GlobalBanner';
 import { PHProvider } from '@/components/providers/PostHogProvider';
 import { CookieConsent } from '@/components/ui/CookieConsent';
+import { NavbarStateProvider } from '@/components/providers/NavbarStateProvider';
 
 const unbounded = Unbounded({
   variable: '--font-heading',
@@ -112,21 +113,23 @@ export default function RootLayout({
             <HtmlLangSync />
             <SettingsProvider>
               <ThemeProvider>
-                <ScrollProvider>
-                  <ScrollResetter />
-                  <GlobalBanner />
-                  <CookieConsent />
-                  <a href="#main-content" className="skip-nav">
-                    Hoppa till innehåll
-                  </a>
-                  <Navbar />
-                  <ScrollContainer>
-                    <main id="main-content" className="relative overflow-x-hidden">
-                      {children}
-                    </main>
-                    <Footer />
-                  </ScrollContainer>
-                </ScrollProvider>
+                <NavbarStateProvider>
+                  <ScrollProvider>
+                    <ScrollResetter />
+                    <GlobalBanner />
+                    <CookieConsent />
+                    <a href="#main-content" className="skip-nav">
+                      Hoppa till innehåll
+                    </a>
+                    <Navbar />
+                    <ScrollContainer>
+                      <main id="main-content" className="relative overflow-x-hidden">
+                        {children}
+                      </main>
+                      <Footer />
+                    </ScrollContainer>
+                  </ScrollProvider>
+                </NavbarStateProvider>
               </ThemeProvider>
             </SettingsProvider>
           </LanguageProvider>

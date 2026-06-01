@@ -59,9 +59,9 @@ export function CookieConsent() {
           aria-label={cookie.text}
         >
           {/* Light-mode overlay */}
-          <div className="absolute inset-0 light:bg-white/50 pointer-events-none rounded-t-2xl" aria-hidden="true" />
+          <div className="absolute inset-0 pointer-events-none rounded-t-2xl" aria-hidden="true" />
 
-          <div className="glass max-w-4xl mx-auto rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="bg-black light:bg-white max-w-4xl mx-auto rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <p className="hero-text-muted text-sm leading-relaxed flex-1">
               {cookie.text}{' '}
               <Link

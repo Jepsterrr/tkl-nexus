@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, MapPin, Calendar, Building2, Clock, ExternalLink } from 'lucide-react';
 import posthog from 'posthog-js';
 import { useLanguage } from '@/components/providers/LanguageProvider';
+import { useNavbarState } from '@/components/providers/NavbarStateProvider';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
@@ -24,6 +25,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
   const { t, locale } = useLanguage();
   const opp = t.opportunities;
   const shouldReduceMotion = useReducedMotion();
+  const { setDrawerOpen } = useNavbarState();
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -75,6 +77,13 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
+  useEffect(() => {
+    setDrawerOpen(isOpen);
+    return () => {
+      if (isOpen) setDrawerOpen(false);
+    };
+  }, [isOpen, setDrawerOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -111,7 +120,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
             {/* Hero */}
             <div
               className="relative shrink-0 flex flex-col justify-end overflow-hidden"
-              style={{ minHeight: 148, padding: '20px 24px', paddingTop: 'calc(var(--navbar-bottom, 80px) + 44px)' }}
+              style={{ minHeight: 148, padding: '20px 24px', paddingTop: '24px' }}
             >
               <div
                 className="absolute inset-0 light:opacity-40"
@@ -131,7 +140,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                 ref={closeButtonRef}
                 onClick={onClose}
                 className="absolute right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-opacity duration-200 hover:opacity-80"
-                style={{ top: 'calc(var(--navbar-bottom, 80px) + 28px)', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
+                style={{ top: '20px', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
                 aria-label={opp.drawerClose}
               >
                 <X className="w-4 h-4 hero-text-muted" />
