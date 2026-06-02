@@ -6,6 +6,7 @@
 //   api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.i.posthog.com',
 //   ui_host: 'https://eu.posthog.com',
 //   defaults: '2026-01-30',
+//   persistence: 'memory',
 //   opt_out_capturing_by_default: true,
 //   capture_exceptions: true,
 //   capture_pageleave: true,

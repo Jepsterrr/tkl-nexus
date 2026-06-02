@@ -21,6 +21,7 @@ export function CookieConsent() {
     try {
       const stored = localStorage.getItem(CONSENT_KEY);
       if (stored === 'accepted') {
+        posthog.set_config({ persistence: 'localStorage+cookie' });
         posthog.opt_in_capturing();
       } else if (!stored) {
         setVisible(true);
@@ -35,6 +36,7 @@ export function CookieConsent() {
   if (pathname.startsWith('/admin')) return null;
 
   const accept = () => {
+    posthog.set_config({ persistence: 'localStorage+cookie' });
     posthog.opt_in_capturing();
     try { localStorage.setItem(CONSENT_KEY, 'accepted'); } catch { /* ignore */ }
     setVisible(false);

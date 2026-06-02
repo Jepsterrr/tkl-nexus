@@ -446,7 +446,7 @@ export function PostContent() {
             aria-labelledby={`tab-${activeTab}`}
           >
             <div
-              className="rounded-3xl p-6 sm:p-8 space-y-8"
+              className="ph-no-capture rounded-3xl p-6 sm:p-8 space-y-8"
               style={{
                 background: 'var(--about-card-bg)',
                 border: '1px solid var(--about-card-border)',

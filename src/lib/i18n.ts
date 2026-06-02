@@ -539,7 +539,7 @@ export const TRANSLATIONS = {
       controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org.nr 897000-5388, Kårhusvägen 5, 977 54 Luleå, är personuppgiftsansvarig för behandlingen av dina uppgifter på denna webbplats.',
 
       dataTitle: 'Vad vi samlar in',
-      dataBody: 'Med ditt samtycke samlar vi in pseudonyma besöksdata via PostHog: sidvisningar, klick, scroll-djup och webbläsartyp. En pseudonym identifierare (UUID) lagras i din webbläsares localStorage. IP-adresser behandlas tillfälligt av PostHog för regional statistik och lagras inte i sin helhet. Inga uppgifter som direkt identifierar dig — som namn eller e-post — samlas in.',
+      dataBody: 'Med ditt samtycke samlar vi in pseudonyma besöksdata via PostHog: sidvisningar, klick, scroll-djup och webbläsartyp. En pseudonym identifierare (UUID) lagras i din webbläsares localStorage. IP-adresser anonymiseras av PostHog omedelbart vid mottagning och lagras aldrig i sin helhet. Inga uppgifter som direkt identifierar dig — som namn eller e-post — samlas in.',
 
       cookiesTitle: 'Cookies och lokal lagring',
       cookiesBody: 'PostHog lagrar en pseudonym sessions-identifierare under nycklarna ph_* i localStorage. Vi lagrar även ditt samtyckesbeslut under nyckeln tkl-cookie-consent. Inga reklamcookies eller tredjepartscookies för profilering används.',
@@ -550,18 +550,21 @@ export const TRANSLATIONS = {
       purposeTitle: 'Ändamål',
       purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och förbättra upplevelsen för studenter och företag. Ingen data säljs eller delas med tredje part i marknadsföringssyfte.',
 
+      automatedTitle: 'Automatiserat beslutsfattande',
+      automatedBody: 'Vi använder inte automatiserat beslutsfattande eller profilering (GDPR artikel 22). Ingen behandling av dina uppgifter sker automatiskt för att fatta beslut som påverkar dig rättsligt eller på ett liknande betydande sätt.',
+
       ageTitle: 'Åldersgräns',
       ageBody: 'Tjänsten riktar sig till studenter och företag. I enlighet med GDPR artikel 8 och svensk lag behandlar vi inte personuppgifter för personer under 16 år. Genom att acceptera cookies bekräftar du att du är 16 år eller äldre.',
 
-      processorTitle: 'Personuppgiftsbiträde',
-      processorBody: 'Vi anlitar PostHog, Inc. (USA) som personuppgiftsbiträde. All data behandlas och lagras uteslutande på PostHogs EU-servrar (eu.posthog.com) och omfattas av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28.',
+      processorTitle: 'Personuppgiftsbiträde & underbiträden',
+      processorBody: 'Vi anlitar PostHog, Inc. (USA) som personuppgiftsbiträde, reglerat av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28. PostHog anlitar i sin tur följande underbiträden för EU Cloud: Amazon Web Services (molnlagring, EU-region), Wiz Inc. (säkerhetsövervakning, EU), PlanetScale Inc. (databasövervakning, USA) och Modal Labs Inc. (beräkningsinfrastruktur, USA). Aktuell lista: posthog.com/subprocessors.',
       processorLinkLabel: 'PostHogs integritetspolicy',
 
       retentionTitle: 'Lagringstid',
       retentionBody: 'Data lagras hos PostHog EU i maximalt 1 år, varefter den raderas automatiskt.',
 
       transferTitle: 'Internationell överföring',
-      transferBody: 'PostHog, Inc. är ett amerikanskt bolag, men dina data behandlas och lagras uteslutande på servrar inom EU/EES. Överföringen skyddas av standardavtalsklausuler (SCC) i enlighet med GDPR kapitel V.',
+      transferBody: 'Dina data lagras på AWS EU-servrar inom EU/EES. Vissa underbiträden (PlanetScale, Modal Labs) är belägna i USA. Överföringar till USA skyddas av standardavtalsklausuler (SCC) enligt GDPR kapitel V samt EU-US Data Privacy Framework (DPF), under vilket PostHog är certifierat.',
 
       rightsTitle: 'Dina rättigheter',
       rightsIntro: 'Under GDPR har du följande rättigheter:',
@@ -1112,7 +1115,7 @@ export const TRANSLATIONS = {
       controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org. no. 897000-5388, Kårhusvägen 5, 977 54 Luleå, Sweden, is the data controller for the processing of your personal data on this website.',
 
       dataTitle: 'What we collect',
-      dataBody: "With your consent, we collect pseudonymous visit data via PostHog: page views, clicks, scroll depth and browser type. A pseudonymous identifier (UUID) is stored in your browser's localStorage. IP addresses are temporarily processed by PostHog for regional statistics and are not stored in full. No data that directly identifies you — such as name or email — is collected.",
+      dataBody: "With your consent, we collect pseudonymous visit data via PostHog: page views, clicks, scroll depth and browser type. A pseudonymous identifier (UUID) is stored in your browser's localStorage. IP addresses are anonymised by PostHog immediately upon receipt and are never stored in full. No data that directly identifies you — such as name or email — is collected.",
 
       cookiesTitle: 'Cookies and local storage',
       cookiesBody: 'PostHog stores a pseudonymous session identifier under the keys ph_* in localStorage. We also store your consent decision under the key tkl-cookie-consent. No advertising cookies or third-party profiling cookies are used.',
@@ -1123,18 +1126,21 @@ export const TRANSLATIONS = {
       purposeTitle: 'Purpose',
       purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies. No data is sold or shared with third parties for marketing purposes.',
 
+      automatedTitle: 'Automated decision-making',
+      automatedBody: 'We do not use automated decision-making or profiling (GDPR Article 22). No processing of your data occurs automatically to make decisions that legally or similarly significantly affect you.',
+
       ageTitle: 'Age restriction',
       ageBody: 'This service is intended for students and companies. In accordance with GDPR Article 8 and Swedish law, we do not process personal data of persons under the age of 16. By accepting cookies, you confirm that you are 16 years of age or older.',
 
-      processorTitle: 'Data Processor',
-      processorBody: "We use PostHog, Inc. (USA) as a data processor. All data is processed and stored exclusively on PostHog's EU servers (eu.posthog.com) and is covered by a Data Processing Agreement (DPA) in accordance with GDPR Article 28.",
+      processorTitle: 'Data Processor & Sub-processors',
+      processorBody: "We use PostHog, Inc. (USA) as a data processor, governed by a Data Processing Agreement (DPA) in accordance with GDPR Article 28. PostHog in turn uses the following sub-processors for EU Cloud: Amazon Web Services (cloud storage, EU region), Wiz Inc. (security monitoring, EU), PlanetScale Inc. (database monitoring, USA) and Modal Labs Inc. (compute infrastructure, USA). Current list: posthog.com/subprocessors.",
       processorLinkLabel: 'PostHog Privacy Policy',
 
       retentionTitle: 'Retention',
       retentionBody: 'Data is stored at PostHog EU for a maximum of 1 year, after which it is automatically deleted.',
 
       transferTitle: 'International transfers',
-      transferBody: 'PostHog, Inc. is a US company, but your data is processed and stored exclusively on servers within the EU/EEA. The transfer is protected by Standard Contractual Clauses (SCC) in accordance with GDPR Chapter V.',
+      transferBody: 'Your data is stored on AWS EU servers within the EU/EEA. Certain sub-processors (PlanetScale, Modal Labs) are located in the USA. Transfers to the USA are protected by Standard Contractual Clauses (SCC) under GDPR Chapter V and the EU-US Data Privacy Framework (DPF), under which PostHog is certified.',
 
       rightsTitle: 'Your rights',
       rightsIntro: 'Under GDPR, you have the following rights:',
