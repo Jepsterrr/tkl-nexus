@@ -45,6 +45,7 @@ export const TRANSLATIONS = {
         corporate: 'För företag',
         about: 'Om oss',
         contact: 'Kontakt',
+        privacy: 'Integritetspolicy',
       },
     },
 
@@ -549,6 +550,9 @@ export const TRANSLATIONS = {
       purposeTitle: 'Ändamål',
       purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och förbättra upplevelsen för studenter och företag. Ingen data säljs eller delas med tredje part i marknadsföringssyfte.',
 
+      ageTitle: 'Åldersgräns',
+      ageBody: 'Tjänsten riktar sig till studenter och företag. I enlighet med GDPR artikel 8 och svensk lag behandlar vi inte personuppgifter för personer under 16 år. Genom att acceptera cookies bekräftar du att du är 16 år eller äldre.',
+
       processorTitle: 'Personuppgiftsbiträde',
       processorBody: 'Vi anlitar PostHog, Inc. (USA) som personuppgiftsbiträde. All data behandlas och lagras uteslutande på PostHogs EU-servrar (eu.posthog.com) och omfattas av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28.',
       processorLinkLabel: 'PostHogs integritetspolicy',
@@ -618,6 +622,7 @@ export const TRANSLATIONS = {
         corporate: 'For companies',
         about: 'About us',
         contact: 'Contact',
+        privacy: 'Privacy Policy',
       },
     },
 
@@ -1117,6 +1122,9 @@ export const TRANSLATIONS = {
 
       purposeTitle: 'Purpose',
       purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies. No data is sold or shared with third parties for marketing purposes.',
+
+      ageTitle: 'Age restriction',
+      ageBody: 'This service is intended for students and companies. In accordance with GDPR Article 8 and Swedish law, we do not process personal data of persons under the age of 16. By accepting cookies, you confirm that you are 16 years of age or older.',
 
       processorTitle: 'Data Processor',
       processorBody: "We use PostHog, Inc. (USA) as a data processor. All data is processed and stored exclusively on PostHog's EU servers (eu.posthog.com) and is covered by a Data Processing Agreement (DPA) in accordance with GDPR Article 28.",

@@ -34,6 +34,7 @@ export function Footer() {
     { label: t.footer.links.corporate, href: '/corporate' },
     { label: t.footer.links.about, href: '/about' },
     { label: t.footer.links.contact, href: '/about#kontakt' },
+    { label: t.footer.links.privacy, href: '/privacy' },
   ];
 
   return (

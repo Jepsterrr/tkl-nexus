@@ -112,6 +112,13 @@ export function PrivacyContent() {
             </SectionCard>
           </RevealItem>
 
+          {/* Åldersgräns */}
+          <RevealItem>
+            <SectionCard title={p.ageTitle}>
+              <p className="hero-text-muted text-sm leading-relaxed">{p.ageBody}</p>
+            </SectionCard>
+          </RevealItem>
+
           {/* Personuppgiftsbiträde */}
           <RevealItem>
             <SectionCard title={p.processorTitle}>
