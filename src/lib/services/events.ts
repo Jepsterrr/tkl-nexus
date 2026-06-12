@@ -2,8 +2,6 @@ import {
   collection,
   getDocs,
   getDoc,
-  getDocsFromCache,
-  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -12,104 +10,62 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  type DocumentData,
 } from 'firebase/firestore';
+import { FirebaseError } from 'firebase/app';
 import { db } from '@/lib/firebase';
 import { EventSchema, EventFormSchema, type TKLEvent, type EventFormData } from '../schemas/event';
 import { withFetchTimeout } from '../fetch-timeout';
-import { getDataSource, bumpCacheVersion } from './cacheVersion';
+import { bumpCacheVersion } from './cacheVersion';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
+
+/** Timestamp/sträng → ISO för alla datumfält. */
+function eventDates(data: DocumentData): Record<string, unknown> {
+  return {
+    date: toIso(data.date) ?? data.date,
+    endDate: toIso(data.endDate) ?? data.endDate,
+    createdAt: toIso(data.createdAt) ?? data.createdAt,
+  };
+}
 
 export async function getPublishedEvents(): Promise<TKLEvent[]> {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   const startOfTodayIso = d.toISOString();
 
-  const eventsRef = collection(db, 'events');
   const q = query(
-    eventsRef,
+    collection(db, 'events'),
     where('published', '==', true),
     where('endDate', '>=', startOfTodayIso),
     orderBy('endDate', 'asc'),
     orderBy('date', 'asc')
   );
 
-  const source = await getDataSource('events');
-  let snapshot;
-  if (source === 'cache') {
-    try {
-      snapshot = await withFetchTimeout(getDocsFromCache(q));
-      if (snapshot.empty) throw new Error('cache empty');
-    } catch {
-      snapshot = await withFetchTimeout(getDocsFromServer(q));
-    }
-  } else {
-    snapshot = await withFetchTimeout(getDocsFromServer(q));
-  }
-
-  const events: TKLEvent[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const eventData = {
-      id: docSnap.id,
-      ...data,
-      date: data.date?.toDate?.().toISOString() ?? data.date,
-      endDate: data.endDate?.toDate?.().toISOString() ?? data.endDate,
-      createdAt: data.createdAt?.toDate?.().toISOString() ?? data.createdAt,
-    };
-
-    const parsed = EventSchema.safeParse(eventData);
-    if (parsed.success) {
-      events.push(parsed.data);
-    } else {
-      console.error(`Valideringsfel för event ${docSnap.id}:`, parsed.error);
-    }
-  });
-
-  return events;
+  const snapshot = await getDocsWithCacheStrategy(q, 'events');
+  return parseSnapshot(snapshot, EventSchema, 'events', eventDates);
 }
 
 export async function getAllEvents(): Promise<TKLEvent[]> {
-  const eventsRef = collection(db, 'events');
-  const q = query(eventsRef, orderBy('date', 'asc'));
+  const q = query(collection(db, 'events'), orderBy('date', 'asc'));
   const snapshot = await withFetchTimeout(getDocs(q));
-
-  const events: TKLEvent[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const eventData = {
-      id: docSnap.id,
-      ...data,
-      date: data.date?.toDate?.().toISOString() ?? data.date,
-      endDate: data.endDate?.toDate?.().toISOString() ?? data.endDate,
-      createdAt: data.createdAt?.toDate?.().toISOString() ?? data.createdAt,
-    };
-    const parsed = EventSchema.safeParse(eventData);
-    if (parsed.success) {
-      events.push(parsed.data);
-    } else {
-      console.error(`Valideringsfel för event ${docSnap.id}:`, parsed.error);
-    }
-  });
-
-  return events;
+  return parseSnapshot(snapshot, EventSchema, 'events', eventDates);
 }
 
 export async function getEventById(id: string): Promise<TKLEvent | null> {
-  const docRef = doc(db, 'events', id);
-  const docSnap = await withFetchTimeout(getDoc(docRef));
+  let docSnap;
+  try {
+    docSnap = await withFetchTimeout(getDoc(doc(db, 'events', id)));
+  } catch (err) {
+    // Security rules nekar läsning av opublicerade dokument — behandla som "finns inte"
+    if (err instanceof FirebaseError && err.code === 'permission-denied') return null;
+    throw err;
+  }
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
   if (data.published !== true) return null;
 
-  const eventData = {
-    id: docSnap.id,
-    ...data,
-    date: data.date?.toDate?.().toISOString() ?? data.date,
-    endDate: data.endDate?.toDate?.().toISOString() ?? data.endDate,
-    createdAt: data.createdAt?.toDate?.().toISOString() ?? data.createdAt,
-  };
-
-  const parsed = EventSchema.safeParse(eventData);
+  const parsed = EventSchema.safeParse({ id: docSnap.id, ...data, ...eventDates(data) });
   if (!parsed.success) {
     console.error(`Valideringsfel för event ${docSnap.id}:`, parsed.error);
     return null;
@@ -117,14 +73,9 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
   return parsed.data;
 }
 
-function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
-}
-
 export async function createEvent(data: EventFormData): Promise<string> {
   const validated = EventFormSchema.parse(data);
-  const eventsRef = collection(db, 'events');
-  const docRef = await addDoc(eventsRef, {
+  const docRef = await addDoc(collection(db, 'events'), {
     ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });
@@ -135,8 +86,7 @@ export async function createEvent(data: EventFormData): Promise<string> {
 export async function updateEvent(id: string, data: Partial<EventFormData>): Promise<void> {
   if (!id) throw new Error('updateEvent: id saknas');
   const validated = EventFormSchema.partial().parse(data);
-  const docRef = doc(db, 'events', id);
-  await updateDoc(docRef, omitUndefined(validated as Record<string, unknown>));
+  await updateDoc(doc(db, 'events', id), omitUndefined(validated as Record<string, unknown>));
   void bumpCacheVersion('events').catch(e => console.warn('[cache] bump failed:', e));
 }
 

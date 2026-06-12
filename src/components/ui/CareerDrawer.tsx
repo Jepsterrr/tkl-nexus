@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, MapPin, Calendar, Building2, Clock, ExternalLink } from 'lucide-react';
-import posthog from 'posthog-js';
+import { capture } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useNavbarState } from '@/components/providers/NavbarStateProvider';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
@@ -222,7 +222,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                   className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
                   style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
                   onClick={() =>
-                    posthog.capture('career_apply_clicked', {
+                    capture('career_apply_clicked', {
                       job_id: job!.id,
                       company: job!.company,
                       job_type: job!.type,

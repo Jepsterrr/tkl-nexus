@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { inputCls, labelCls, errorCls, sectionHdCls } from '@/components/admin/shared/formStyles';
 import { ImageUploadField } from '@/components/admin/shared/ImageUploadField';
 import { createDeal, updateDeal } from '@/lib/services/deals';
-import { getCloudinarySecrets } from '@/lib/services/secrets';
 import { deleteFromCloudinary } from '@/lib/services/cloudinary';
 import { DealFormSchema } from '@/lib/schemas/deal';
 import type { TKLDeal, DealFormData } from '@/lib/schemas/deal';
@@ -80,8 +79,7 @@ export function DealForm({ mode, initialData }: DealFormProps) {
         initialData.cloudinaryPublicId !== cloudinaryPublicId
       ) {
         try {
-          const secrets = await getCloudinarySecrets();
-          await deleteFromCloudinary(initialData.cloudinaryPublicId, secrets);
+          await deleteFromCloudinary(initialData.cloudinaryPublicId);
         } catch {
           console.warn('[cloudinary] Kunde inte radera gammal bild vid uppdatering av deal');
         }

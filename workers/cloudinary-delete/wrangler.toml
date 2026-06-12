@@ -1,0 +1,15 @@
+name = "tkl-cloudinary-delete"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+workers_dev = true
+# Preview-URL:er av — CSP tillåter bara den exakta produktions-URL:en
+preview_urls = false
+
+[vars]
+FIREBASE_PROJECT_ID = "tkl-nexus"
+ALLOWED_ORIGINS = "https://tklnexus.se,https://www.tklnexus.se,http://localhost:3000"
+
+# Secrets — sätts EN gång med:
+#   wrangler secret put CLOUDINARY_CLOUD_NAME
+#   wrangler secret put CLOUDINARY_API_KEY
+#   wrangler secret put CLOUDINARY_API_SECRET

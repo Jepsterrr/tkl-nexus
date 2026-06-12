@@ -141,6 +141,16 @@ export function Navbar() {
                     className="relative"
                     onMouseEnter={() => { if (children) handleMouseEnter(href); }}
                     onMouseLeave={() => { if (children) handleMouseLeave(); }}
+                    // Tangentbordsnav: öppna på fokus, stäng när fokus lämnar wrappern eller på Escape
+                    onFocusCapture={() => { if (children) handleMouseEnter(href); }}
+                    onBlurCapture={(e) => {
+                      if (children && !e.currentTarget.contains(e.relatedTarget as Node)) {
+                        handleMouseLeave();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (children && e.key === 'Escape') setHoveredHref(null);
+                    }}
                   >
                     <Link
                       href={href}
@@ -405,7 +415,7 @@ export function Navbar() {
                           <button
                             onClick={() => setMobileExpanded(isExpanded ? null : href)}
                             aria-expanded={isExpanded}
-                            aria-label={isExpanded ? 'Dölj undermeny' : 'Visa undermeny'}
+                            aria-label={isExpanded ? t.nav.hideSubmenu : t.nav.showSubmenu}
                             className="p-2.5 rounded-xl nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5 transition-all duration-200"
                           >
                             <motion.span

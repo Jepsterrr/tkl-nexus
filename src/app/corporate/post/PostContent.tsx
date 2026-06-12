@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import posthog from 'posthog-js';
+import { capture } from '@/lib/analytics';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip, Info, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon, Paperclip, CheckCircle2 } from 'lucide-react';
+import { EventTypeCard } from '@/components/ui/EventTypeCard';
+import { EASE_OUT_EXPO } from '@/lib/motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { getPublishedEventTypes } from '@/lib/services/eventTypes';
 import type { TKLEventType } from '@/lib/schemas/eventType';
@@ -41,7 +43,6 @@ interface EventForm {
   endDate: string;
   location: string;
   section: 'data' | 'geo' | 'i' | 'maskin' | 'general' | '';
-  tags: string;
   description: string;
   descriptionEn: string;
 }
@@ -72,7 +73,7 @@ const EMPTY_OPPORTUNITY: OpportunityForm = {
 const EMPTY_EVENT: EventForm = {
   contactName: '', contactEmail: '', title: '', titleEn: '',
   date: '', endDate: '', location: '', section: '',
-  tags: '', description: '', descriptionEn: '',
+  description: '', descriptionEn: '',
 };
 
 const EMPTY_DEAL: DealForm = {
@@ -117,7 +118,12 @@ function buildOpportunityMailto(f: OpportunityForm, email: string): string {
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-function buildEventMailto(f: EventForm, email: string): string {
+function buildEventMailto(
+  f: EventForm,
+  email: string,
+  eventTypeName: string,
+  hidden: string[]
+): string {
   const subject = `[Event] ${f.contactName} (${f.contactEmail}) – ${f.title}`;
   const body = [
     '=== TKL NEXUS — Ny inlämning ===',
@@ -129,21 +135,22 @@ function buildEventMailto(f: EventForm, email: string): string {
     field('Kontakt-e-post', f.contactEmail),
     '',
     '--- EVENTDATA (events) ---',
+    field('eventType', eventTypeName),
     field('title', f.title),
     field('titleEn', f.titleEn),
     field('date', f.date),
-    field('endDate', f.endDate),
-    field('location', f.location),
-    field('section', f.section),
-    field('tags', f.tags),
+    !hidden.includes('endDate') ? field('endDate', f.endDate) : null,
+    !hidden.includes('location') ? field('location', f.location) : field('location', '(TKL väljer lokal)'),
+    !hidden.includes('section') ? field('section', f.section) : null,
     field('description (sv)', f.description),
     field('descriptionEn', f.descriptionEn),
     '',
     '--- NOTERINGAR ---',
     'Samling: events',
     'published: false (sätt till true vid publicering)',
-    'tags: dela upp på kommatecken → array i Firestore',
-  ].join('\n');
+  ]
+    .filter((line): line is string => line !== null)
+    .join('\n');
   return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
@@ -182,8 +189,18 @@ function isOpportunityValid(f: OpportunityForm): boolean {
   return !!(f.contactName && f.contactEmail && f.title && f.company && f.type && f.location && f.deadline);
 }
 
-function isEventValid(f: EventForm): boolean {
-  return !!(f.contactName && f.contactEmail && f.title && f.date && f.endDate && f.location && f.section && f.description);
+function isEventValid(f: EventForm, hidden: string[], hasEventType: boolean): boolean {
+  return !!(
+    hasEventType &&
+    f.contactName &&
+    f.contactEmail &&
+    f.title &&
+    f.date &&
+    f.description &&
+    (hidden.includes('endDate') || f.endDate) &&
+    (hidden.includes('location') || f.location) &&
+    (hidden.includes('section') || f.section)
+  );
 }
 
 function isDealValid(f: DealForm): boolean {
@@ -236,7 +253,7 @@ export function PostContent() {
   function switchTab(id: ActiveTab) {
     setActiveTab(id);
     setTouched(new Set());
-    posthog.capture('corporate_tab_changed', { tab: id });
+    capture('corporate_tab_changed', { tab: id });
   }
 
   function hasFieldErr(id: string, value: string): boolean {
@@ -262,12 +279,20 @@ export function PostContent() {
     return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400">{msg}</span>;
   }
 
+  const selectedEventType = eventTypes.find((et) => et.id === selectedEventTypeId) ?? null;
+  const eventHidden = selectedEventType?.hiddenFields ?? [];
+
   function handleSubmit() {
     let url = '';
     if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
-    else if (activeTab === 'event') url = buildEventMailto({ ...evt, contactName, contactEmail }, recipientEmail);
+    else if (activeTab === 'event') url = buildEventMailto(
+      { ...evt, contactName, contactEmail },
+      recipientEmail,
+      selectedEventType ? (locale === 'en' && selectedEventType.nameEn ? selectedEventType.nameEn : selectedEventType.name) : '',
+      eventHidden
+    );
     else url = buildDealMailto({ ...deal, contactName, contactEmail }, recipientEmail);
-    posthog.capture('corporate_form_submitted', {
+    capture('corporate_form_submitted', {
       tab_type: activeTab,
       company: activeTab === 'opportunity' ? opp.company : activeTab === 'deal' ? deal.company : evt.title,
     });
@@ -277,7 +302,7 @@ export function PostContent() {
 
   const isValid =
     activeTab === 'opportunity' ? isOpportunityValid({ ...opp, contactName, contactEmail }) :
-    activeTab === 'event' ? isEventValid({ ...evt, contactName, contactEmail }) :
+    activeTab === 'event' ? isEventValid({ ...evt, contactName, contactEmail }, eventHidden, !!selectedEventType) :
     isDealValid({ ...deal, contactName, contactEmail });
 
   function handleTabKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, currentId: ActiveTab) {
@@ -300,8 +325,6 @@ export function PostContent() {
   ];
 
   const requiredDot = <span className="text-[#3B82F6] ml-0.5">*</span>;
-
-  const selectedEventType = eventTypes.find((et) => et.id === selectedEventTypeId) ?? null;
 
   return (
     <>
@@ -632,170 +655,213 @@ export function PostContent() {
                   >
                     {cp.event.sectionTitle}
                   </legend>
-                  <div className="space-y-4">
-                    {/* Step 1: Select event type */}
-                    <div>
-                      <label htmlFor="evt-type" className={labelCls}>
-                        {cp.eventTypeLabel}{requiredDot}
-                      </label>
-                      {eventTypesLoading ? (
-                        <p className="text-xs hero-text-muted">{cp.eventTypeLoading}</p>
-                      ) : (
-                        <select
-                          id="evt-type"
-                          className={inputCls}
-                          value={selectedEventTypeId}
-                          onChange={(e) => setSelectedEventTypeId(e.target.value)}
-                        >
-                          <option value="" disabled>{cp.eventTypePlaceholder}</option>
-                          {eventTypes.map((et) => (
-                            <option key={et.id} value={et.id}>
-                              {locale === 'en' && et.nameEn ? et.nameEn : et.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
+                  <div className="space-y-5">
 
-                    {/* Info panel for selected event type */}
-                    {selectedEventType && (
-                      <div
-                        className="rounded-xl px-5 py-4 space-y-3"
-                        style={{
-                          background: 'rgba(59,130,246,0.07)',
-                          border: '1px solid rgba(59,130,246,0.18)',
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Info className="w-4 h-4 shrink-0" style={{ color: '#3B82F6' }} aria-hidden="true" />
-                          <span className="text-sm font-semibold hero-text">{cp.eventTypeInfoTitle}</span>
-                        </div>
-                        <p className="text-sm hero-text-muted leading-relaxed">
-                          {locale === 'en' && selectedEventType.descriptionEn
-                            ? selectedEventType.descriptionEn
-                            : selectedEventType.description}
-                        </p>
-                        {(locale === 'en' ? selectedEventType.highlightsEn : selectedEventType.highlights).length > 0 && (
-                          <ul className="space-y-1.5 pt-1">
-                            {(locale === 'en' ? selectedEventType.highlightsEn : selectedEventType.highlights).map((point, i) => (
-                              <li key={i} className="flex items-start gap-2 text-xs hero-text-muted">
-                                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: '#3B82F6' }} aria-hidden="true" />
-                                <span>{point}</span>
-                              </li>
+                    {/* Kortval — visas när ingen typ är vald */}
+                    {!selectedEventTypeId && (
+                      <div>
+                        <p id="evt-type-label" className={labelCls}>{cp.eventTypeSelectHeading}{requiredDot}</p>
+                        {eventTypesLoading ? (
+                          <p className="text-xs mt-2" style={{ color: 'var(--hero-text-muted)' }}>
+                            {cp.eventTypeLoading}
+                          </p>
+                        ) : eventTypes.length === 0 ? (
+                          <p className="text-xs mt-2" style={{ color: 'var(--hero-text-subtle)' }}>
+                            {cp.eventTypeNone}
+                          </p>
+                        ) : (
+                          <motion.div
+                            role="group"
+                            aria-labelledby="evt-type-label"
+                            className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2"
+                            initial={false}
+                          >
+                            {eventTypes.map((et, i) => (
+                              <EventTypeCard
+                                key={et.id}
+                                eventType={et}
+                                locale={locale}
+                                index={i}
+                                selected={false}
+                                onSelect={() => setSelectedEventTypeId(et.id)}
+                              />
                             ))}
-                          </ul>
+                          </motion.div>
                         )}
                       </div>
                     )}
-                    {!selectedEventType && !eventTypesLoading && (
-                      <p className="text-xs hero-text-subtle">{cp.eventTypeNone}</p>
+
+                    {/* Bekräftelserad — visas när typ är vald */}
+                    {selectedEventType && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, ease: EASE_OUT_EXPO }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                        style={{
+                          background: 'rgba(59,130,246,0.08)',
+                          border: '1px solid rgba(59,130,246,0.22)',
+                        }}
+                      >
+                        <CheckCircle2
+                          className="w-4 h-4 shrink-0"
+                          style={{ color: '#3B82F6' }}
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm hero-text flex-1">
+                          {cp.selectedEventType}{' '}
+                          <strong>
+                            {locale === 'en' && selectedEventType.nameEn
+                              ? selectedEventType.nameEn
+                              : selectedEventType.name}
+                          </strong>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => { setSelectedEventTypeId(''); setEvt(EMPTY_EVENT); }}
+                          className="text-xs underline hover:opacity-70 transition-opacity shrink-0"
+                          style={{ color: 'var(--text-blue)' }}
+                        >
+                          {cp.changeEventType}
+                        </button>
+                      </motion.div>
                     )}
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
-                        <input id="evt-title" type="text" aria-required="true"
-                          aria-invalid={hasFieldErr('evt-title', evt.title) || undefined}
-                          aria-describedby={hasFieldErr('evt-title', evt.title) ? 'error-evt-title' : undefined}
-                          placeholder={cp.event.titlePlaceholder} className={inputCls}
-                          value={evt.title} onChange={e => setEvt(p => ({ ...p, title: e.target.value }))}
-                          onBlur={() => touch('evt-title')} />
-                        {fieldErr('evt-title', evt.title)}
-                      </div>
-                      <div>
-                        <label htmlFor="evt-titleEn" className={labelCls}>{cp.event.titleEn}</label>
-                        <input id="evt-titleEn" type="text" placeholder={cp.event.titleEnPlaceholder} className={inputCls}
-                          value={evt.titleEn} onChange={e => setEvt(p => ({ ...p, titleEn: e.target.value }))} />
-                      </div>
-                    </div>
+                    {/* Formulärfält — visas bara när typ är vald */}
+                    {selectedEventType && (
+                      <motion.div
+                        key={selectedEventTypeId}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25, ease: EASE_OUT_EXPO }}
+                        className="space-y-4"
+                      >
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
+                            <input id="evt-title" type="text" aria-required="true"
+                              aria-invalid={hasFieldErr('evt-title', evt.title) || undefined}
+                              aria-describedby={hasFieldErr('evt-title', evt.title) ? 'error-evt-title' : undefined}
+                              placeholder={cp.event.titlePlaceholder} className={inputCls}
+                              value={evt.title} onChange={e => setEvt(p => ({ ...p, title: e.target.value }))}
+                              onBlur={() => touch('evt-title')} />
+                            {fieldErr('evt-title', evt.title)}
+                          </div>
+                          <div>
+                            <label htmlFor="evt-titleEn" className={labelCls}>{cp.event.titleEn}</label>
+                            <input id="evt-titleEn" type="text" placeholder={cp.event.titleEnPlaceholder} className={inputCls}
+                              value={evt.titleEn} onChange={e => setEvt(p => ({ ...p, titleEn: e.target.value }))} />
+                          </div>
+                        </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="evt-date" className={labelCls}>{cp.event.date}{requiredDot}</label>
-                        <input id="evt-date" type="datetime-local" aria-required="true"
-                          aria-invalid={hasFieldErr('evt-date', evt.date) || undefined}
-                          aria-describedby={hasFieldErr('evt-date', evt.date) ? 'error-evt-date' : undefined}
-                          className={inputCls}
-                          value={evt.date} onChange={e => setEvt(p => ({ ...p, date: e.target.value }))}
-                          onBlur={() => touch('evt-date')} />
-                        {fieldErr('evt-date', evt.date)}
-                      </div>
-                      <div>
-                        <label htmlFor="evt-endDate" className={labelCls}>{cp.event.endDate}{requiredDot}</label>
-                        <input id="evt-endDate" type="datetime-local" aria-required="true"
-                          aria-invalid={hasFieldErr('evt-endDate', evt.endDate) || undefined}
-                          aria-describedby={hasFieldErr('evt-endDate', evt.endDate) ? 'error-evt-endDate' : undefined}
-                          className={inputCls}
-                          value={evt.endDate} onChange={e => setEvt(p => ({ ...p, endDate: e.target.value }))}
-                          onBlur={() => touch('evt-endDate')} />
-                        {fieldErr('evt-endDate', evt.endDate)}
-                      </div>
-                    </div>
+                        {/* Datum — anpassat till dateMode */}
+                        {(() => {
+                          const isDateOnly = (selectedEventType.dateMode ?? 'datetime') === 'date';
+                          return (
+                            <div className={`grid gap-4 ${!eventHidden.includes('endDate') ? 'sm:grid-cols-2' : ''}`}>
+                              <div>
+                                <label htmlFor="evt-date" className={labelCls}>{cp.event.date}{requiredDot}</label>
+                                <input
+                                  id="evt-date"
+                                  type={isDateOnly ? 'date' : 'datetime-local'}
+                                  aria-required="true"
+                                  aria-invalid={hasFieldErr('evt-date', evt.date) || undefined}
+                                  aria-describedby={hasFieldErr('evt-date', evt.date) ? 'error-evt-date' : undefined}
+                                  className={inputCls}
+                                  value={evt.date}
+                                  onChange={e => setEvt(p => ({ ...p, date: e.target.value }))}
+                                  onBlur={() => touch('evt-date')} />
+                                {fieldErr('evt-date', evt.date)}
+                              </div>
+                              {!eventHidden.includes('endDate') && (
+                                <div>
+                                  <label htmlFor="evt-endDate" className={labelCls}>{cp.event.endDate}{requiredDot}</label>
+                                  <input
+                                    id="evt-endDate"
+                                    type={isDateOnly ? 'date' : 'datetime-local'}
+                                    aria-required="true"
+                                    aria-invalid={hasFieldErr('evt-endDate', evt.endDate) || undefined}
+                                    aria-describedby={hasFieldErr('evt-endDate', evt.endDate) ? 'error-evt-endDate' : undefined}
+                                    className={inputCls}
+                                    value={evt.endDate}
+                                    onChange={e => setEvt(p => ({ ...p, endDate: e.target.value }))}
+                                    onBlur={() => touch('evt-endDate')} />
+                                  {fieldErr('evt-endDate', evt.endDate)}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="evt-location" className={labelCls}>{cp.event.location}{requiredDot}</label>
-                        <input id="evt-location" type="text" aria-required="true"
-                          aria-invalid={hasFieldErr('evt-location', evt.location) || undefined}
-                          aria-describedby={hasFieldErr('evt-location', evt.location) ? 'error-evt-location' : undefined}
-                          placeholder={cp.event.locationPlaceholder} className={inputCls}
-                          value={evt.location} onChange={e => setEvt(p => ({ ...p, location: e.target.value }))}
-                          onBlur={() => touch('evt-location')} />
-                        {fieldErr('evt-location', evt.location)}
-                      </div>
-                      <div>
-                        <label htmlFor="evt-section" className={labelCls}>{cp.event.section}{requiredDot}</label>
-                        <select id="evt-section" aria-required="true"
-                          aria-invalid={hasFieldErr('evt-section', evt.section) || undefined}
-                          aria-describedby={hasFieldErr('evt-section', evt.section) ? 'error-evt-section' : undefined}
-                          className={inputCls}
-                          value={evt.section} onChange={e => setEvt(p => ({ ...p, section: e.target.value as EventForm['section'] }))}
-                          onBlur={() => touch('evt-section')}>
-                          <option value="" disabled>{cp.event.sectionPlaceholder}</option>
-                          <option value="data">{cp.event.sections.data}</option>
-                          <option value="geo">{cp.event.sections.geo}</option>
-                          <option value="i">{cp.event.sections.i}</option>
-                          <option value="maskin">{cp.event.sections.maskin}</option>
-                          <option value="general">{cp.event.sections.general}</option>
-                        </select>
-                        {fieldErr('evt-section', evt.section)}
-                      </div>
-                    </div>
+                        {/* Lokal + Sektion */}
+                        {(!eventHidden.includes('location') || !eventHidden.includes('section')) && (
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            {!eventHidden.includes('location') && (
+                              <div>
+                                <label htmlFor="evt-location" className={labelCls}>{cp.event.location}{requiredDot}</label>
+                                <input id="evt-location" type="text" aria-required="true"
+                                  aria-invalid={hasFieldErr('evt-location', evt.location) || undefined}
+                                  aria-describedby={hasFieldErr('evt-location', evt.location) ? 'error-evt-location' : undefined}
+                                  placeholder={cp.event.locationPlaceholder} className={inputCls}
+                                  value={evt.location} onChange={e => setEvt(p => ({ ...p, location: e.target.value }))}
+                                  onBlur={() => touch('evt-location')} />
+                                {fieldErr('evt-location', evt.location)}
+                              </div>
+                            )}
+                            {!eventHidden.includes('section') && (
+                              <div>
+                                <label htmlFor="evt-section" className={labelCls}>{cp.event.section}{requiredDot}</label>
+                                <select id="evt-section" aria-required="true"
+                                  aria-invalid={hasFieldErr('evt-section', evt.section) || undefined}
+                                  aria-describedby={hasFieldErr('evt-section', evt.section) ? 'error-evt-section' : undefined}
+                                  className={inputCls}
+                                  value={evt.section} onChange={e => setEvt(p => ({ ...p, section: e.target.value as EventForm['section'] }))}
+                                  onBlur={() => touch('evt-section')}>
+                                  <option value="" disabled>{cp.event.sectionPlaceholder}</option>
+                                  <option value="data">{cp.event.sections.data}</option>
+                                  <option value="geo">{cp.event.sections.geo}</option>
+                                  <option value="i">{cp.event.sections.i}</option>
+                                  <option value="maskin">{cp.event.sections.maskin}</option>
+                                  <option value="general">{cp.event.sections.general}</option>
+                                </select>
+                                {fieldErr('evt-section', evt.section)}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
-                    <div>
-                      <label htmlFor="evt-tags" className={labelCls}>{cp.event.tags}</label>
-                      <input id="evt-tags" type="text" placeholder={cp.event.tagsPlaceholder} className={inputCls}
-                        value={evt.tags} onChange={e => setEvt(p => ({ ...p, tags: e.target.value }))} />
-                    </div>
+                        {/* Beskrivning */}
+                        <div>
+                          <label htmlFor="evt-desc" className={labelCls}>
+                            {cp.event.description}{requiredDot}
+                            <span className="ml-2 font-normal opacity-60">
+                              {cp.charCount.replace('{count}', String(evt.description.length))}
+                            </span>
+                          </label>
+                          <textarea id="evt-desc" rows={5} maxLength={2000} aria-required="true"
+                            aria-invalid={hasFieldErr('evt-desc', evt.description) || undefined}
+                            aria-describedby={hasFieldErr('evt-desc', evt.description) ? 'error-evt-desc' : undefined}
+                            placeholder={cp.event.descriptionPlaceholder}
+                            className={`${inputCls} resize-y min-h-30`}
+                            value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))}
+                            onBlur={() => touch('evt-desc')} />
+                          {fieldErr('evt-desc', evt.description)}
+                        </div>
 
-                    <div>
-                      <label htmlFor="evt-desc" className={labelCls}>
-                        {cp.event.description}{requiredDot}
-                        <span className="ml-2 font-normal opacity-60">
-                          {cp.charCount.replace('{count}', String(evt.description.length))}
-                        </span>
-                      </label>
-                      <textarea id="evt-desc" rows={5} maxLength={2000} aria-required="true"
-                        aria-invalid={hasFieldErr('evt-desc', evt.description) || undefined}
-                        aria-describedby={hasFieldErr('evt-desc', evt.description) ? 'error-evt-desc' : undefined}
-                        placeholder={cp.event.descriptionPlaceholder}
-                        className={`${inputCls} resize-y min-h-30`}
-                        value={evt.description} onChange={e => setEvt(p => ({ ...p, description: e.target.value }))}
-                        onBlur={() => touch('evt-desc')} />
-                      {fieldErr('evt-desc', evt.description)}
-                    </div>
+                        <div>
+                          <label htmlFor="evt-descEn" className={labelCls}>
+                            {cp.event.descriptionEn}
+                            <span className="ml-2 font-normal opacity-60">
+                              {cp.charCount.replace('{count}', String(evt.descriptionEn.length))}
+                            </span>
+                          </label>
+                          <textarea id="evt-descEn" rows={4} maxLength={2000} placeholder={cp.event.descriptionEnPlaceholder}
+                            className={`${inputCls} resize-y min-h-25`}
+                            value={evt.descriptionEn} onChange={e => setEvt(p => ({ ...p, descriptionEn: e.target.value }))} />
+                        </div>
+                      </motion.div>
+                    )}
 
-                    <div>
-                      <label htmlFor="evt-descEn" className={labelCls}>
-                        {cp.event.descriptionEn}
-                        <span className="ml-2 font-normal opacity-60">
-                          {cp.charCount.replace('{count}', String(evt.descriptionEn.length))}
-                        </span>
-                      </label>
-                      <textarea id="evt-descEn" rows={4} maxLength={2000} placeholder={cp.event.descriptionEnPlaceholder}
-                        className={`${inputCls} resize-y min-h-25`}
-                        value={evt.descriptionEn} onChange={e => setEvt(p => ({ ...p, descriptionEn: e.target.value }))} />
-                    </div>
                   </div>
                 </fieldset>
               )}

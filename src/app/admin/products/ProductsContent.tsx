@@ -1,8 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { getAllProducts, deleteProduct, toggleProductPublished } from '@/lib/services/products';
+import { useEffect, useState, useCallback } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
+import { getAllProducts, deleteProduct, toggleProductPublished, reorderProducts } from '@/lib/services/products';
 import type { TKLProduct } from '@/lib/schemas/product';
 
 const CATEGORY_LABELS: Record<TKLProduct['category'], string> = {
@@ -10,15 +28,146 @@ const CATEGORY_LABELS: Record<TKLProduct['category'], string> = {
   services: 'Övriga tjänster',
   marketing: 'Marknadsföring',
 };
+const CATEGORIES: TKLProduct['category'][] = ['activities', 'services', 'marketing'];
 
-type CategoryFilter = TKLProduct['category'] | 'all';
+// Sortable row
+
+interface RowProps {
+  item: TKLProduct;
+  toggling: boolean;
+  onToggle: () => void;
+  onDelete: () => void;
+}
+
+function SortableProductRow({ item, toggling, onToggle, onDelete }: RowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: 'relative' as const,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className="border-t border-[oklch(20%_0.012_265)] hover:bg-[oklch(13%_0.01_265)]"
+    >
+      <td className="px-2 py-3 w-8">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-[oklch(40%_0.01_265)] hover:text-[oklch(65%_0.02_265)] touch-none"
+          aria-label={`Dra för att ändra ordning för ${item.name}`}
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+      </td>
+      <td className="px-4 py-3 text-[oklch(88%_0.01_265)] font-medium">{item.name}</td>
+      <td className="px-4 py-3 text-[oklch(65%_0.02_265)] text-xs max-w-35 truncate">
+        {item.price || '—'}
+      </td>
+      <td className="px-4 py-3">
+        <button
+          onClick={onToggle}
+          disabled={toggling}
+          className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors disabled:opacity-50 ${
+            item.published
+              ? 'bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400'
+              : 'bg-[oklch(22%_0.012_265)] text-[oklch(55%_0.02_265)] hover:bg-green-500/15 hover:text-green-400'
+          }`}
+        >
+          {toggling ? '…' : item.published ? 'Publicerad' : 'Utkast'}
+        </button>
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex gap-2 justify-end">
+          <Link
+            href={`/admin/products/edit?id=${item.id}`}
+            className="text-xs text-[oklch(55%_0.12_265)] hover:text-[oklch(70%_0.12_265)] transition-colors"
+          >
+            Redigera
+          </Link>
+          <button
+            onClick={onDelete}
+            className="text-xs text-[oklch(45%_0.02_265)] hover:text-red-400 transition-colors"
+          >
+            Ta bort
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Category group with own DndContext
+
+interface GroupProps {
+  category: TKLProduct['category'];
+  items: TKLProduct[];
+  toggling: Record<string, boolean>;
+  onToggle: (item: TKLProduct) => void;
+  onDelete: (item: TKLProduct) => void;
+  onReorder: (category: TKLProduct['category'], reordered: TKLProduct[]) => void;
+}
+
+function CategoryGroup({ category, items, toggling, onToggle, onDelete, onReorder }: GroupProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    onReorder(category, reordered);
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      <tr>
+        <td
+          colSpan={5}
+          className="px-4 py-2 bg-[oklch(11%_0.01_265)] border-t border-[oklch(22%_0.015_265)]"
+        >
+          <span className="text-xs font-semibold text-[oklch(55%_0.02_265)] uppercase tracking-wider">
+            {CATEGORY_LABELS[category]}
+          </span>
+        </td>
+      </tr>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          {items.map((item) => (
+            <SortableProductRow
+              key={item.id}
+              item={item}
+              toggling={!!toggling[item.id]}
+              onToggle={() => onToggle(item)}
+              onDelete={() => onDelete(item)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
+    </>
+  );
+}
+
+// Main component
 
 export function ProductsContent() {
   const [items, setItems] = useState<TKLProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
-  const [filter, setFilter] = useState<CategoryFilter>('all');
   const [toggling, setToggling] = useState<Record<string, boolean>>({});
   const [deleteTarget, setDeleteTarget] = useState<TKLProduct | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -39,7 +188,7 @@ export function ProductsContent() {
     return () => window.removeEventListener('focus', onFocus);
   }, []);
 
-  const handleToggle = async (item: TKLProduct) => {
+  const handleToggle = useCallback(async (item: TKLProduct) => {
     setToggling((t) => ({ ...t, [item.id]: true }));
     try {
       await toggleProductPublished(item.id, item.published);
@@ -47,9 +196,9 @@ export function ProductsContent() {
     } finally {
       setToggling((t) => ({ ...t, [item.id]: false }));
     }
-  };
+  }, []);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
@@ -59,9 +208,19 @@ export function ProductsContent() {
     } finally {
       setDeleting(false);
     }
-  };
+  }, [deleteTarget]);
 
-  const filtered = filter === 'all' ? items : items.filter((p) => p.category === filter);
+  const handleReorder = useCallback(
+    (category: TKLProduct['category'], reordered: TKLProduct[]) => {
+      setItems((prev) => {
+        const others = prev.filter((p) => p.category !== category);
+        const updated = [...others, ...reordered];
+        void reorderProducts(reordered.map((p) => p.id));
+        return updated;
+      });
+    },
+    []
+  );
 
   return (
     <div className="p-6 space-y-6">
@@ -75,28 +234,16 @@ export function ProductsContent() {
         </Link>
       </div>
 
-      {/* Category filter */}
-      <div className="flex gap-2 flex-wrap">
-        {(['all', 'activities', 'services', 'marketing'] as const).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-              filter === cat
-                ? 'bg-[oklch(55%_0.12_265)] text-white'
-                : 'bg-[oklch(20%_0.012_265)] text-[oklch(65%_0.02_265)] hover:text-[oklch(80%_0.01_265)]'
-            }`}
-          >
-            {cat === 'all' ? 'Alla' : CATEGORY_LABELS[cat]}
-          </button>
-        ))}
-      </div>
-
       {loading && <p className="text-sm text-[oklch(55%_0.02_265)]">Laddar…</p>}
       {error && (
         <div>
           <p className="text-sm text-red-400 mb-2">Kunde inte hämta produkter.</p>
-          <button onClick={() => setFetchKey((k) => k + 1)} className="text-xs text-[oklch(65%_0.02_265)] underline">Försök igen</button>
+          <button
+            onClick={() => setFetchKey((k) => k + 1)}
+            className="text-xs text-[oklch(65%_0.02_265)] underline"
+          >
+            Försök igen
+          </button>
         </div>
       )}
 
@@ -105,51 +252,26 @@ export function ProductsContent() {
           <table className="w-full text-sm">
             <thead className="bg-[oklch(14%_0.01_265)]">
               <tr>
+                <th className="w-8 px-2 py-3" aria-label="Dra för att sortera" />
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[oklch(55%_0.02_265)]">Namn</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[oklch(55%_0.02_265)]">Kategori</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[oklch(55%_0.02_265)]">Pris</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[oklch(55%_0.02_265)]">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
-              {filtered.map((item) => (
-                <tr key={item.id} className="border-t border-[oklch(20%_0.012_265)] hover:bg-[oklch(13%_0.01_265)]">
-                  <td className="px-4 py-3 text-[oklch(88%_0.01_265)] font-medium">{item.name}</td>
-                  <td className="px-4 py-3 text-[oklch(65%_0.02_265)] text-xs">{CATEGORY_LABELS[item.category]}</td>
-                  <td className="px-4 py-3 text-[oklch(65%_0.02_265)] text-xs max-w-35 truncate">{item.price || '—'}</td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleToggle(item)}
-                      disabled={toggling[item.id]}
-                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
-                        item.published
-                          ? 'bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400'
-                          : 'bg-[oklch(22%_0.012_265)] text-[oklch(55%_0.02_265)] hover:bg-green-500/15 hover:text-green-400'
-                      } disabled:opacity-50`}
-                    >
-                      {toggling[item.id] ? '…' : item.published ? 'Publicerad' : 'Utkast'}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
-                      <Link
-                        href={`/admin/products/edit?id=${item.id}`}
-                        className="text-xs text-[oklch(55%_0.12_265)] hover:text-[oklch(70%_0.12_265)] transition-colors"
-                      >
-                        Redigera
-                      </Link>
-                      <button
-                        onClick={() => setDeleteTarget(item)}
-                        className="text-xs text-[oklch(45%_0.02_265)] hover:text-red-400 transition-colors"
-                      >
-                        Ta bort
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+              {CATEGORIES.map((cat) => (
+                <CategoryGroup
+                  key={cat}
+                  category={cat}
+                  items={items.filter((p) => p.category === cat)}
+                  toggling={toggling}
+                  onToggle={handleToggle}
+                  onDelete={(item) => setDeleteTarget(item)}
+                  onReorder={handleReorder}
+                />
               ))}
-              {filtered.length === 0 && (
+              {items.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-[oklch(45%_0.02_265)] text-sm">
                     Inga produkter hittades.
@@ -161,7 +283,6 @@ export function ProductsContent() {
         </div>
       )}
 
-      {/* Delete confirm dialog */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[oklch(12%_0.01_265)] border border-[oklch(25%_0.015_265)] rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4">

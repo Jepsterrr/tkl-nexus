@@ -32,15 +32,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement;
-    const actual: 'dark' | 'light' =
-      theme === 'system'
-        ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        : theme;
 
-    setResolved(actual);
-    root.classList.toggle('dark', actual === 'dark');
-    root.classList.toggle('light', actual === 'light');
+    const apply = () => {
+      const actual: 'dark' | 'light' =
+        theme === 'system'
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          : theme;
+      setResolved(actual);
+      root.classList.toggle('dark', actual === 'dark');
+      root.classList.toggle('light', actual === 'light');
+    };
+
+    apply();
     localStorage.setItem('tkl-theme', theme);
+
+    // I system-läge: följ med när OS byter tema mitt i sessionen
+    if (theme === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
+    }
   }, [theme, mounted]);
 
   const setTheme = (t: Theme) => setThemeState(t);

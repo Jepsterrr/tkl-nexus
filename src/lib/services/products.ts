@@ -2,8 +2,6 @@ import {
   collection,
   getDocs,
   getDoc,
-  getDocsFromCache,
-  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -13,6 +11,8 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  writeBatch,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
@@ -22,77 +22,32 @@ import {
   type TKLProductFormData,
 } from '@/lib/schemas/product';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
-import { getDataSource, bumpCacheVersion } from './cacheVersion';
+import { bumpCacheVersion } from './cacheVersion';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
 
-function toIso(ts: unknown): string | undefined {
-  if (!ts) return undefined;
-  if (typeof ts === 'object' && ts !== null && 'toDate' in ts) {
-    return (ts as { toDate(): Date }).toDate().toISOString();
-  }
-  if (typeof ts === 'string') return ts;
-  return undefined;
-}
-
-function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+function productDates(data: DocumentData): Record<string, unknown> {
+  return { createdAt: toIso(data.createdAt) ?? new Date().toISOString() };
 }
 
 export async function getProducts(): Promise<TKLProduct[]> {
-  const ref = collection(db, 'products');
-  const q = query(ref, where('published', '==', true), orderBy('order', 'asc'));
-
-  const source = await getDataSource('products');
-  let snapshot;
-  if (source === 'cache') {
-    try {
-      snapshot = await withFetchTimeout(getDocsFromCache(q));
-      if (snapshot.empty) throw new Error('cache empty');
-    } catch {
-      snapshot = await withFetchTimeout(getDocsFromServer(q));
-    }
-  } else {
-    snapshot = await withFetchTimeout(getDocsFromServer(q));
-  }
-
-  const items: TKLProduct[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const parsed = TKLProductSchema.safeParse({
-      id: docSnap.id,
-      ...data,
-      createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-    });
-    if (parsed.success) items.push(parsed.data);
-    else if (process.env.NODE_ENV === 'development')
-      console.warn('[products] Ogiltigt dokument:', docSnap.id, parsed.error.flatten());
-  });
-
-  return items;
+  const q = query(
+    collection(db, 'products'),
+    where('published', '==', true),
+    orderBy('order', 'asc'),
+  );
+  const snapshot = await getDocsWithCacheStrategy(q, 'products');
+  return parseSnapshot(snapshot, TKLProductSchema, 'products', productDates);
 }
 
 export async function getAllProducts(): Promise<TKLProduct[]> {
-  const ref = collection(db, 'products');
-  const q = query(ref, orderBy('order', 'asc'));
+  const q = query(collection(db, 'products'), orderBy('order', 'asc'));
   const snapshot = await withFetchTimeout(getDocs(q));
-
-  const items: TKLProduct[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const parsed = TKLProductSchema.safeParse({
-      id: docSnap.id,
-      ...data,
-      createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-    });
-    if (parsed.success) items.push(parsed.data);
-  });
-
-  return items;
+  return parseSnapshot(snapshot, TKLProductSchema, 'products', productDates);
 }
 
 export async function createProduct(data: TKLProductFormData): Promise<string> {
   const validated = TKLProductFormSchema.parse(data);
-  const ref = collection(db, 'products');
-  const docRef = await addDoc(ref, {
+  const docRef = await addDoc(collection(db, 'products'), {
     ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });
@@ -120,23 +75,33 @@ export async function toggleProductPublished(id: string, current: boolean): Prom
 }
 
 export async function getMaxOrderForCategory(category: TKLProduct['category']): Promise<number> {
-  const ref = collection(db, 'products');
-  const q = query(ref, where('category', '==', category), orderBy('order', 'desc'), limit(1));
+  const q = query(
+    collection(db, 'products'),
+    where('category', '==', category),
+    orderBy('order', 'desc'),
+    limit(1),
+  );
   const snapshot = await withFetchTimeout(getDocs(q));
   if (snapshot.empty) return 0;
   const data = snapshot.docs[0].data();
   return typeof data.order === 'number' ? data.order + 10 : 10;
 }
 
+export async function reorderProducts(orderedIds: string[]): Promise<void> {
+  const batch = writeBatch(db);
+  orderedIds.forEach((id, index) => {
+    batch.update(doc(db, 'products', id), { order: (index + 1) * 10 });
+  });
+  await batch.commit();
+  void bumpCacheVersion('products').catch((e) =>
+    console.warn('[cache] bump failed:', e)
+  );
+}
+
 export async function getProductById(id: string): Promise<TKLProduct | null> {
-  const docRef = doc(db, 'products', id);
-  const docSnap = await withFetchTimeout(getDoc(docRef));
+  const docSnap = await withFetchTimeout(getDoc(doc(db, 'products', id)));
   if (!docSnap.exists()) return null;
   const data = docSnap.data();
-  const parsed = TKLProductSchema.safeParse({
-    id: docSnap.id,
-    ...data,
-    createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-  });
+  const parsed = TKLProductSchema.safeParse({ id: docSnap.id, ...data, ...productDates(data) });
   return parsed.success ? parsed.data : null;
 }

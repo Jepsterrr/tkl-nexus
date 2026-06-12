@@ -15,7 +15,8 @@ export function ScrollContainer({ children }: { children: React.ReactNode }) {
     const target = document.getElementById(hash.slice(1));
     if (!target) return;
     e.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   }
 
   return (

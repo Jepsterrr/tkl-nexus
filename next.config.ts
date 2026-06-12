@@ -2,10 +2,17 @@ import type { NextConfig } from "next";
 
 // ---------------------------------------------------------------------------
 // Content Security Policy
+//
+// VIKTIGT: headers() nedan körs ENBART av Node-servern (next dev / next start).
+// I produktion serveras sajten statiskt av Firebase Hosting — där gäller
+// uteslutande headers i firebase.json. Ändra alltid BÅDA filerna i synk.
+//
 // Tillåter:
 //  - Firebase (auth, firestore, storage, analytics, remote config)
 //  - Google Fonts (fonts.googleapis.com, fonts.gstatic.com)
 //  - LUDD Events API
+//  - Cloudinary (upload) + Cloudflare Worker (signerad delete)
+//  - PostHog EU (script, API, inbäddad dashboard i admin)
 //  - Egna tillgångar (self)
 // ---------------------------------------------------------------------------
 const CSP = [
@@ -18,7 +25,7 @@ const CSP = [
   "font-src 'self' https://fonts.gstatic.com",
   // Bilder: egna + data-URI:er + Cloudinary
   "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://res.cloudinary.com",
-  // API-anrop: Firebase services + LUDD Events API + PostHog
+  // API-anrop: Firebase services + LUDD Events API + Cloudinary + Worker + PostHog
   [
     "connect-src 'self'",
     "https://*.googleapis.com",
@@ -29,11 +36,12 @@ const CSP = [
     "https://events.ludd.ltu.se",
     "https://www.google-analytics.com",
     "https://api.cloudinary.com",
+    "https://tkl-cloudinary-delete.tklnexus.workers.dev",
     "https://eu.i.posthog.com",
     "https://eu-assets.i.posthog.com",
   ].join(" "),
-  // Frames: ingen inbäddning tillåten
-  "frame-src 'none'",
+  // Frames: enbart PostHog-dashboard (inbäddas på /admin/analytics)
+  "frame-src https://eu.posthog.com",
   // Objekt: blockera Flash och plugins
   "object-src 'none'",
   // Base URI: enbart eget ursprung
@@ -49,54 +57,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Admin routes: allow PostHog iframe
-        source: "/admin/(.*)",
+        // Applicera på alla routes (gäller bara dev/next start — se kommentar ovan)
+        source: "/(.*)",
         headers: [
-          {
-            key: "Content-Security-Policy",
-            value: CSP.replace("frame-src 'none'", "frame-src https://eu.posthog.com"),
-          },
+          { key: "Content-Security-Policy", value: CSP },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-        ],
-      },
-      {
-        // Applicera på alla routes
-        source: "/(.*)",
-        headers: [
-          // XSS-skydd via Content Security Policy
-          {
-            key: "Content-Security-Policy",
-            value: CSP,
-          },
-          // Blockera inbäddning i iframes (clickjacking-skydd)
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          // Hindra webbläsare från att sniffa MIME-typ
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          // Begränsa referrer-information vid cross-origin-navigering
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          // Inaktivera känsliga browser-API:er som inte används
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-          },
-          // Aktivera HSTS (1 år, inkludera under-domäner)
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=31536000; includeSubDomains",
-          },
         ],
       },
     ];

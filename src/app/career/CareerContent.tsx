@@ -17,7 +17,7 @@ import { CareerDrawer } from '@/components/ui/CareerDrawer';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 import { getPublishedCareer, getCareerById } from '@/lib/services/career';
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
-import posthog from 'posthog-js';
+import { capture } from '@/lib/analytics';
 
 type FilterKey = CareerType | 'all';
 
@@ -58,7 +58,7 @@ export function CareerContent() {
       if (triggerEl) previousFocusRef.current = triggerEl;
       setSelectedJob(job);
       pushId(job.id);
-      posthog.capture('career_job_viewed', {
+      capture('career_job_viewed', {
         job_id: job.id,
         company: job.company,
         job_type: job.type,
@@ -319,7 +319,7 @@ export function CareerContent() {
                 <FilterTab
                   key={key}
                   active={filter === key}
-                  onClick={() => { setFilter(key); if (key !== 'all') posthog.capture('career_filter_applied', { filter: key }); }}
+                  onClick={() => { setFilter(key); if (key !== 'all') capture('career_filter_applied', { filter: key }); }}
                   label={opportunity.filters[key]}
                   color={FILTER_COLORS[key]}
                   showActiveIcon

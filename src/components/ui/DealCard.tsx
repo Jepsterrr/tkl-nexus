@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { ExternalLink, Copy, Check, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import posthog from 'posthog-js';
+import { capture } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
@@ -32,7 +32,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
     navigator.clipboard.writeText(deal.discountCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      posthog.capture('deal_code_copied', {
+      capture('deal_code_copied', {
         deal_id: deal.id,
         company: deal.company,
         discount: deal.discount,
@@ -181,7 +181,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
                 style={{ color: 'var(--text-orange)' }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  posthog.capture('deal_link_visited', {
+                  capture('deal_link_visited', {
                     deal_id: deal.id,
                     company: deal.company,
                   });

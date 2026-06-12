@@ -17,7 +17,21 @@ import type { TKLEvent, Section } from '@/lib/schemas/event';
 import { getPublishedEvents, getEventById } from '@/lib/services/events';
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { EASE_OUT_EXPO } from '@/lib/motion';
-import posthog from 'posthog-js';
+import { z } from 'zod';
+import { capture } from '@/lib/analytics';
+
+// LUDD API är extern data — validera istället för att lita på formen
+const LuddItemSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  title: z.string().optional(),
+  description: z.string().nullable().optional(),
+  start_datetime: z.number(),
+  place_name: z.string().nullable().optional(),
+  place_address: z.string().nullable().optional(),
+  tags: z.array(z.string()).optional(),
+  url: z.string().optional(),
+  slug: z.string().optional(),
+});
 
 // Section logo map
 const SECTION_LOGOS: Record<Section, string | null> = {
@@ -55,11 +69,12 @@ function EventCard({
   const color = SECTION_COLORS[event.section];
   const logo = SECTION_LOGOS[event.section];
 
+  const isEnglish = locale === 'en';
+  const dateLocale = isEnglish ? 'en-GB' : 'sv-SE';
+
   const dateObj = new Date(event.date);
   const day = dateObj.getDate();
-  const month = dateObj.toLocaleString('default', { month: 'short' });
-
-  const isEnglish = locale === 'en';
+  const month = dateObj.toLocaleString(dateLocale, { month: 'short' });
 
   const displayTitle = isEnglish && event.titleEn ? event.titleEn : event.title;
   const displayDesc = isEnglish && event.descriptionEn ? event.descriptionEn : event.description;
@@ -136,7 +151,7 @@ function EventCard({
       >
         <span className="flex items-center gap-1.5 text-xs hero-text-subtle">
           <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
-          {dateObj.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long' })}
+          {dateObj.toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'long' })}
         </span>
 
         <button
@@ -177,7 +192,7 @@ export function EventsContent() {
       if (triggerEl) previousFocusRef.current = triggerEl;
       setSelectedEvent(event);
       pushId(event.id);
-      posthog.capture('event_details_viewed', {
+      capture('event_details_viewed', {
         event_id: event.id,
         title: event.title,
         section: event.section,
@@ -285,23 +300,28 @@ export function EventsContent() {
         .then((data) => {
           clearTimeout(timeoutId);
           if (!isMounted) return;
-          const items = Array.isArray(data) ? data : data.events || [];
+          const items: unknown[] = Array.isArray(data) ? data : data?.events ?? [];
 
-          // Mappar LUDD-datan till vårt utökade ExtendedEvent-format
-          const mapped: ExtendedEvent[] = items.map((item: any) => {
+          // Mappar LUDD-datan till vårt utökade ExtendedEvent-format.
+          // Extern data valideras med Zod — poster som inte matchar hoppas över.
+          const mapped: ExtendedEvent[] = items.flatMap((raw) => {
+            const parsed = LuddItemSchema.safeParse(raw);
+            if (!parsed.success) return [];
+            const item = parsed.data;
             const timeMs = item.start_datetime > 9999999999 ? item.start_datetime : item.start_datetime * 1000;
-            return {
-              id: `ludd-${item.id || Math.random()}`,
+            return [{
+              id: `ludd-${item.id ?? Math.random()}`,
               title: item.title || 'Campus Event',
               description: item.description ? item.description.replace(/<[^>]*>?/gm, '').trim() : '',
               date: new Date(timeMs).toISOString(),
+              endDate: new Date(timeMs).toISOString(),
               location: item.place_name || item.place_address || 'LUDD (Campus)',
-              tags: item.tags || [],
-              section: 'general',
+              tags: item.tags ?? [],
+              section: 'general' as const,
               published: true,
               createdAt: new Date().toISOString(),
-              externalUrl: item.url || `https://events.ludd.ltu.se/event/${item.slug || item.id}`,
-            };
+              externalUrl: item.url || `https://events.ludd.ltu.se/event/${item.slug ?? item.id}`,
+            }];
           });
 
           setLuddEvents(mapped);
@@ -507,7 +527,7 @@ export function EventsContent() {
                 {ev.nexusTab}
               </button>
               <button
-                onClick={() => { setCalendarView('ludd'); posthog.capture('campus_calendar_viewed'); }}
+                onClick={() => { setCalendarView('ludd'); capture('campus_calendar_viewed'); }}
                 aria-pressed={calendarView === 'ludd'}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
                 style={calendarView === 'ludd'
@@ -564,7 +584,7 @@ export function EventsContent() {
                       <FilterTab key={f.key} active={filter === f.key} onClick={() => {
                         setFilter(f.key);
                         if (f.key !== filter) {
-                          posthog.capture('event_filter_applied', { filter: f.key });
+                          capture('event_filter_applied', { filter: f.key });
                         }
                       }} logo={f.logo} label={f.label} color={f.color} />
                     ))}

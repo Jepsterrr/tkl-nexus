@@ -4,6 +4,7 @@ import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
+import { capture } from '@/lib/analytics';
 
 /**
  * Trackar $pageview-events vid SPA-navigering (App Router pathname-ändringar).
@@ -16,7 +17,7 @@ function PostHogPageView() {
   useEffect(() => {
     const search = searchParams?.toString();
     const url = window.origin + pathname + (search ? `?${search}` : '');
-    posthog.capture('$pageview', { $current_url: url });
+    capture('$pageview', { $current_url: url });
   }, [pathname, searchParams]);
 
   return null;

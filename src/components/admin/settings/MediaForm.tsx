@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Loader2, RotateCcw } from 'lucide-react';
-import { getCloudinarySecrets } from '@/lib/services/secrets';
 import { deleteFromCloudinary } from '@/lib/services/cloudinary';
 import {
   getHeroImagesSettings,
@@ -151,8 +150,7 @@ export function MediaForm() {
   const handleHeroRevert = async (key: HeroKey, cloudinaryId: string) => {
     setHeroRevert(prev => ({ ...prev, [key]: 'reverting' }));
     try {
-      const secrets = await getCloudinarySecrets();
-      await deleteFromCloudinary(cloudinaryId, secrets);
+      await deleteFromCloudinary(cloudinaryId);
       const cleared = toHeroSettings({ ...heroState, [key]: { url: '', cloudinaryId: '' } });
       await saveHeroImagesSettings(cleared);
       setHeroState(prev => ({ ...prev, [key]: { url: '', cloudinaryId: '' } }));
@@ -165,8 +163,7 @@ export function MediaForm() {
   const handleCampusRevert = async (cloudinaryId: string) => {
     setCampusRevert('reverting');
     try {
-      const secrets = await getCloudinarySecrets();
-      await deleteFromCloudinary(cloudinaryId, secrets);
+      await deleteFromCloudinary(cloudinaryId);
       await saveAboutSettings({ campusPhotoUrl: '', campusPhotoCloudinaryId: '' });
       setCampusState({ url: '', cloudinaryId: '' });
       setCampusRevert('idle');

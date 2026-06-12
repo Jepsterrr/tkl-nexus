@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
-import posthog from 'posthog-js';
+import { capture } from '@/lib/analytics';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { CalendarDays, LayoutGrid, Handshake, Package, Building2, ArrowRight, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
@@ -244,7 +244,7 @@ export function CorporateContent() {
                     href={service.linkHref}
                     className="inline-flex items-center gap-1.5 text-sm font-semibold hero-text-muted hover:hero-text transition-colors duration-150 group"
                     onClick={() =>
-                      posthog.capture('corporate_service_clicked', {
+                      capture('corporate_service_clicked', {
                         service: service.linkHref,
                         label: service.title,
                       })

@@ -2,8 +2,6 @@ import {
   collection,
   getDocs,
   getDoc,
-  getDocsFromCache,
-  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -13,23 +11,20 @@ import {
   orderBy,
   serverTimestamp,
   Timestamp,
+  type DocumentData,
 } from 'firebase/firestore';
+import { FirebaseError } from 'firebase/app';
 import { db } from '@/lib/firebase';
 import { CareerSchema, CareerFormSchema, type TKLCareer, type CareerFormData } from '@/lib/schemas/career';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
-import { getDataSource, bumpCacheVersion } from './cacheVersion';
+import { bumpCacheVersion } from './cacheVersion';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
 
-function toIso(ts: unknown): string | undefined {
-  if (!ts) return undefined;
-  if (typeof ts === 'object' && ts !== null && 'toDate' in ts) {
-    return (ts as { toDate(): Date }).toDate().toISOString();
-  }
-  if (typeof ts === 'string') return ts;
-  return undefined;
-}
-
-function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+function careerDates(data: DocumentData): Record<string, unknown> {
+  return {
+    deadline: toIso(data.deadline) ?? data.deadline,
+    createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
+  };
 }
 
 export async function getPublishedCareer(): Promise<TKLCareer[]> {
@@ -37,80 +32,38 @@ export async function getPublishedCareer(): Promise<TKLCareer[]> {
   d.setHours(0, 0, 0, 0);
   const startOfToday = Timestamp.fromDate(d);
 
-  const ref = collection(db, 'career');
   const q = query(
-    ref,
+    collection(db, 'career'),
     where('published', '==', true),
     where('deadline', '>=', startOfToday),
     orderBy('deadline', 'asc'),
     orderBy('createdAt', 'desc')
   );
 
-  const source = await getDataSource('career');
-  let snapshot;
-  if (source === 'cache') {
-    try {
-      snapshot = await withFetchTimeout(getDocsFromCache(q));
-      if (snapshot.empty) throw new Error('cache empty');
-    } catch {
-      snapshot = await withFetchTimeout(getDocsFromServer(q));
-    }
-  } else {
-    snapshot = await withFetchTimeout(getDocsFromServer(q));
-  }
-
-  const items: TKLCareer[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const parsed = CareerSchema.safeParse({
-      id: docSnap.id,
-      ...data,
-      deadline: toIso(data.deadline) ?? data.deadline,
-      createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-    });
-    if (parsed.success) items.push(parsed.data);
-    else console.error(`Valideringsfel för career ${docSnap.id}:`, parsed.error);
-  });
-
-  return items;
+  const snapshot = await getDocsWithCacheStrategy(q, 'career');
+  return parseSnapshot(snapshot, CareerSchema, 'career', careerDates);
 }
 
 export async function getAllCareer(): Promise<TKLCareer[]> {
-  const ref = collection(db, 'career');
-  const q = query(ref, orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'career'), orderBy('createdAt', 'desc'));
   const snapshot = await withFetchTimeout(getDocs(q));
-
-  const items: TKLCareer[] = [];
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const parsed = CareerSchema.safeParse({
-      id: docSnap.id,
-      ...data,
-      deadline: toIso(data.deadline) ?? data.deadline,
-      createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-    });
-    if (parsed.success) items.push(parsed.data);
-    else if (process.env.NODE_ENV === 'development')
-      console.warn('[career] Ogiltigt dokument:', docSnap.id, parsed.error.flatten());
-  });
-
-  return items;
+  return parseSnapshot(snapshot, CareerSchema, 'career', careerDates);
 }
 
 export async function getCareerById(id: string): Promise<TKLCareer | null> {
-  const docRef = doc(db, 'career', id);
-  const docSnap = await withFetchTimeout(getDoc(docRef));
+  let docSnap;
+  try {
+    docSnap = await withFetchTimeout(getDoc(doc(db, 'career', id)));
+  } catch (err) {
+    if (err instanceof FirebaseError && err.code === 'permission-denied') return null;
+    throw err;
+  }
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
   if (data.published !== true) return null;
 
-  const parsed = CareerSchema.safeParse({
-    id: docSnap.id,
-    ...data,
-    deadline: toIso(data.deadline) ?? data.deadline,
-    createdAt: toIso(data.createdAt) ?? new Date().toISOString(),
-  });
+  const parsed = CareerSchema.safeParse({ id: docSnap.id, ...data, ...careerDates(data) });
   if (!parsed.success) {
     console.error(`Valideringsfel för career ${docSnap.id}:`, parsed.error);
     return null;
@@ -120,8 +73,7 @@ export async function getCareerById(id: string): Promise<TKLCareer | null> {
 
 export async function createCareer(data: CareerFormData): Promise<string> {
   const validated = CareerFormSchema.parse(data);
-  const ref = collection(db, 'career');
-  const docRef = await addDoc(ref, {
+  const docRef = await addDoc(collection(db, 'career'), {
     ...omitUndefined(validated as Record<string, unknown>),
     createdAt: serverTimestamp(),
   });

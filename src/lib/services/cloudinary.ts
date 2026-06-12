@@ -1,12 +1,5 @@
+import { auth } from '@/lib/firebase';
 import type { CloudinarySecrets } from './secrets';
-
-async function sha1(message: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 export async function uploadToCloudinary(
   file: File,
@@ -29,31 +22,40 @@ export async function uploadToCloudinary(
   return { url: data.secure_url, publicId: data.public_id };
 }
 
-export async function deleteFromCloudinary(
-  publicId: string,
-  secrets: CloudinarySecrets
-): Promise<void> {
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const toSign = `public_id=${publicId}&timestamp=${timestamp}${secrets.apiSecret}`;
-  const signature = await sha1(toSign);
+/**
+ * Raderar en bild via Cloudflare Workern (workers/cloudinary-delete/),
+ * som verifierar admin-status och håller API-hemligheterna serversidigt.
+ * Kastar om Workern inte är konfigurerad eller raderingen misslyckas —
+ * anroparna fångar och varnar (bilden blir då kvar som orphan i Cloudinary).
+ */
+export async function deleteFromCloudinary(publicId: string): Promise<void> {
+  const endpoint = process.env.NEXT_PUBLIC_CLOUDINARY_DELETE_URL;
+  if (!endpoint) {
+    throw new Error(
+      'NEXT_PUBLIC_CLOUDINARY_DELETE_URL saknas — se workers/cloudinary-delete/README.md'
+    );
+  }
 
-  const formData = new FormData();
-  formData.append('public_id', publicId);
-  formData.append('timestamp', timestamp);
-  formData.append('api_key', secrets.apiKey);
-  formData.append('signature', signature);
+  const idToken = await auth.currentUser?.getIdToken();
+  if (!idToken) {
+    throw new Error('deleteFromCloudinary: ingen inloggad användare');
+  }
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${secrets.cloudName}/image/destroy`,
-    { method: 'POST', body: formData }
-  );
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ publicId }),
+  });
 
   if (!res.ok) {
     throw new Error(`Cloudinary delete misslyckades: ${res.status}`);
   }
 
   const body = await res.json() as { result: string };
-  if (body.result !== 'ok') {
-    console.warn(`[cloudinary] deleteFromCloudinary: oväntat svar för public_id "${publicId}":`, body.result);
+  if (body.result !== 'ok' && body.result !== 'not found') {
+    console.warn(`[cloudinary] Oväntat svar för public_id "${publicId}":`, body.result);
   }
 }

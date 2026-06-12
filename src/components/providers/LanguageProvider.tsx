@@ -2,8 +2,10 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react';
@@ -30,13 +32,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setLocale = (l: Locale) => {
+  const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
     localStorage.setItem('tkl-locale', l);
-  };
+  }, []);
+
+  // Memoiserat värde — annars omrenderas alla konsumenter vid varje render
+  const value = useMemo(
+    () => ({ locale, setLocale, t: TRANSLATIONS[locale] }),
+    [locale, setLocale],
+  );
 
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t: TRANSLATIONS[locale] }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

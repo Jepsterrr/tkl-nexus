@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import posthog from 'posthog-js';
+import { ANALYTICS_ENABLED } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
@@ -18,6 +19,7 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (!ANALYTICS_ENABLED) return;
     try {
       const stored = localStorage.getItem(CONSENT_KEY);
       if (stored === 'accepted') {
@@ -31,6 +33,9 @@ export function CookieConsent() {
       // localStorage not available
     }
   }, []);
+
+  // Ingen banner när analytiken är avstängd — det finns inget att samtycka till
+  if (!ANALYTICS_ENABLED) return null;
 
   // Hide on /admin/* routes
   if (pathname.startsWith('/admin')) return null;

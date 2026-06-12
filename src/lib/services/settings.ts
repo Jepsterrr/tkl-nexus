@@ -1,10 +1,14 @@
 import {
-  doc, getDoc, setDoc,
-  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocFromCache, getDocFromServer, setDoc,
+  collection, addDoc, updateDoc, deleteDoc,
   orderBy, query,
+  type DocumentSnapshot,
 } from 'firebase/firestore';
+import type { z } from 'zod';
 import { db } from '@/lib/firebase';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
+import { getDataSource, bumpCacheVersion } from './cacheVersion';
+import { getDocsWithCacheStrategy, parseSnapshot, omitUndefined } from './firestore-helpers';
 import {
   StatsSettingsSchema,        type StatsSettings,
   ContactSettingsSchema,      type ContactSettings,
@@ -17,153 +21,89 @@ import {
   TimelineItemDataSchema,     type TimelineItemData,
 } from '@/lib/schemas/settings';
 
-function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
-}
+const bump = () =>
+  void bumpCacheVersion('settings').catch(e => console.warn('[cache] bump failed:', e));
 
-// Generic
-
-async function getSettings(docId: string): Promise<Record<string, unknown> | null> {
+/** Dokumentläsning enligt cacheVersion-strategin (cache om färsk, annars server). */
+async function getSettingsDoc(docId: string): Promise<DocumentSnapshot> {
   const ref = doc(db, 'settings', docId);
-  const snap = await withFetchTimeout(getDoc(ref));
-  if (!snap.exists()) return null;
-  return snap.data() as Record<string, unknown>;
-}
-
-async function saveSettings(docId: string, data: Record<string, unknown>): Promise<void> {
-  const ref = doc(db, 'settings', docId);
-  await setDoc(ref, omitUndefined(data), { merge: true });
-}
-
-// Stats
-
-export async function getStatsSettings(): Promise<StatsSettings | null> {
-  const data = await getSettings('stats');
-  if (!data) return null;
-  const r = StatsSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:stats] Parse-fel:', r.error.flatten());
-    return null;
+  const source = await getDataSource('settings');
+  if (source === 'cache') {
+    try {
+      return await withFetchTimeout(getDocFromCache(ref));
+    } catch {
+      return withFetchTimeout(getDocFromServer(ref));
+    }
   }
-  return r.data;
+  return withFetchTimeout(getDoc(ref));
 }
 
-export async function saveStatsSettings(data: StatsSettings): Promise<void> {
-  const validated = StatsSettingsSchema.parse(data);
-  await saveSettings('stats', validated as Record<string, unknown>);
+/**
+ * Fabrik för settings-dokument: varje dokument får ett identiskt
+ * get/save-par med Zod-validering, cache-strategi och versionsbump.
+ */
+function makeSettingsIO<S extends z.ZodTypeAny>(docId: string, schema: S) {
+  return {
+    async get(): Promise<z.output<S> | null> {
+      const snap = await getSettingsDoc(docId);
+      if (!snap.exists()) return null;
+      const r = schema.safeParse(snap.data());
+      if (!r.success) {
+        if (process.env.NODE_ENV === 'development')
+          console.warn(`[settings:${docId}] Parse-fel:`, r.error.flatten());
+        return null;
+      }
+      return r.data;
+    },
+    async save(data: z.input<S>): Promise<void> {
+      const validated = schema.parse(data);
+      await setDoc(
+        doc(db, 'settings', docId),
+        omitUndefined(validated as Record<string, unknown>),
+        { merge: true },
+      );
+      bump();
+    },
+  };
 }
 
-// Contact
+const statsIO      = makeSettingsIO('stats', StatsSettingsSchema);
+const contactIO    = makeSettingsIO('contact', ContactSettingsSchema);
+const aboutIO      = makeSettingsIO('about', AboutSettingsSchema);
+const servicesIO   = makeSettingsIO('services', ServicesSettingsSchema);
+const linksIO      = makeSettingsIO('links', LinksSettingsSchema);
+const bannerIO     = makeSettingsIO('banner', BannerSettingsSchema);
+const heroImagesIO = makeSettingsIO('hero-images', HeroImagesSettingsSchema);
 
-export async function getContactSettings(): Promise<ContactSettings | null> {
-  const data = await getSettings('contact');
-  if (!data) return null;
-  const r = ContactSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:contact] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
+export const getStatsSettings = (): Promise<StatsSettings | null> => statsIO.get();
+export const saveStatsSettings = (d: StatsSettings): Promise<void> => statsIO.save(d);
 
-export async function saveContactSettings(data: ContactSettings): Promise<void> {
-  const validated = ContactSettingsSchema.parse(data);
-  await saveSettings('contact', validated as Record<string, unknown>);
-}
+export const getContactSettings = (): Promise<ContactSettings | null> => contactIO.get();
+export const saveContactSettings = (d: ContactSettings): Promise<void> => contactIO.save(d);
 
-// About
+export const getAboutSettings = (): Promise<AboutSettings | null> => aboutIO.get();
+export const saveAboutSettings = (d: AboutSettings): Promise<void> => aboutIO.save(d);
 
-export async function getAboutSettings(): Promise<AboutSettings | null> {
-  const data = await getSettings('about');
-  if (!data) return null;
-  const r = AboutSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:about] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
+export const getServicesSettings = (): Promise<ServicesSettings | null> => servicesIO.get();
+export const saveServicesSettings = (d: ServicesSettings): Promise<void> => servicesIO.save(d);
 
-export async function saveAboutSettings(data: AboutSettings): Promise<void> {
-  const validated = AboutSettingsSchema.parse(data);
-  await saveSettings('about', validated as Record<string, unknown>);
-}
+export const getLinksSettings = (): Promise<LinksSettings | null> => linksIO.get();
+export const saveLinksSettings = (d: LinksSettings): Promise<void> => linksIO.save(d);
 
-// Services
+export const getBannerSettings = (): Promise<BannerSettings | null> => bannerIO.get();
+export const saveBannerSettings = (d: BannerSettings): Promise<void> => bannerIO.save(d);
 
-export async function getServicesSettings(): Promise<ServicesSettings | null> {
-  const data = await getSettings('services');
-  if (!data) return null;
-  const r = ServicesSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:services] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
+export const getHeroImagesSettings = (): Promise<HeroImagesSettings | null> => heroImagesIO.get();
+export const saveHeroImagesSettings = (d: HeroImagesSettings): Promise<void> => heroImagesIO.save(d);
 
-export async function saveServicesSettings(data: ServicesSettings): Promise<void> {
-  const validated = ServicesSettingsSchema.parse(data);
-  await saveSettings('services', validated as Record<string, unknown>);
-}
-
-// Links
-
-export async function getLinksSettings(): Promise<LinksSettings | null> {
-  const data = await getSettings('links');
-  if (!data) return null;
-  const r = LinksSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:links] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
-
-export async function saveLinksSettings(data: LinksSettings): Promise<void> {
-  const validated = LinksSettingsSchema.parse(data);
-  await saveSettings('links', validated as Record<string, unknown>);
-}
-
-// Banner
-
-export async function getBannerSettings(): Promise<BannerSettings | null> {
-  const data = await getSettings('banner');
-  if (!data) return null;
-  const r = BannerSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:banner] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
-
-export async function saveBannerSettings(data: BannerSettings): Promise<void> {
-  const validated = BannerSettingsSchema.parse(data);
-  await saveSettings('banner', validated as Record<string, unknown>);
-}
-
-// Timeline
+// Timeline (subkollektion settings/timeline/items)
 
 const TIMELINE_COL = () => collection(db, 'settings', 'timeline', 'items');
 
 export async function getTimelineItems(): Promise<TimelineItem[]> {
   const q = query(TIMELINE_COL(), orderBy('order', 'asc'));
-  const snap = await withFetchTimeout(getDocs(q));
-  const items: TimelineItem[] = [];
-  snap.forEach(s => {
-    const r = TimelineItemSchema.safeParse({ id: s.id, ...s.data() });
-    if (r.success) items.push(r.data);
-    else if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:timeline] Ogiltigt dokument:', s.id, r.error.flatten());
-  });
-  return items;
+  const snap = await getDocsWithCacheStrategy(q, 'settings');
+  return parseSnapshot(snap, TimelineItemSchema, 'settings:timeline');
 }
 
 export async function getTimelineItem(id: string): Promise<TimelineItem | null> {
@@ -182,6 +122,7 @@ export async function getTimelineItem(id: string): Promise<TimelineItem | null> 
 export async function createTimelineItem(data: TimelineItemData): Promise<string> {
   const validated = TimelineItemDataSchema.parse(data);
   const ref = await addDoc(TIMELINE_COL(), omitUndefined(validated as Record<string, unknown>));
+  bump();
   return ref.id;
 }
 
@@ -189,28 +130,11 @@ export async function saveTimelineItem(id: string, data: TimelineItemData): Prom
   if (!id) throw new Error('saveTimelineItem: id saknas');
   const validated = TimelineItemDataSchema.parse(data);
   await updateDoc(doc(db, 'settings', 'timeline', 'items', id), omitUndefined(validated as Record<string, unknown>));
+  bump();
 }
 
 export async function deleteTimelineItem(id: string): Promise<void> {
   if (!id) throw new Error('deleteTimelineItem: id saknas');
   await deleteDoc(doc(db, 'settings', 'timeline', 'items', id));
-}
-
-// Hero Images
-
-export async function getHeroImagesSettings(): Promise<HeroImagesSettings | null> {
-  const data = await getSettings('hero-images');
-  if (!data) return null;
-  const r = HeroImagesSettingsSchema.safeParse(data);
-  if (!r.success) {
-    if (process.env.NODE_ENV === 'development')
-      console.warn('[settings:hero-images] Parse-fel:', r.error.flatten());
-    return null;
-  }
-  return r.data;
-}
-
-export async function saveHeroImagesSettings(data: HeroImagesSettings): Promise<void> {
-  const validated = HeroImagesSettingsSchema.parse(data);
-  await saveSettings('hero-images', validated as Record<string, unknown>);
+  bump();
 }

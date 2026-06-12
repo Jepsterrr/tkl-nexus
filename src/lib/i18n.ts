@@ -28,6 +28,15 @@ export const TRANSLATIONS = {
       studentsSubDeals: 'NEXUS Deals',
       settings: 'Inställningar',
       chooseLang: 'Välj språk',
+      showSubmenu: 'Visa undermeny',
+      hideSubmenu: 'Dölj undermeny',
+    },
+
+    // --- 404 ---
+    notFound: {
+      heading: 'Sidan kunde inte hittas',
+      description: 'Sidan du letar efter finns inte eller har flyttats.',
+      cta: 'Till startsidan',
     },
 
     // --- Footer ---
@@ -365,11 +374,11 @@ export const TRANSLATIONS = {
       sendAnother: 'Skicka in ett nytt',
       infoBanner: 'Förfrågan skickas till ao@teknologkaren.se. Vi hör av oss så snart vi kan.',
       requiredNote: '* Obligatoriska fält',
-      eventTypeLabel: 'Eventtyp',
-      eventTypePlaceholder: 'Välj eventtyp',
-      eventTypeInfoTitle: 'Om denna eventtyp',
-      eventTypeNone: 'Välj en eventtyp för att se mer information.',
-      eventTypeLoading: 'Laddar eventtyper…',
+      eventTypeSelectHeading: 'Välj eventformat',
+      eventTypeLoading: 'Laddar eventformat…',
+      eventTypeNone: 'Inga eventformat tillgängliga just nu.',
+      selectedEventType: 'Du har valt:',
+      changeEventType: 'Ändra',
       validation: { required: 'Obligatoriskt fält', invalidEmail: 'Ange en giltig e-postadress' },
       charCount: '{count}/2000 tecken',
     },
@@ -608,6 +617,15 @@ export const TRANSLATIONS = {
       studentsSubDeals: 'NEXUS Deals',
       settings: 'Settings',
       chooseLang: 'Language',
+      showSubmenu: 'Show submenu',
+      hideSubmenu: 'Hide submenu',
+    },
+
+    // --- 404 ---
+    notFound: {
+      heading: 'Page not found',
+      description: 'The page you are looking for does not exist or has been moved.',
+      cta: 'Back to home',
     },
 
     // --- Footer ---
@@ -941,11 +959,11 @@ export const TRANSLATIONS = {
       sendAnother: 'Submit another',
       infoBanner: 'Your request will be sent to ao@teknologkaren.se. We will get back to you as soon as we can.',
       requiredNote: '* Required fields',
-      eventTypeLabel: 'Event type',
-      eventTypePlaceholder: 'Select event type',
-      eventTypeInfoTitle: 'About this event type',
-      eventTypeNone: 'Select an event type to see more information.',
-      eventTypeLoading: 'Loading event types…',
+      eventTypeSelectHeading: 'Select event format',
+      eventTypeLoading: 'Loading event formats…',
+      eventTypeNone: 'No event formats available right now.',
+      selectedEventType: 'You selected:',
+      changeEventType: 'Change',
       validation: { required: 'Required field', invalidEmail: 'Enter a valid email address' },
       charCount: '{count}/2000 characters',
     },

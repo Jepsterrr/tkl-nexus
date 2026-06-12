@@ -15,7 +15,9 @@ export function ScrollResetter() {
       // Scroll to hash target after content renders; accounts for custom scroll container
       const timer = setTimeout(() => {
         const target = document.getElementById(hash.slice(1));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!target) return;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
       }, 80);
       return () => clearTimeout(timer);
     } else {

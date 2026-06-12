@@ -11,13 +11,16 @@ export const EventSchema = z.object({
   titleEn: z.string().max(120).optional(),
   description: z.string().max(2000),
   descriptionEn: z.string().max(2000).optional(),
-  date: z.string().datetime({ offset: true }),
-  endDate: z.string().datetime({ offset: true }),
+  // Enbart Z-suffix (UTC) tillåts — datumen jämförs lexikografiskt i
+  // Firestore-queries (endDate >=), vilket bara är korrekt om alla
+  // strängar delar samma offsetformat.
+  date: z.string().datetime(),
+  endDate: z.string().datetime(),
   location: z.string().min(1).max(120),
   tags: z.array(z.string()).default([]),
   section: SectionSchema,
   published: z.boolean(),
-  createdAt: z.string().datetime({ offset: true }),
+  createdAt: z.string().datetime(),
 });
 
 export type TKLEvent = z.infer<typeof EventSchema>;
