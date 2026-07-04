@@ -1,0 +1,76 @@
+# E2E + kvalitetsgrind för TKL Nexus.
+#
+# Körs på varje PR och push mot master:
+#   lint → produktionsbygge → Playwright (navigation, toggles, drawer,
+#   axe a11y-smoke, security headers) mot `next start`.
+#
+# Kräver följande repository secrets (Settings → Secrets and variables →
+# Actions). Värdena finns i .env.local — Firebase-webconfig är publik
+# (skeppas i JS-bundlen), men hålls som secrets av hygienskäl:
+#   NEXT_PUBLIC_FIREBASE_API_KEY
+#   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+#   NEXT_PUBLIC_FIREBASE_PROJECT_ID
+#   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+#   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+#   NEXT_PUBLIC_FIREBASE_APP_ID
+#   NEXT_PUBLIC_CLOUDINARY_DELETE_URL
+#
+# OBS: Testerna läser live Firestore (enbart publika, publicerade dokument).
+# Datadrivna tester (drawer) skippar sig själva när kollektioner är tomma.
+
+name: E2E
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+      NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+      NEXT_PUBLIC_CLOUDINARY_DELETE_URL: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_DELETE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Installera Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Produktionsbygge
+        run: npm run build
+
+      - name: E2E-tester
+        run: npx playwright test
+
+      - name: Ladda upp testrapport vid fel
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
