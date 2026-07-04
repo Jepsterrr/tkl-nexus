@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
 import { checkAdminAccess, signOutAdmin } from '@/lib/services/auth';
 import { LoginForm } from './LoginForm';
 import { AdminShell } from './AdminShell';
@@ -41,7 +41,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   if (authState.status === 'loading') {
     return (
-      <div className="min-h-[calc(100svh-var(--navbar-height,72px))] flex items-center justify-center bg-[oklch(12%_0.01_265)] p-6" aria-busy="true" aria-label="Laddar…">
+      <div className="min-h-[calc(100svh-var(--navbar-height,72px))] flex items-center justify-center bg-[oklch(12%_0.01_265)] p-6" role="status" aria-busy="true" aria-label="Laddar…">
         <p className="font-(family-name:--font-body) text-sm text-[oklch(55%_0.02_265)]">
           Laddar…
         </p>

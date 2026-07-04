@@ -4,15 +4,6 @@ import {
   createContext, useContext, useEffect, useState, type ReactNode,
 } from 'react';
 import {
-  getStatsSettings,
-  getContactSettings,
-  getAboutSettings,
-  getServicesSettings,
-  getLinksSettings,
-  getBannerSettings,
-  getHeroImagesSettings,
-} from '@/lib/services/settings';
-import {
   type StatsSettings,
   type ContactSettings,
   type AboutSettings,
@@ -44,6 +35,19 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function fetchAll(): Promise<SettingsContextValue> {
+  // Dynamisk import — service-lagret drar in hela Firestore-SDK:t (~145 kB gzip).
+  // Statisk import här lägger SDK:t i den delade bundlen och blockerar
+  // hydration/LCP på VARJE sida. Håll firebase utanför kritiska JS-vägen.
+  const {
+    getStatsSettings,
+    getContactSettings,
+    getAboutSettings,
+    getServicesSettings,
+    getLinksSettings,
+    getBannerSettings,
+    getHeroImagesSettings,
+  } = await import('@/lib/services/settings');
+
   const [stats, contact, about, services, links, banner, heroImages] = await Promise.allSettled([
     getStatsSettings(),
     getContactSettings(),

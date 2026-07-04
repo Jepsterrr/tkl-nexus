@@ -9,7 +9,8 @@ import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DealCard } from '@/components/ui/DealCard';
 import { DealDrawer } from '@/components/ui/DealDrawer';
 import type { TKLDeal } from '@/lib/schemas/deal';
-import { getPublishedDeals, getDealById } from '@/lib/services/deals';
+// Service-lagret importeras dynamiskt i effekterna — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { capture } from '@/lib/analytics';
@@ -37,13 +38,16 @@ export function DealsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+  // Init alltid 'icon' och läs localStorage i en effect — en initializer som
+  // läser localStorage ger hydration-mismatch (servern prerendrar 'icon').
+  const [viewMode, setViewMode] = useState<ViewMode>('icon');
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('tkl-deals-view');
-      if (saved === 'icon' || saved === 'detail') return saved;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved === 'icon' || saved === 'detail') setViewMode(saved);
     } catch {}
-    return 'icon';
-  });
+  }, []);
 
   const handleViewChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -82,7 +86,7 @@ export function DealsContent() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) return;
-    void getDealById(id).then((d) => { if (d) setSelectedDeal(d); });
+    void import('@/lib/services/deals').then((m) => m.getDealById(id)).then((d) => { if (d) setSelectedDeal(d); });
   }, []); // kör bara vid mount
 
   // Browser back/forward
@@ -93,7 +97,7 @@ export function DealsContent() {
       if (!id) { setSelectedDeal(null); return; }
       const cached = allDeals.find((d) => d.id === id);
       if (cached) setSelectedDeal(cached);
-      else void getDealById(id).then((d) => { if (d) setSelectedDeal(d); });
+      else void import('@/lib/services/deals').then((m) => m.getDealById(id)).then((d) => { if (d) setSelectedDeal(d); });
     };
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
@@ -105,7 +109,8 @@ export function DealsContent() {
     setLoading(true);
     setError(null);
 
-    getPublishedDeals()
+    import('@/lib/services/deals')
+      .then((m) => m.getPublishedDeals())
       .then((data) => {
         if (isMounted) {
           setAllDeals(data);
@@ -196,7 +201,8 @@ export function DealsContent() {
                   {deals?.badge ?? 'NEXUS Deals'}
                 </p>
               </RevealItem>
-              <RevealItem>
+              {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+              <div className="hero-reveal">
                 <h1
                   id="deals-hero-heading"
                   className="hero-text hero-heading"
@@ -206,7 +212,7 @@ export function DealsContent() {
                   <br />
                   <span className="text-accent-orange">{deals?.headingAccent ?? 'kårförmåner'}</span>
                 </h1>
-              </RevealItem>
+              </div>
               {/* Separator */}
               <RevealItem>
                 <div
@@ -319,11 +325,11 @@ export function DealsContent() {
           {error && !loading && (
             <div className="flex justify-center py-16" role="alert">
               <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
-                <p className="text-red-400 font-medium">{error}</p>
+                <p className="text-red-400 light:text-red-700 font-medium">{error}</p>
                 <button
                   onClick={() => setFetchKey((k) => k + 1)}
                   className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #F59E0B, #f97316)' }}
+                  style={{ background: 'linear-gradient(135deg, #B45309, #C2410C)' }}
                 >
                   {deals?.retry ?? 'Försök igen'}
                 </button>

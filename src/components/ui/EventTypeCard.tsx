@@ -46,8 +46,6 @@ export function EventTypeCard({ eventType, locale, index, selected, onSelect }: 
         boxShadow: selected ? '0 0 24px rgba(59,130,246,0.12)' : 'none',
       }}
     >
-      {/* Light-mode surface overlay */}
-      <div className="absolute inset-0 pointer-events-none rounded-2xl light:bg-white/40" aria-hidden="true" />
 
       {/* Selected checkmark */}
       <AnimatePresence>

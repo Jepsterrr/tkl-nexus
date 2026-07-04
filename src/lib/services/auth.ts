@@ -4,7 +4,8 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { FirebaseError } from 'firebase/app';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
+import { db } from '@/lib/firebase';
 
 /**
  * Loggar in användaren med e-post + lösenord och sätter lokal persistens.

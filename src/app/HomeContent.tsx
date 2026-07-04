@@ -2,12 +2,12 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { capture } from '@/lib/analytics';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useImageLoad } from '@/lib/hooks/useImageLoad';
 import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
-import { RootNetwork } from '@/components/ui/RootNetwork';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { BenefitCardComponent } from '@/components/ui/BenefitCard';
@@ -15,6 +15,12 @@ import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StarField } from '@/components/ui/StarField';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import type { BenefitCard } from '@/lib/types';
+
+// Under fold + DOM-mätande (ResizeObserver) — splitta ur initial-bundlen
+const RootNetwork = dynamic(
+  () => import('@/components/ui/RootNetwork').then((m) => m.RootNetwork),
+  { ssr: false },
+);
 
 // Module-level style constants — avoids recreating objects on every scroll-driven render
 const PILL_STYLE_GREEN: React.CSSProperties = {
@@ -211,8 +217,9 @@ export function HomeContent() {
               </span>
             </RevealItem>
 
-            {/* Heading */}
-            <RevealItem>
+            {/* Heading — hero-reveal (CSS) istället för RevealItem (JS):
+                LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="home-hero-heading"
                 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black hero-text hero-heading"
@@ -221,7 +228,7 @@ export function HomeContent() {
                 <br />
                 <span className="text-accent-red">{home.headingAccent}</span>
               </h1>
-            </RevealItem>
+            </div>
 
             {/* Description */}
             <RevealItem>

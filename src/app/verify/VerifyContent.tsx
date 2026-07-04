@@ -7,7 +7,7 @@ import {
   signInWithEmailLink,
   updatePassword,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
 
 type Phase = 'loading' | 'confirm-email' | 'set-password' | 'error';
 

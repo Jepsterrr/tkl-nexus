@@ -45,7 +45,7 @@ export function FilterTab({ active, onClick, label, color, logo, showActiveIcon 
       aria-pressed={active}
     >
       {logo && (
-        <img src={logo} alt="" width={16} height={16} className="object-contain" aria-hidden="true" />
+        <img src={logo} alt="" width={16} height={16} className="object-contain" aria-hidden="true" loading="lazy" decoding="async" />
       )}
       {showActiveIcon && (
         <Sparkles

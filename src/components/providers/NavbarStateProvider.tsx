@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
 interface NavbarStateContextValue {
   isDrawerOpen: boolean;
@@ -11,8 +11,10 @@ const NavbarStateContext = createContext<NavbarStateContextValue | null>(null);
 
 export function NavbarStateProvider({ children }: { children: ReactNode }) {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  // Memoiserat värde — annars omrenderas alla konsumenter vid varje render
+  const value = useMemo(() => ({ isDrawerOpen, setDrawerOpen }), [isDrawerOpen]);
   return (
-    <NavbarStateContext.Provider value={{ isDrawerOpen, setDrawerOpen }}>
+    <NavbarStateContext.Provider value={value}>
       {children}
     </NavbarStateContext.Provider>
   );

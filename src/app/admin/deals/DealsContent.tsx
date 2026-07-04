@@ -129,7 +129,7 @@ export function DealsContent() {
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="space-y-px" aria-busy="true" aria-label="Laddar deals">
+          <div className="space-y-px" role="status" aria-busy="true" aria-label="Laddar deals">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
@@ -197,6 +197,8 @@ export function DealsContent() {
                       src={deal.logoUrl}
                       alt=""
                       className="w-full h-full object-contain"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <span className="text-[10px] font-bold text-[oklch(50%_0.02_265)]">

@@ -8,7 +8,8 @@ import { ArrowLeft, Briefcase, CalendarDays, Gift, CheckCircle, Link as LinkIcon
 import { EventTypeCard } from '@/components/ui/EventTypeCard';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import { getPublishedEventTypes } from '@/lib/services/eventTypes';
+// Service-lagret importeras dynamiskt i effekten — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import type { TKLEventType } from '@/lib/schemas/eventType';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -241,7 +242,8 @@ export function PostContent() {
   useEffect(() => {
     if (activeTab !== 'event') return;
     setEventTypesLoading(true);
-    getPublishedEventTypes()
+    import('@/lib/services/eventTypes')
+      .then((m) => m.getPublishedEventTypes())
       .then((types) => { setEventTypes(types); setEventTypesLoading(false); })
       .catch(() => setEventTypesLoading(false));
   }, [activeTab]);
@@ -267,7 +269,7 @@ export function PostContent() {
 
   function fieldErr(id: string, value: string) {
     if (!hasFieldErr(id, value)) return null;
-    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400">{cp.validation.required}</span>;
+    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400 light:text-red-700">{cp.validation.required}</span>;
   }
 
   function emailErr(id: string, value: string) {
@@ -276,7 +278,7 @@ export function PostContent() {
       : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? cp.validation.invalidEmail
       : null;
     if (!msg) return null;
-    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400">{msg}</span>;
+    return <span id={`error-${id}`} role="alert" className="block mt-1 text-xs text-red-400 light:text-red-700">{msg}</span>;
   }
 
   const selectedEventType = eventTypes.find((et) => et.id === selectedEventTypeId) ?? null;
@@ -375,7 +377,8 @@ export function PostContent() {
               </span>
             </RevealItem>
 
-            <RevealItem>
+            {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="post-hero-heading"
                 className="hero-text mb-4"
@@ -391,7 +394,7 @@ export function PostContent() {
                 <br />
                 <span style={{ color: colors.hex }}>{cp.headingAccent}</span>
               </h1>
-            </RevealItem>
+            </div>
 
             <RevealItem>
               <p className="hero-text-muted text-base sm:text-lg leading-relaxed max-w-[56ch]">
@@ -1038,7 +1041,7 @@ export function PostContent() {
                         style={
                           isValid
                             ? {
-                                background: 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                                background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
                                 boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
                               }
                             : {

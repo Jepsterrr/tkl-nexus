@@ -176,9 +176,9 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
               </button>
 
               <div className="relative z-10 flex items-center gap-2 mb-2.5">
-                {logo && <img src={logo} alt="" className="w-4 h-4 object-contain" aria-hidden="true" />}
+                {logo && <img src={logo} alt="" className="w-4 h-4 object-contain" aria-hidden="true" loading="lazy" decoding="async" />}
                 <span
-                  className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                  className="text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                   style={{ color, background: `${color}18`, border: `1px solid ${color}30` }}
                 >
                   {ev.sections[event!.section]}
@@ -224,7 +224,7 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                 )}
               </div>
 
-              <p className="text-[10px] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
+              <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
                 {ev.drawerAbout}
               </p>
               <p className="text-sm leading-relaxed hero-text-muted" style={{ maxWidth: '65ch' }}>

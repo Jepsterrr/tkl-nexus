@@ -154,7 +154,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                     className="w-10 h-10 rounded-lg flex items-center justify-center p-1.5 shrink-0"
                     style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
                   >
-                    <img src={deal!.logoUrl} alt="" className="w-full h-full object-contain rounded" />
+                    <img src={deal!.logoUrl} alt="" className="w-full h-full object-contain rounded" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div
@@ -186,7 +186,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
+              <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
                 {deals.drawerAbout}
               </p>
               <p className="text-sm leading-relaxed hero-text-muted mb-6" style={{ maxWidth: '65ch' }}>

@@ -9,7 +9,8 @@ import {
   sendSignInLinkToEmail,
   sendPasswordResetEmail,
 } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
+import { db } from '@/lib/firebase';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 
 export async function getAdmins(): Promise<string[]> {

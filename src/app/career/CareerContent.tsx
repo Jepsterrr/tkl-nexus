@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useDeferredValue } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Briefcase, Building2, Compass, Search, X, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +15,8 @@ import { JobCard } from '@/components/ui/JobCard';
 import { JobCardSkeleton } from '@/components/ui/JobCardSkeleton';
 import { CareerDrawer } from '@/components/ui/CareerDrawer';
 import type { TKLCareer, CareerType } from '@/lib/schemas/career';
-import { getPublishedCareer, getCareerById } from '@/lib/services/career';
+// Service-lagret importeras dynamiskt i effekterna — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { capture } from '@/lib/analytics';
 
@@ -73,7 +74,7 @@ export function CareerContent() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) return;
-    void getCareerById(id).then((j) => { if (j) setSelectedJob(j); });
+    void import('@/lib/services/career').then((m) => m.getCareerById(id)).then((j) => { if (j) setSelectedJob(j); });
   }, []); // kör bara vid mount
 
   // Browser back/forward
@@ -84,7 +85,7 @@ export function CareerContent() {
       if (!id) { setSelectedJob(null); return; }
       const cached = careerItems.find((j) => j.id === id);
       if (cached) setSelectedJob(cached);
-      else void getCareerById(id).then((j) => { if (j) setSelectedJob(j); });
+      else void import('@/lib/services/career').then((m) => m.getCareerById(id)).then((j) => { if (j) setSelectedJob(j); });
     };
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
@@ -106,7 +107,8 @@ export function CareerContent() {
     let isMounted = true;
     setLoading(true);
 
-    getPublishedCareer()
+    import('@/lib/services/career')
+      .then((m) => m.getPublishedCareer())
       .then((data) => {
         if (isMounted) {
           setCareerItems(data);
@@ -127,11 +129,15 @@ export function CareerContent() {
     };
   }, [opportunity.error, fetchKey]);
 
+  // Deferred sök — inputfältet uppdateras direkt, medan grid-filtreringen
+  // (AnimatePresence + layout-animationer) får släpa efter utan att blockera skrivandet.
+  const deferredSearch = useDeferredValue(search);
+
   const filteredItems = careerItems
     .filter((o) => filter === 'all' || o.type === filter)
     .filter((o) => {
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
+      if (!deferredSearch.trim()) return true;
+      const q = deferredSearch.toLowerCase();
       return (
         o.title.toLowerCase().includes(q) ||
         o.company.toLowerCase().includes(q) ||
@@ -223,7 +229,8 @@ export function CareerContent() {
               </span>
             </RevealItem>
 
-            <RevealItem>
+            {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="career-hero-heading"
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl hero-text hero-heading"
@@ -239,7 +246,7 @@ export function CareerContent() {
                   />
                 </span>
               </h1>
-            </RevealItem>
+            </div>
 
             <RevealItem>
               <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
@@ -328,7 +335,9 @@ export function CareerContent() {
             </div>
           </motion.div>
 
-          {/* Laddar-state + Jobb Grid — AnimatePresence cross-fade */}
+          {/* Laddar-state + Jobb Grid — AnimatePresence cross-fade.
+              min-h stabiliserar höjden vid skeleton→innehåll-swap (CLS) */}
+          <div className="min-h-[26rem]">
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div
@@ -338,11 +347,12 @@ export function CareerContent() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                aria-live="polite"
+                role="status"
                 aria-busy="true"
                 aria-label={opportunity.loading}
               >
-                <JobCardSkeleton count={3} accentColor="blue" />
+                {/* count=2: mobilstaplad höjd ≈ min-h-wrappern → ingen CLS vid swap */}
+                <JobCardSkeleton count={2} accentColor="blue" />
               </motion.div>
             ) : !error && filteredItems.length > 0 ? (
               <motion.div
@@ -369,11 +379,11 @@ export function CareerContent() {
           {error && !loading && (
             <div className="flex justify-center py-16" role="alert">
               <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
-                <p className="text-red-400 font-medium">{error}</p>
+                <p className="text-red-400 light:text-red-700 font-medium">{error}</p>
                 <button
                   onClick={() => { setError(null); setLoading(true); setFetchKey((k) => k + 1); }}
                   className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}
+                  style={{ background: 'linear-gradient(135deg, #1D4ED8, #047857)' }}
                 >
                   {opportunity.retry}
                 </button>
@@ -410,6 +420,7 @@ export function CareerContent() {
               )}
             </motion.div>
           )}
+          </div>
 
           {/* Aria-live region för filterresultat */}
           {!loading && !error && (

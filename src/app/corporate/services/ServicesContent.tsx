@@ -8,7 +8,8 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { ProductCard } from '@/components/ui/ProductCard';
-import { getProducts } from '@/lib/services/products';
+// Service-lagret importeras dynamiskt i effekten — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import type { TKLProduct } from '@/lib/schemas/product';
 
 const CATEGORY_ORDER: TKLProduct['category'][] = ['activities', 'services', 'marketing'];
@@ -42,7 +43,8 @@ export function ServicesContent() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    getProducts()
+    import('@/lib/services/products')
+      .then((m) => m.getProducts())
       .then((data) => { if (!cancelled) { setProducts(data); setLoading(false); } })
       .catch(() => { if (!cancelled) { setError(s.error); setLoading(false); } });
     return () => { cancelled = true; };
@@ -81,7 +83,8 @@ export function ServicesContent() {
                 {s.badge}
               </span>
             </RevealItem>
-            <RevealItem>
+            {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="services-hero-heading"
                 className="text-4xl sm:text-5xl md:text-6xl font-black hero-text hero-heading"
@@ -89,7 +92,7 @@ export function ServicesContent() {
                 {s.heading}{' '}
                 <span style={{ color: '#8B5CF6' }}>{s.headingAccent}</span>
               </h1>
-            </RevealItem>
+            </div>
             <RevealItem>
               <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">
                 {s.description}
@@ -99,7 +102,7 @@ export function ServicesContent() {
               <Link
                 href="/about#kontakt"
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#fff', boxShadow: '0 0 20px rgba(139,92,246,0.3)' }}
+                style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)', color: '#fff', boxShadow: '0 0 20px rgba(139,92,246,0.3)' }}
               >
                 {s.contactBtn}
               </Link>

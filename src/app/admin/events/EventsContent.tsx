@@ -165,7 +165,7 @@ export function EventsContent() {
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="space-y-px" aria-busy="true" aria-label="Laddar events">
+          <div className="space-y-px" role="status" aria-busy="true" aria-label="Laddar events">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}

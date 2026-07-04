@@ -59,14 +59,15 @@ export function PrivacyContent() {
         </motion.div>
 
         <StaggerReveal>
-          <RevealItem>
+          {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+          <div className="hero-reveal">
             <h1
               className="hero-text font-black mb-4"
               style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(2rem, 5vw, 3rem)', letterSpacing: '-0.03em' }}
             >
               {p.title}
             </h1>
-          </RevealItem>
+          </div>
 
           <RevealItem>
             <p className="hero-text-muted text-base leading-relaxed mb-10">{p.intro}</p>

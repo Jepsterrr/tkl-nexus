@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface Star {
   x: number;
@@ -15,12 +16,16 @@ export function StarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const starsRef = useRef<Star[]>([]);
   const rafRef = useRef<number>(0);
+  const { resolved } = useTheme();
   const prefersReducedMotion =
     typeof window !== 'undefined'
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false;
 
   useEffect(() => {
+    // Canvasen är dold i light mode (light:hidden) — kör ingen rAF-loop i onödan
+    if (resolved === 'light') return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -28,7 +33,7 @@ export function StarField() {
 
     const COUNT = 160;
 
-    const resize = () => {
+    const regenerate = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       // Re-generate stars proportionally on resize
@@ -42,11 +47,7 @@ export function StarField() {
       }));
     };
 
-    resize();
-    window.addEventListener('resize', resize);
-
-    if (prefersReducedMotion) {
-      // Render once, no animation
+    const drawStatic = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       starsRef.current.forEach((s) => {
         ctx.beginPath();
@@ -54,10 +55,33 @@ export function StarField() {
         ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
         ctx.fill();
       });
-      return;
+    };
+
+    // Debouncad resize — annars regenereras 160 stjärnor per resize-event
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        regenerate();
+        if (prefersReducedMotion) drawStatic();
+      }, 150);
+    };
+
+    regenerate();
+    window.addEventListener('resize', onResize);
+
+    if (prefersReducedMotion) {
+      // Render once, no animation
+      drawStatic();
+      return () => {
+        clearTimeout(resizeTimer);
+        window.removeEventListener('resize', onResize);
+      };
     }
 
     let t = 0;
+    let visible = true;
+
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       t += 0.005;
@@ -68,16 +92,31 @@ export function StarField() {
         ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.fill();
       });
-      rafRef.current = requestAnimationFrame(draw);
+      if (visible) rafRef.current = requestAnimationFrame(draw);
     };
+
+    // Pausa loopen när canvasen scrollats ur bild — sparar CPU/batteri
+    const io = new IntersectionObserver(([entry]) => {
+      const nowVisible = entry.isIntersecting;
+      if (nowVisible && !visible) {
+        visible = true;
+        rafRef.current = requestAnimationFrame(draw);
+      } else if (!nowVisible) {
+        visible = false;
+        cancelAnimationFrame(rafRef.current);
+      }
+    });
+    io.observe(canvas);
 
     rafRef.current = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', resize);
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
+      io.disconnect();
     };
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, resolved]);
 
   return (
     <div className="light:hidden">

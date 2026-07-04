@@ -17,6 +17,14 @@ claude.md
 .idx/
 .agents/
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Lighthouse-rapporter
+/lighthouse-reports/
+
 # next.js
 /.next/
 /out/

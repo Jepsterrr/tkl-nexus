@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Theme } from '@/lib/types';
 
 interface ThemeContextValue {
@@ -54,10 +54,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, mounted]);
 
-  const setTheme = (t: Theme) => setThemeState(t);
+  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+
+  // Memoiserat värde — annars omrenderas alla konsumenter vid varje render
+  const value = useMemo(() => ({ theme, setTheme, resolved }), [theme, setTheme, resolved]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolved }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

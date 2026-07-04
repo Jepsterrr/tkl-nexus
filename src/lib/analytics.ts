@@ -1,5 +1,3 @@
-import posthog from 'posthog-js';
-
 /**
  * Central på/av-knapp för all analytik.
  *
@@ -7,6 +5,11 @@ import posthog from 'posthog-js';
  * Sätt till true först när DPA är signerat med PostHog — init-blocket i
  * instrumentation-client.ts läser samma flagga, så hela kedjan slås på
  * från en enda punkt.
+ *
+ * posthog-js importeras dynamiskt — biblioteket (~180 kB) hamnar aldrig i
+ * root-bundlen när flaggan är av. Behåll det mönstret: ingen statisk
+ * `import posthog from 'posthog-js'` utanför denna fil och
+ * instrumentation-client.ts.
  */
 export const ANALYTICS_ENABLED = false;
 
@@ -17,5 +20,16 @@ export const ANALYTICS_ENABLED = false;
  */
 export function capture(event: string, properties?: Record<string, unknown>): void {
   if (!ANALYTICS_ENABLED) return;
-  posthog.capture(event, properties);
+  void import('posthog-js').then(({ default: posthog }) => {
+    posthog.capture(event, properties);
+  });
+}
+
+/** Sätter samtyckes-läge efter cookie-bannern. No-op när analytiken är av. */
+export function optInAnalytics(): void {
+  if (!ANALYTICS_ENABLED) return;
+  void import('posthog-js').then(({ default: posthog }) => {
+    posthog.set_config({ persistence: 'localStorage+cookie' });
+    posthog.opt_in_capturing();
+  });
 }

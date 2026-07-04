@@ -10,7 +10,8 @@ import { useSettings } from '@/components/providers/SettingsProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { useImageLoad } from '@/lib/hooks/useImageLoad';
 import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
-import { getTimelineItems } from '@/lib/services/settings';
+// Service-lagret importeras dynamiskt i effekten — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import type { TimelineItem } from '@/lib/schemas/settings';
 import { Timeline } from '@/components/ui/Timeline';
 import { GradientOrb } from '@/components/ui/GradientOrb';
@@ -25,7 +26,8 @@ export function AboutContent() {
   const [timelineItems, setTimelineItems] = useState<TimelineItem[] | null>(null);
   useEffect(() => {
     let cancelled = false;
-    getTimelineItems()
+    import('@/lib/services/settings')
+      .then((m) => m.getTimelineItems())
       .then((items) => {
         if (!cancelled) setTimelineItems(items);
       })
@@ -173,7 +175,8 @@ export function AboutContent() {
             </RevealItem>
 
             {/* Rubrik — andra raden indenterad för redaktionell känsla */}
-            <RevealItem>
+            {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="about-hero-heading"
                 className="hero-text hero-heading"
@@ -183,7 +186,7 @@ export function AboutContent() {
                 <br />
                 <span className="text-accent-red pl-8 sm:pl-16">{about.headingAccent}</span>
               </h1>
-            </RevealItem>
+            </div>
 
             <RevealItem>
               <p className="mt-8 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">

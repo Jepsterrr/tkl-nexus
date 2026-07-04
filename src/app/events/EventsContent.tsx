@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useDeferredValue } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { CalendarDays, MapPin, Tag, Loader2, Search, Sparkles, X, PlusCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -11,14 +12,20 @@ import { useImageLoad } from '@/lib/hooks/useImageLoad';
 import { HeroPhotoLayer } from '@/components/ui/HeroPhotoLayer';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
-import { LuddCalendar } from '@/components/ui/LuddCalendar';
 import { EventDrawer } from '@/components/ui/EventDrawer';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
-import { getPublishedEvents, getEventById } from '@/lib/services/events';
+// Service-lagret importeras dynamiskt i effekterna — statisk import drar in
+// Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { z } from 'zod';
 import { capture } from '@/lib/analytics';
+
+// Kalendern används bara i LUDD-vyn — ladda den först när fliken öppnas
+const LuddCalendar = dynamic(
+  () => import('@/components/ui/LuddCalendar').then((m) => m.LuddCalendar),
+  { ssr: false },
+);
 
 // LUDD API är extern data — validera istället för att lita på formen
 const LuddItemSchema = z.object({
@@ -99,7 +106,7 @@ function EventCard({
           style={{ background: `${color}22`, border: `1px solid ${color}44` }}
         >
           <span className="text-xl leading-none" style={{ color }}>{day}</span>
-          <span className="text-[10px] uppercase tracking-widest opacity-70">{month}</span>
+          <span className="text-[0.625rem] uppercase tracking-widest opacity-70">{month}</span>
         </div>
 
         <div className="flex-1 min-w-0">
@@ -111,10 +118,12 @@ function EventCard({
                 width={20}
                 height={20}
                 className="object-contain"
+                loading="lazy"
+                decoding="async"
               />
             )}
             <span
-              className="text-[11px] font-semibold uppercase tracking-widest"
+              className="text-[0.6875rem] font-semibold uppercase tracking-widest"
               style={{ color }}
             >
               {ev.sections[event.section]}
@@ -207,7 +216,7 @@ export function EventsContent() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) return;
-    void getEventById(id).then((ev) => {
+    void import('@/lib/services/events').then((m) => m.getEventById(id)).then((ev) => {
       if (ev) setSelectedEvent(ev as ExtendedEvent);
     });
   }, []); // kör bara vid mount
@@ -225,7 +234,7 @@ export function EventsContent() {
       if (cached) {
         setSelectedEvent(cached);
       } else {
-        void getEventById(id).then((ev) => {
+        void import('@/lib/services/events').then((m) => m.getEventById(id)).then((ev) => {
           if (ev) setSelectedEvent(ev as ExtendedEvent);
         });
       }
@@ -272,7 +281,8 @@ export function EventsContent() {
     let isMounted = true;
     setLoading(true);
     setError(null);
-    getPublishedEvents()
+    import('@/lib/services/events')
+      .then((m) => m.getPublishedEvents())
       .then((data) => {
         if (isMounted) { setAllEvents(data); setLoading(false); }
       })
@@ -304,13 +314,15 @@ export function EventsContent() {
 
           // Mappar LUDD-datan till vårt utökade ExtendedEvent-format.
           // Extern data valideras med Zod — poster som inte matchar hoppas över.
-          const mapped: ExtendedEvent[] = items.flatMap((raw) => {
+          const mapped: ExtendedEvent[] = items.flatMap((raw, rawIndex) => {
             const parsed = LuddItemSchema.safeParse(raw);
             if (!parsed.success) return [];
             const item = parsed.data;
             const timeMs = item.start_datetime > 9999999999 ? item.start_datetime : item.start_datetime * 1000;
             return [{
-              id: `ludd-${item.id ?? Math.random()}`,
+              // Stabil key-fallback — Math.random() ger ny identitet per render
+              // och bryter Reacts reconciliation (omount + tappade animationer)
+              id: `ludd-${item.id ?? item.slug ?? `idx-${rawIndex}`}`,
               title: item.title || 'Campus Event',
               description: item.description ? item.description.replace(/<[^>]*>?/gm, '').trim() : '',
               date: new Date(timeMs).toISOString(),
@@ -339,11 +351,15 @@ export function EventsContent() {
     }
   }, [calendarView, luddEvents.length]);
 
+  // Deferred sök — inputfältet uppdateras direkt, medan grid-filtreringen
+  // (AnimatePresence + layout-animationer) får släpa efter utan att blockera skrivandet.
+  const deferredSearch = useDeferredValue(search);
+
   const filtered = allEvents
     .filter((e) => filter === 'all' || e.section === filter)
     .filter((e) => {
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
+      if (!deferredSearch.trim()) return true;
+      const q = deferredSearch.toLowerCase();
       return (
         e.title.toLowerCase().includes(q) ||
         (e.location ?? '').toLowerCase().includes(q)
@@ -437,20 +453,20 @@ export function EventsContent() {
           {/* Desktop: poster split — heading words stacked left, content right */}
           <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-20 lg:items-center">
             <motion.div style={{ y: heroTextY }}>
-              <StaggerReveal delay={0.05}>
-                <h1
-                  id="events-hero-heading"
-                  className="hero-text"
-                  style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 0.95, fontSize: 'clamp(4rem, 7vw, 7rem)' }}
-                >
-                  {ev.heading.split(' ').map((word, i) => (
-                    <RevealItem key={i} className="block">{word}</RevealItem>
-                  ))}
-                  <RevealItem className="block">
-                    <span className="text-accent-purple">{ev.headingAccent}</span>
-                  </RevealItem>
-                </h1>
-              </StaggerReveal>
+              {/* hero-reveal (CSS) per ord — LCP-elementet får inte vänta på
+                  hydration; staggern återskapas med animation-delay */}
+              <h1
+                id="events-hero-heading"
+                className="hero-text"
+                style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 0.95, fontSize: 'clamp(4rem, 7vw, 7rem)' }}
+              >
+                {ev.heading.split(' ').map((word, i) => (
+                  <span key={i} className="block hero-reveal" style={{ animationDelay: `${0.05 + i * 0.1}s` }}>{word}</span>
+                ))}
+                <span className="block hero-reveal" style={{ animationDelay: `${0.05 + ev.heading.split(' ').length * 0.1}s` }}>
+                  <span className="text-accent-purple">{ev.headingAccent}</span>
+                </span>
+              </h1>
             </motion.div>
 
             <motion.div style={{ y: heroTextY }} className="flex flex-col justify-center">
@@ -484,11 +500,12 @@ export function EventsContent() {
                   {ev.badge}
                 </span>
               </RevealItem>
-              <RevealItem>
+              {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+              <div className="hero-reveal">
                 <h1 className="text-4xl sm:text-5xl hero-text hero-heading">
                   {ev.heading}{' '}<span className="text-accent-purple">{ev.headingAccent}</span>
                 </h1>
-              </RevealItem>
+              </div>
               <RevealItem>
                 <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">{ev.description}</p>
               </RevealItem>
@@ -591,18 +608,18 @@ export function EventsContent() {
                   </div>
                 </div>
                 {loading && (
-                  <div className="flex justify-center py-24" aria-live="polite" aria-busy="true" aria-label={ev.loading}>
+                  <div className="flex justify-center py-24" role="status" aria-busy="true" aria-label={ev.loading}>
                     <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} aria-hidden="true" />
                   </div>
                 )}
                 {error && !loading && (
                   <div className="flex justify-center py-16" role="alert">
                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
-                      <p className="text-red-400 font-medium">{error}</p>
+                      <p className="text-red-400 light:text-red-700 font-medium">{error}</p>
                       <button
                         onClick={() => setFetchKey((k) => k + 1)}
                         className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}
+                        style={{ background: 'linear-gradient(135deg, #6D28D9, #1D4ED8)' }}
                       >
                         {ev.retry}
                       </button>
@@ -673,12 +690,12 @@ export function EventsContent() {
                     rel="noopener noreferrer"
                     className="text-xs font-medium hero-text-subtle hover:text-[#60A5FA] transition-colors flex items-center gap-1.5"
                   >
-                    {ev.luddPoweredBy} <span className="font-bold text-white tracking-wide">/LUDD/</span>
+                    {ev.luddPoweredBy} <span className="font-bold text-white light:text-black tracking-wide">/LUDD/</span>
                   </a>
                 </div>
 
                 {luddLoading && (
-                  <div className="flex justify-center py-24" aria-live="polite" aria-busy="true" aria-label={ev.loading}>
+                  <div className="flex justify-center py-24" role="status" aria-busy="true" aria-label={ev.loading}>
                     <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#60A5FA' }} aria-hidden="true" />
                   </div>
                 )}
@@ -686,11 +703,11 @@ export function EventsContent() {
                 {!luddLoading && luddError && (
                   <div className="flex justify-center py-16" role="alert">
                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
-                      <p className="text-red-400 font-medium">{ev.luddFetchError}</p>
+                      <p className="text-red-400 light:text-red-700 font-medium">{ev.luddFetchError}</p>
                       <button
                         onClick={() => { setLuddError(false); setLuddEvents([]); }}
                         className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)' }}
+                        style={{ background: 'linear-gradient(135deg, #6D28D9, #1D4ED8)' }}
                       >
                         {ev.retry}
                       </button>

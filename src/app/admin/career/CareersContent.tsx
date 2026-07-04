@@ -157,7 +157,7 @@ export function CareersContent() {
 
         {/* Loading skeleton */}
         {loading && (
-          <div className="space-y-px" aria-busy="true" aria-label="Laddar annonser">
+          <div className="space-y-px" role="status" aria-busy="true" aria-label="Laddar annonser">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}

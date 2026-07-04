@@ -44,11 +44,12 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2.5">
-              <img src="/Logo/TKL NEXUS.svg" alt="TKL NEXUS" width={32} height={32} />
+              <img src="/Logo/TKL NEXUS.svg" alt="TKL NEXUS" width={32} height={32} loading="lazy" decoding="async" />
               <span className="footer-text font-black text-lg tracking-tight select-none">
                 TKL
               </span>
-              <span className="font-bold text-lg tracking-wide text-red-500">
+              {/* Varumärkesröd i light (4.6:1 AA), ljusare röd i dark (5.0:1) */}
+              <span className="font-bold text-lg tracking-wide text-[#E30613] dark:text-red-500">
                 NEXUS
               </span>
             </div>
@@ -162,7 +163,9 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="footer-text-subtle text-xs">
+          {/* suppressHydrationWarning: SSG bakar in byggårets värde — klienten
+              korrigerar vid hydration utan mismatch-varning vid årsskiften */}
+          <p className="footer-text-subtle text-xs" suppressHydrationWarning>
             © {new Date().getFullYear()} TKL NEXUS. {t.footer.copyright}
           </p>
           <p className="footer-text-subtle text-xs">

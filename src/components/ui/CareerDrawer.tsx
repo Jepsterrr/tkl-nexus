@@ -148,7 +148,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
 
               <div className="relative z-10 flex items-center gap-2 mb-2.5">
                 <span
-                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                  className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                   style={{ color: '#fff', background: `${color}cc`, boxShadow: `0 0 12px ${color}40` }}
                 >
                   {opp.filters[job!.type]}
@@ -198,7 +198,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                 </span>
               </div>
 
-              <p className="text-[10px] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
+              <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
                 {opp.drawerAbout}
               </p>
               <p className="text-sm leading-relaxed hero-text-muted" style={{ maxWidth: '65ch' }}>

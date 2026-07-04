@@ -78,7 +78,7 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
               {job.company}
             </div>
             <span
-              className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+              className="text-[0.625rem] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
               style={{
                 color: '#fff',
                 background: `linear-gradient(135deg, ${badgeColor}cc, ${badgeColor}88)`,

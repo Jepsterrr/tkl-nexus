@@ -97,7 +97,8 @@ export function CorporateContent() {
           className="relative flex items-end lg:items-center px-8 sm:px-12 lg:px-16 pt-32 pb-8 lg:py-24 z-10"
         >
           <StaggerReveal delay={0.05}>
-            <RevealItem>
+            {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+            <div className="hero-reveal">
               <h1
                 id="corporate-hero-heading"
                 className="hero-text"
@@ -113,7 +114,7 @@ export function CorporateContent() {
                 <br />
                 <span className="text-accent-purple">{corporate.headingAccent}</span>
               </h1>
-            </RevealItem>
+            </div>
           </StaggerReveal>
         </motion.div>
 
@@ -169,7 +170,7 @@ export function CorporateContent() {
                 href="/about#kontakt"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95"
                 style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #a78bfa)',
+                  background: 'linear-gradient(135deg, #7C3AED, #6D28D9)',
                   boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >

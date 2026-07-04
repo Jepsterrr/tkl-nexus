@@ -151,7 +151,8 @@ export function StudentsContent() {
           {/* Left: heading */}
           <motion.div style={{ y: heroTextY }} className="flex items-center lg:items-end pb-0 lg:pb-12">
             <StaggerReveal delay={0.05}>
-              <RevealItem>
+              {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
+              <div className="hero-reveal">
                 <h1
                   id="students-hero-heading"
                   className="hero-text hero-heading text-left"
@@ -167,7 +168,7 @@ export function StudentsContent() {
                     />
                   </span>
                 </h1>
-              </RevealItem>
+              </div>
             </StaggerReveal>
           </motion.div>
 

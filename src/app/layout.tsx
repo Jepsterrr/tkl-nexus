@@ -104,6 +104,9 @@ export default function RootLayout({
         {/* Blocking script: reads localStorage before first paint to prevent theme flash */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('tkl-theme');if(!t||!['dark','light','system'].includes(t))t='light';var r=t==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;document.documentElement.classList.remove('dark','light');document.documentElement.classList.add(r);}catch(e){}})();` }} />
         <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any" />
+        {/* Hero-foton (admin-uppladdade) bor på Cloudinary — värm upp
+            DNS+TLS direkt så fotot laddar snabbare när settings-svaret kommer */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
       </head>

@@ -102,7 +102,7 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
         {WEEK_DAYS.map((d) => (
           <div
             key={d}
-            className="text-center text-[11px] font-semibold uppercase tracking-widest pb-2 hero-text-subtle"
+            className="text-center text-[0.6875rem] font-semibold uppercase tracking-widest pb-2 hero-text-subtle"
           >
             {d}
           </div>

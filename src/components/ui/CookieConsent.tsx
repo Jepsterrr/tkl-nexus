@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import posthog from 'posthog-js';
-import { ANALYTICS_ENABLED } from '@/lib/analytics';
+import { ANALYTICS_ENABLED, optInAnalytics } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
@@ -23,8 +22,7 @@ export function CookieConsent() {
     try {
       const stored = localStorage.getItem(CONSENT_KEY);
       if (stored === 'accepted') {
-        posthog.set_config({ persistence: 'localStorage+cookie' });
-        posthog.opt_in_capturing();
+        optInAnalytics();
       } else if (!stored) {
         setVisible(true);
       }
@@ -41,8 +39,7 @@ export function CookieConsent() {
   if (pathname.startsWith('/admin')) return null;
 
   const accept = () => {
-    posthog.set_config({ persistence: 'localStorage+cookie' });
-    posthog.opt_in_capturing();
+    optInAnalytics();
     try { localStorage.setItem(CONSENT_KEY, 'accepted'); } catch { /* ignore */ }
     setVisible(false);
   };

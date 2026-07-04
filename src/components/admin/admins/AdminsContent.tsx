@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Mail, KeyRound, Trash2 } from 'lucide-react';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
 import {
   getAdmins,
   addAdmin,

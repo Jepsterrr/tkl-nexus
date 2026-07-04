@@ -125,7 +125,8 @@ export function Navbar() {
               <span className="nav-text font-bold text-base select-none" style={{ letterSpacing: '-0.03em' }}>
                 TKL
               </span>
-              <span className="font-semibold text-base tracking-wide text-red-500">
+              {/* Varumärkesröd i light (4.6:1 AA), ljusare röd i dark (5.0:1) */}
+              <span className="font-semibold text-base tracking-wide text-[#E30613] dark:text-red-500">
                 NEXUS
               </span>
             </Link>
@@ -244,7 +245,7 @@ export function Navbar() {
                       >
                         {/* Tema */}
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest nav-text-subtle mb-2">
+                          <p className="text-[0.625rem] font-bold uppercase tracking-widest nav-text-subtle mb-2">
                             {t.nav.chooseTheme}
                           </p>
                           <div
@@ -270,7 +271,7 @@ export function Navbar() {
 
                         {/* Språk */}
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest nav-text-subtle mb-2">
+                          <p className="text-[0.625rem] font-bold uppercase tracking-widest nav-text-subtle mb-2">
                             {t.nav.chooseLang}
                           </p>
                           <div className="flex items-center gap-0 rounded-xl nav-control-border border overflow-hidden text-xs font-semibold">

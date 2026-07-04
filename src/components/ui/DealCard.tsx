@@ -45,7 +45,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
   const transitionProps = { duration: 0.35, delay: Math.min(idx * 0.04, 0.4), ease: EASE_OUT_EXPO };
 
   const logoNode = deal.logoUrl ? (
-    <img src={deal.logoUrl} alt={deal.company} className="w-full h-full object-contain" />
+    <img src={deal.logoUrl} alt={deal.company} className="w-full h-full object-contain" loading="lazy" decoding="async" />
   ) : (
     <span className="text-2xl font-black select-none" style={{ color: 'var(--text-orange)' }}>
       {avatarLetter}

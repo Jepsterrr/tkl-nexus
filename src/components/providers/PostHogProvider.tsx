@@ -1,7 +1,5 @@
 'use client';
 
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 import { capture } from '@/lib/analytics';
@@ -24,17 +22,19 @@ function PostHogPageView() {
 }
 
 /**
- * Wrapper som ger PostHog React-kontext (usePostHog()) till hela trädet
- * och trackar sidbyten automatiskt. PostHog initialiseras i
- * instrumentation-client.ts — providern konsumerar samma singleton.
+ * Pageview-tracking för hela trädet. PostHog initialiseras i
+ * instrumentation-client.ts; all capture går via lib/analytics som
+ * importerar posthog-js dynamiskt — root-bundlen är posthog-fri när
+ * ANALYTICS_ENABLED är false. usePostHog()/React-context används inte
+ * i kodbasen — återinför posthog-js/react-providern bara om det behövs.
  */
 export function PHProvider({ children }: { children: React.ReactNode }) {
   return (
-    <PostHogProvider client={posthog}>
+    <>
       <Suspense fallback={null}>
         <PostHogPageView />
       </Suspense>
       {children}
-    </PostHogProvider>
+    </>
   );
 }
