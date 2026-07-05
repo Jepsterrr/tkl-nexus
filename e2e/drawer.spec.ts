@@ -51,3 +51,23 @@ test.describe('Career-drawer', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('Event-drawer', () => {
+  test('öppnas via kort, synkar URL, stängs med Escape', async ({ page }) => {
+    await page.goto('/events');
+    await waitForAppReady(page, 4000);
+
+    const viewButtons = page.getByRole('button', { name: /Visa mer:|View details:/ });
+    const count = await viewButtons.count();
+    test.skip(count === 0, 'Inga publicerade events i Firestore — inget att testa');
+
+    await viewButtons.first().click();
+    const drawer = page.getByRole('dialog', { name: /Eventdetaljer|Event details/ });
+    await expect(drawer).toBeVisible();
+    await expect(page).toHaveURL(/\?id=.+/);
+
+    await page.keyboard.press('Escape');
+    await expect(drawer).not.toBeVisible();
+    await expect(page).not.toHaveURL(/\?id=/);
+  });
+});
