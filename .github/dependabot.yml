@@ -1,0 +1,26 @@
+# Automatisk bevakning av beroenden — säkerhetspatchar upptäcks utan manuellt
+# arbete. Minor/patch grupperas till en PR per vecka för att minska bruset;
+# majors får egna PR:ar. E2E-workflowen agerar kvalitetsgrind på varje PR.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Stockholm
+    open-pull-requests-limit: 5
+    groups:
+      minor-och-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Stockholm

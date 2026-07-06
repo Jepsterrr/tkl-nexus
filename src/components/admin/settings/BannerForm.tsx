@@ -36,8 +36,6 @@ export function BannerForm() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setLoadError(false);
     getBannerSettings()
       .then((data) => {
         if (cancelled) return;
@@ -99,7 +97,7 @@ export function BannerForm() {
         </p>
         <button
           type="button"
-          onClick={() => setFetchKey((k) => k + 1)}
+          onClick={() => { setLoadError(false); setLoading(true); setFetchKey((k) => k + 1); }}
           className="text-xs text-[oklch(55%_0.12_265)] hover:text-[oklch(70%_0.12_265)] transition-colors"
         >
           Försök igen

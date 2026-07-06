@@ -29,7 +29,6 @@ export function ContactForm() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setLoadError(false);
     getContactSettings()
       .then(data => {
         if (cancelled) return;
@@ -79,7 +78,7 @@ export function ContactForm() {
   if (loadError) return (
     <div className="p-6 sm:p-8">
       <p className="text-sm text-[oklch(65%_0.2_25)] mb-3">Kunde inte hämta inställningar.</p>
-      <button type="button" onClick={() => setFetchKey(k => k + 1)}
+      <button type="button" onClick={() => { setLoadError(false); setLoading(true); setFetchKey(k => k + 1); }}
         className="text-xs text-[oklch(55%_0.12_265)] hover:text-[oklch(70%_0.12_265)] transition-colors">
         Försök igen
       </button>

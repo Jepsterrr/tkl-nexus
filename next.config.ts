@@ -18,7 +18,7 @@ import type { NextConfig } from "next";
 const CSP = [
   "default-src 'self'",
   // Scripts: egna + Next.js inline hattar (unsafe-inline behövs för Next.js hydration)
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://eu-assets.i.posthog.com",
+  "script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com",
   // Styles: egna + Google Fonts CDN
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Fonter: Google Fonts statiska tillgångar
@@ -29,12 +29,9 @@ const CSP = [
   [
     "connect-src 'self'",
     "https://*.googleapis.com",
-    "https://*.firebaseio.com",
-    "https://*.cloudfunctions.net",
     "https://identitytoolkit.googleapis.com",
     "https://securetoken.googleapis.com",
     "https://events.ludd.ltu.se",
-    "https://www.google-analytics.com",
     "https://api.cloudinary.com",
     "https://tkl-cloudinary-delete.tklnexus.workers.dev",
     "https://eu.i.posthog.com",
@@ -42,6 +39,8 @@ const CSP = [
   ].join(" "),
   // Frames: enbart PostHog-dashboard (inbäddas på /admin/analytics)
   "frame-src https://eu.posthog.com",
+  // Ingen annan sajt får rama in oss (kompletterar X-Frame-Options: DENY)
+  "frame-ancestors 'none'",
   // Objekt: blockera Flash och plugins
   "object-src 'none'",
   // Base URI: enbart eget ursprung

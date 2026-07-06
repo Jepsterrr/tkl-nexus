@@ -1,0 +1,76 @@
+# Automatisk produktionsdeploy till Firebase Hosting.
+#
+# Triggas när E2E-workflowen gått grön på master — aldrig direkt på push.
+# Deployar ENBART hosting; Firestore-regler deployas medvetet manuellt
+# (`firebase deploy --only firestore`) eftersom regeländringar är sällsynta
+# och känsliga.
+#
+# Kräver repository secret FIREBASE_SERVICE_ACCOUNT (utöver NEXT_PUBLIC_*-
+# secrets som E2E-workflowen redan använder):
+#   1. Google Cloud Console → IAM & Admin → Service Accounts (projekt tkl-nexus)
+#      → Create service account → ge rollen "Firebase Hosting Admin" +
+#      "Service Usage Consumer". (Rollen "Firebase Admin" fungerar också men
+#      är bredare än nödvändigt.)
+#   2. Skapa en JSON-nyckel för kontot → klistra in HELA filinnehållet som
+#      secret FIREBASE_SERVICE_ACCOUNT (Settings → Secrets and variables →
+#      Actions).
+#
+# Utan secreten failar jobbet i autentiseringssteget utan att röra produktionen.
+
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [E2E]
+    types: [completed]
+    branches: [master]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+      NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+      NEXT_PUBLIC_CLOUDINARY_DELETE_URL: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_DELETE_URL }}
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/.firebase-sa.json
+
+    steps:
+      # Deploya exakt den commit som E2E-workflowen testade
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera beroenden
+        run: npm ci
+
+      - name: Skriv service account-nyckel
+        run: |
+          cat > "$GOOGLE_APPLICATION_CREDENTIALS" <<'EOF'
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EOF
+
+      - name: Aktivera web frameworks-stöd
+        run: npx --yes firebase-tools experiments:enable webframeworks
+
+      - name: Deploya till Firebase Hosting
+        run: npx --yes firebase-tools deploy --only hosting --project tkl-nexus --force
+
+      - name: Rensa service account-nyckel
+        if: always()
+        run: rm -f "$GOOGLE_APPLICATION_CREDENTIALS"

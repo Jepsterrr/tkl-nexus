@@ -7,6 +7,7 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useNavbarState } from '@/components/providers/NavbarStateProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary-url';
 
 const ORANGE = '#F59E0B';
 
@@ -154,7 +155,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                     className="w-10 h-10 rounded-lg flex items-center justify-center p-1.5 shrink-0"
                     style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
                   >
-                    <img src={deal!.logoUrl} alt="" className="w-full h-full object-contain rounded" loading="lazy" decoding="async" />
+                    <img src={optimizeCloudinaryUrl(deal!.logoUrl, 400)} alt="" className="w-full h-full object-contain rounded" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div

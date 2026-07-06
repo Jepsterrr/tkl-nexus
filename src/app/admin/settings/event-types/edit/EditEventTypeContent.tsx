@@ -14,7 +14,7 @@ export function EditEventTypeContent() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!id) { setError(true); setLoading(false); return; }
+    if (!id) return; // saknat id hanteras direkt i render
     getAllEventTypes()
       .then((types) => {
         const found = types.find((t) => t.id === id) ?? null;
@@ -25,7 +25,7 @@ export function EditEventTypeContent() {
       .catch(() => { setError(true); setLoading(false); });
   }, [id]);
 
-  if (loading) return <p className="p-6 text-sm text-[oklch(55%_0.02_265)]">Laddar…</p>;
-  if (error || !eventType) return <p className="p-6 text-sm text-red-400">Eventtypen hittades inte.</p>;
+  if (loading && id) return <p className="p-6 text-sm text-[oklch(55%_0.02_265)]">Laddar…</p>;
+  if (!id || error || !eventType) return <p className="p-6 text-sm text-red-400">Eventtypen hittades inte.</p>;
   return <EventTypeForm initial={eventType} />;
 }

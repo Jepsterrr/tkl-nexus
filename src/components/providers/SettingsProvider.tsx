@@ -12,6 +12,7 @@ import {
   type BannerSettings,
   type HeroImagesSettings,
 } from '@/lib/schemas/settings';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary-url';
 
 interface SettingsContextValue {
   stats:       StatsSettings       | null;
@@ -24,6 +25,27 @@ interface SettingsContextValue {
 }
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
+
+// Hero-fotona är LCP-element — leverera dem via Cloudinarys f_auto/q_auto/w_
+// istället för originalfilen. Transformationen sker vid läsning; Firestore
+// behåller alltid originala URL:er (admin-formulären läser servicen direkt).
+function optimizeHeroImages(h: HeroImagesSettings | null): HeroImagesSettings | null {
+  if (!h) return null;
+  return {
+    ...h,
+    homeUrl:      h.homeUrl      ? optimizeCloudinaryUrl(h.homeUrl)      : h.homeUrl,
+    studentsUrl:  h.studentsUrl  ? optimizeCloudinaryUrl(h.studentsUrl)  : h.studentsUrl,
+    corporateUrl: h.corporateUrl ? optimizeCloudinaryUrl(h.corporateUrl) : h.corporateUrl,
+    eventsUrl:    h.eventsUrl    ? optimizeCloudinaryUrl(h.eventsUrl)    : h.eventsUrl,
+    careerUrl:    h.careerUrl    ? optimizeCloudinaryUrl(h.careerUrl)    : h.careerUrl,
+    aboutUrl:     h.aboutUrl     ? optimizeCloudinaryUrl(h.aboutUrl)     : h.aboutUrl,
+  };
+}
+
+function optimizeAbout(a: AboutSettings | null): AboutSettings | null {
+  if (!a?.campusPhotoUrl) return a;
+  return { ...a, campusPhotoUrl: optimizeCloudinaryUrl(a.campusPhotoUrl, 1600) };
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -60,11 +82,11 @@ async function fetchAll(): Promise<SettingsContextValue> {
   return {
     stats:      stats.status      === 'fulfilled' ? stats.value      : null,
     contact:    contact.status    === 'fulfilled' ? contact.value    : null,
-    about:      about.status      === 'fulfilled' ? about.value      : null,
+    about:      about.status      === 'fulfilled' ? optimizeAbout(about.value) : null,
     services:   services.status   === 'fulfilled' ? services.value   : null,
     links:      links.status      === 'fulfilled' ? links.value      : null,
     banner:     banner.status     === 'fulfilled' ? banner.value     : null,
-    heroImages: heroImages.status === 'fulfilled' ? heroImages.value : null,
+    heroImages: heroImages.status === 'fulfilled' ? optimizeHeroImages(heroImages.value) : null,
   };
 }
 

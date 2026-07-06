@@ -44,7 +44,6 @@ export function DealsContent() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem('tkl-deals-view');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved === 'icon' || saved === 'detail') setViewMode(saved);
     } catch {}
   }, []);

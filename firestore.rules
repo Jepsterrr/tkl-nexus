@@ -3,8 +3,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // email_verified krävs: admins-dokumentet skapas INNAN mottagaren registrerat
+    // sig (inbjudningsflödet). Utan verifieringskravet kan vem som helst som
+    // känner till e-posten själv-registrera kontot via Auth REST API och bli
+    // admin. Email-link-inloggning (invite/verify-flödet) sätter verified=true.
     function isAdmin() {
       return request.auth.token.email != null
+        && request.auth.token.email_verified == true
         && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
     }
 
@@ -12,7 +17,9 @@ service cloud.firestore {
     // (för att kontrollera om de är admin). Skrivning kräver admin.
     // Delete: admin kan inte ta bort sig själv (skydd mot oavsiktlig utlåsning).
     match /admins/{email} {
-      allow read: if request.auth != null && request.auth.token.email == email;
+      allow read: if request.auth != null
+        && request.auth.token.email == email
+        && request.auth.token.email_verified == true;
       allow create, update: if request.auth != null && isAdmin();
       allow delete: if request.auth != null && isAdmin() && request.auth.token.email != email;
     }

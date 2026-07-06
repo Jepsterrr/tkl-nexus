@@ -14,9 +14,8 @@ export function EditCareerContent() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!id) { setError(true); setLoading(false); return; }
+    if (!id) return; // saknat id hanteras direkt i render
     let cancelled = false;
-    setLoading(true);
     getCareerById(id)
       .then(data => {
         if (!cancelled) { setCareer(data); setLoading(false); }
@@ -27,7 +26,7 @@ export function EditCareerContent() {
     return () => { cancelled = true; };
   }, [id]);
 
-  if (loading) {
+  if (loading && id) {
     return (
       <div className="p-6 sm:p-8 max-w-3xl">
         <div className="space-y-4 animate-pulse">
@@ -41,7 +40,7 @@ export function EditCareerContent() {
     );
   }
 
-  if (error || !career) {
+  if (!id || error || !career) {
     return (
       <div className="p-6 sm:p-8">
         <p className="text-sm text-[oklch(65%_0.2_25)]">

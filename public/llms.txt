@@ -11,7 +11,9 @@
 - [NEXUS Deals](https://tklnexus.se/students/deals): Exklusiva rabatter och förmåner för kårmedlemmar i Teknologkåren.
 - [För företag](https://tklnexus.se/corporate): Information om hur företag kan samarbeta med Teknologkåren via TKL NEXUS.
 - [Annonsera](https://tklnexus.se/corporate/post): Formulär för att publicera exjobb, event eller deals via TKL NEXUS.
+- [Produktportfölj](https://tklnexus.se/corporate/services): TKL NEXUS produkter och tjänster för företag — aktiviteter, tjänster och marknadsföring.
 - [Om oss](https://tklnexus.se/about): Om TKL NEXUS arbetsmarknadsgrupp och Teknologkåren vid LTU.
+- [Integritetspolicy](https://tklnexus.se/privacy): Hur TKL NEXUS behandlar personuppgifter enligt GDPR.
 
 ## Organisation
 
