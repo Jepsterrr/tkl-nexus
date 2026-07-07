@@ -16,6 +16,15 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # @types/node ska matcha Node-versionen i CI/hosting (22) — inte senaste
+      # major. Bumpas manuellt när runtime-versionen höjs.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # eslint-config-next (16.2.10) bundlar eslint-plugin-react som kraschar
+      # under ESLint 10 (getFilename borttaget). Ta majorn när Next stödjer den.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
@@ -24,3 +33,7 @@ updates:
       day: monday
       time: "06:00"
       timezone: Europe/Stockholm
+    # En samlad PR för alla actions-bumpar istället för en per action
+    groups:
+      actions:
+        patterns: ["*"]

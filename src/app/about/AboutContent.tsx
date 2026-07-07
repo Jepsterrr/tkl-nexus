@@ -3,7 +3,8 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
-import { Mail, MapPin, Linkedin, Instagram } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
+import { Instagram, Linkedin } from '@/components/ui/BrandIcons';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
