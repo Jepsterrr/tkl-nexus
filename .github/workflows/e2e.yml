@@ -62,7 +62,18 @@ jobs:
         run: npm run lint
 
       - name: Produktionsbygge
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
+
+      # Spark-vakt: en enda dynamisk route (ƒ) skulle trigga Cloud Functions
+      # och knäcka Firebase Hosting-deployen. Faila hellre här än i deploy.
+      - name: Verifiera helstatiskt bygge
+        run: |
+          if grep -F "ƒ" build.log; then
+            echo "::error::Dynamisk route i bygget — bryter Spark-deployen (se Firebase Hosting-begränsningar)."
+            exit 1
+          fi
 
       - name: E2E-tester
         run: npx playwright test

@@ -140,7 +140,7 @@ export function EventTypesContent() {
   const handleToggle = useCallback(async (item: TKLEventType) => {
     setToggling((t) => ({ ...t, [item.id]: true }));
     try {
-      await toggleEventTypePublished(item.id, item.published);
+      await toggleEventTypePublished(item.id);
       setItems((all) => all.map((e) => (e.id === item.id ? { ...e, published: !e.published } : e)));
     } finally {
       setToggling((t) => ({ ...t, [item.id]: false }));

@@ -8,7 +8,8 @@ import { auth } from '@/lib/firebase-auth';
 import { db } from '@/lib/firebase';
 
 /**
- * Loggar in användaren med e-post + lösenord och sätter lokal persistens.
+ * Loggar in användaren med e-post + lösenord. Persistensen (browserLocal)
+ * sätts vid Auth-init i lib/firebase-auth.ts — inte här.
  * Kastar vid fel (felaktiga uppgifter, nätverksfel etc).
  */
 export async function signInAdmin(email: string, password: string): Promise<void> {

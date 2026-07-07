@@ -14,6 +14,7 @@ import { GlobalBanner } from '@/components/layout/GlobalBanner';
 import { PHProvider } from '@/components/providers/PostHogProvider';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { NavbarStateProvider } from '@/components/providers/NavbarStateProvider';
+import { toJsonLd } from '@/lib/json-ld';
 
 const unbounded = Unbounded({
   variable: '--font-heading',
@@ -107,8 +108,8 @@ export default function RootLayout({
         {/* Hero-foton (admin-uppladdade) bor på Cloudinary — värm upp
             DNS+TLS direkt så fotot laddar snabbare när settings-svaret kommer */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(organizationSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(websiteSchema) }} />
       </head>
       <body className="antialiased bg-cosmic-bg overflow-x-hidden">
         <PHProvider>

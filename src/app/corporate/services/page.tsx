@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { toJsonLd } from '@/lib/json-ld';
 import { ServicesContent } from './ServicesContent';
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ export default function ServicesPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumb) }} />
       <ServicesContent />
     </>
   );

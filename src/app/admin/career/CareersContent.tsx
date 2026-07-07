@@ -72,7 +72,7 @@ export function CareersContent() {
     setToggleError(null);
     setToggling(t => ({ ...t, [item.id]: true }));
     try {
-      await toggleCareerPublished(item.id, item.published);
+      await toggleCareerPublished(item.id);
       setItems(all =>
         all.map(c => (c.id === item.id ? { ...c, published: !c.published } : c))
       );

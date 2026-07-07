@@ -8,6 +8,21 @@ preview_urls = false
 [vars]
 FIREBASE_PROJECT_ID = "tkl-nexus"
 ALLOWED_ORIGINS = "https://tklnexus.se,https://www.tklnexus.se,http://localhost:3000"
+# Valfritt: begränsa radering till en Cloudinary-mapp (kommentera in och
+# matcha upload-presetens folder). Utan denna kan en admin radera vilken
+# bild som helst i hela kontot.
+# PUBLIC_ID_PREFIX = "tkl-nexus/"
+
+# Rate limiting per klient-IP (Workers-binding — WAF-regler går inte att
+# använda eftersom tklnexus.se-zonen inte ligger hos Cloudflare).
+# 20 raderingar/minut räcker gott för legitim admin-användning.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
 
 # Secrets — sätts EN gång med:
 #   wrangler secret put CLOUDINARY_CLOUD_NAME

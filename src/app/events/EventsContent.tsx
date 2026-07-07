@@ -20,6 +20,7 @@ import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { z } from 'zod';
 import { capture } from '@/lib/analytics';
+import { toJsonLd } from '@/lib/json-ld';
 
 // Kalendern används bara i LUDD-vyn — ladda den först när fliken öppnas
 const LuddCalendar = dynamic(
@@ -306,7 +307,10 @@ export function EventsContent() {
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       fetch('https://events.ludd.ltu.se/api/events?show_recurrent=true', { signal: controller.signal })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error(`LUDD API svarade ${res.status}`);
+          return res.json();
+        })
         .then((data) => {
           clearTimeout(timeoutId);
           if (!isMounted) return;
@@ -421,7 +425,7 @@ export function EventsContent() {
       {eventSchemaList && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchemaList) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(eventSchemaList) }}
         />
       )}
       <section ref={heroRef} className="relative min-h-[60svh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-12 px-4 sm:px-6 lg:px-8" aria-labelledby="events-hero-heading">

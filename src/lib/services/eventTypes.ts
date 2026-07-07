@@ -19,7 +19,7 @@ import {
 } from '@/lib/schemas/eventType';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, togglePublishedField } from './firestore-helpers';
 
 const ITEMS_REF = () => collection(db, 'settings', 'eventTypes', 'items');
 
@@ -58,9 +58,8 @@ export async function deleteEventType(id: string): Promise<void> {
   bump();
 }
 
-export async function toggleEventTypePublished(id: string, current: boolean): Promise<void> {
-  if (!id) throw new Error('toggleEventTypePublished: id saknas');
-  await updateDoc(doc(db, 'settings', 'eventTypes', 'items', id), { published: !current });
+export async function toggleEventTypePublished(id: string): Promise<void> {
+  await togglePublishedField(['settings', 'eventTypes', 'items'], id);
   bump();
 }
 

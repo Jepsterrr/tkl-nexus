@@ -1,13 +1,16 @@
 import {
+  doc,
   getDocsFromCache,
   getDocsFromServer,
+  runTransaction,
   type DocumentData,
   type Query,
   type QuerySnapshot,
 } from 'firebase/firestore';
 import type { z } from 'zod';
+import { db } from '@/lib/firebase';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
-import { getDataSource, type CacheKey } from './cacheVersion';
+import { getDataSource, markCacheFresh, type CacheKey } from './cacheVersion';
 
 /** Firestore Timestamp | ISO-sträng → ISO-sträng. */
 export function toIso(ts: unknown): string | undefined {
@@ -17,6 +20,24 @@ export function toIso(ts: unknown): string | undefined {
   }
   if (typeof ts === 'string') return ts;
   return undefined;
+}
+
+/**
+ * Växlar `published` atomiskt utifrån serverns aktuella värde — inte det
+ * (potentiellt inaktuella) värde UI:t senast såg. Utan transaktion kan två
+ * admins som togglar samtidigt skriva över varandra med gammalt state.
+ * `pathSegments` är dokumentets kollektionsväg, t.ex. ['events'] eller
+ * ['settings', 'eventTypes', 'items'].
+ */
+export async function togglePublishedField(pathSegments: [string, ...string[]], id: string): Promise<void> {
+  if (!id) throw new Error('togglePublishedField: id saknas');
+  const [first, ...rest] = pathSegments;
+  const ref = doc(db, first, ...rest, id);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error(`togglePublishedField: dokumentet ${id} finns inte`);
+    tx.update(ref, { published: snap.data().published !== true });
+  });
 }
 
 /** Firestore accepterar inte undefined-värden — filtrera bort dem före skrivning. */
@@ -40,10 +61,14 @@ export async function getDocsWithCacheStrategy(
       if (snap.empty) throw new Error('cache empty');
       return snap;
     } catch {
-      return withFetchTimeout(getDocsFromServer(q));
+      const snap = await withFetchTimeout(getDocsFromServer(q));
+      void markCacheFresh(key);
+      return snap;
     }
   }
-  return withFetchTimeout(getDocsFromServer(q));
+  const snap = await withFetchTimeout(getDocsFromServer(q));
+  void markCacheFresh(key);
+  return snap;
 }
 
 /**

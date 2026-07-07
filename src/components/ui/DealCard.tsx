@@ -9,6 +9,8 @@ import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary-url';
 
+// Enbart för framer-motions filter-animation — color-mix()/CSS-variabler
+// kan inte interpoleras i whileHover. Övriga färger använder var(--text-orange).
 const ORANGE = '#F59E0B';
 
 interface DealCardProps {
@@ -79,7 +81,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
               style={{
                 background: 'var(--about-card-bg)',
                 color: 'var(--text-orange)',
-                border: `1px solid ${ORANGE}35`,
+                border: '1px solid color-mix(in srgb, var(--text-orange) 21%, transparent)',
               }}
             >
               {deal.discount}
@@ -90,7 +92,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
         <div
           className="absolute inset-0 pointer-events-none rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{
-            background: `linear-gradient(135deg, transparent 30%, ${ORANGE}0e 55%, transparent 70%)`,
+            background: 'linear-gradient(135deg, transparent 30%, color-mix(in srgb, var(--text-orange) 5%, transparent) 55%, transparent 70%)',
           }}
           aria-hidden="true"
         />
@@ -113,7 +115,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
       {/* Logo-yta */}
       <div
         className="relative flex items-center justify-center overflow-hidden"
-        style={{ height: '160px', borderBottom: `1px solid ${ORANGE}1a` }}
+        style={{ height: '160px', borderBottom: '1px solid color-mix(in srgb, var(--text-orange) 10%, transparent)' }}
       >
         <div className="w-36 h-24 flex items-center justify-center p-2">
           {logoNode}
@@ -125,7 +127,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
             style={{
               background: 'var(--about-card-bg)',
               color: 'var(--text-orange)',
-              border: `1px solid ${ORANGE}35`,
+              border: '1px solid color-mix(in srgb, var(--text-orange) 21%, transparent)',
             }}
           >
             {deal.discount}
@@ -135,7 +137,7 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
         <div
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{
-            background: `linear-gradient(135deg, transparent 30%, ${ORANGE}08 55%, transparent 70%)`,
+            background: 'linear-gradient(135deg, transparent 30%, color-mix(in srgb, var(--text-orange) 3%, transparent) 55%, transparent 70%)',
           }}
           aria-hidden="true"
         />
@@ -161,14 +163,14 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
                 disabled={copied}
                 className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
                 style={{
-                  background: `${ORANGE}18`,
-                  border: `1px solid ${ORANGE}40`,
+                  background: 'color-mix(in srgb, var(--text-orange) 9%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--text-orange) 25%, transparent)',
                   color: 'var(--text-orange)',
                 }}
-                aria-label={`${deals?.copyCodeAriaLabel ?? 'Kopiera rabattkod:'} ${deal.discountCode}`}
+                aria-label={`${deals.copyCodeAriaLabel} ${deal.discountCode}`}
               >
                 {copied ? (
-                  <><Check className="w-3.5 h-3.5" />{deals?.codeCopied ?? 'Kopierat!'}</>
+                  <><Check className="w-3.5 h-3.5" />{deals.codeCopied}</>
                 ) : (
                   <><Copy className="w-3.5 h-3.5" />{deal.discountCode}</>
                 )}
@@ -188,12 +190,12 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
                   });
                 }}
               >
-                {deals?.visit ?? 'Besök'}
+                {deals.visit}
                 <ExternalLink className="w-3 h-3" />
               </a>
             ) : (
               <span className="text-xs hero-text-subtle italic">
-                {deals?.showMembership ?? 'Visa kårlegitimation'}
+                {deals.showMembership}
               </span>
             )}
           </div>
@@ -204,11 +206,11 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
               className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
               style={{
                 color: 'var(--text-orange)',
-                background: `${ORANGE}12`,
-                border: `1px solid ${ORANGE}28`,
+                background: 'color-mix(in srgb, var(--text-orange) 7%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--text-orange) 16%, transparent)',
               }}
             >
-              {deals?.visaMer ?? 'Visa mer'}
+              {deals.visaMer}
               <ArrowRight className="w-3 h-3" aria-hidden="true" />
             </button>
           )}

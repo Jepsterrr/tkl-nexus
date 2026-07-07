@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { toJsonLd } from '@/lib/json-ld';
 import { CorporateContent } from './CorporateContent';
 
 export const metadata: Metadata = {
@@ -33,7 +34,7 @@ export default function CorporatePage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumb) }} />
       <CorporateContent />
     </>
   );

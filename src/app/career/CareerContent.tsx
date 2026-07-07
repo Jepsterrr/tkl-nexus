@@ -19,6 +19,7 @@ import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 // Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
 import { capture } from '@/lib/analytics';
+import { toJsonLd } from '@/lib/json-ld';
 
 type FilterKey = CareerType | 'all';
 
@@ -190,7 +191,7 @@ export function CareerContent() {
       {jobSchemaList && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchemaList) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLd(jobSchemaList) }}
         />
       )}
       {/* HERO SECTION */}

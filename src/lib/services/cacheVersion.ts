@@ -61,19 +61,33 @@ export async function getDataSource(key: CacheKey): Promise<'cache' | 'server'> 
     }
 
     // Första besöket (ingen lokal version) eller äldre lokal version:
-    // hämta från server och spara versionen så nästa besök kan gå mot cache.
+    // hämta från server. Den lokala versionen bumpas INTE här utan i
+    // markCacheFresh() — först när serverhämtningen faktiskt lyckats.
+    // Annars markeras cachen som färsk trots att datan aldrig kom fram.
     if (localVersion === null || serverVersion > localVersion) {
-      try {
-        localStorage.setItem(`cacheVersion_${key}`, String(serverVersion));
-      } catch {
-        // localStorage write misslyckades — fortsätt ändå
-      }
       return 'server';
     }
 
     return 'cache';
   } catch {
     return 'server';
+  }
+}
+
+/**
+ * Markerar lokal cache som färsk för `key`. Anropas efter en LYCKAD
+ * serverhämtning — nästa sidvisning kan då gå mot IndexedDB-cachen.
+ * Återanvänder den memoiserade versionsläsningen (ingen extra read).
+ */
+export async function markCacheFresh(key: CacheKey): Promise<void> {
+  try {
+    const versions = await getServerVersions();
+    const serverVersion = versions?.[key];
+    if (!serverVersion) return;
+    localStorage.setItem(`cacheVersion_${key}`, String(serverVersion));
+  } catch {
+    // Kunde inte läsa version eller skriva localStorage — nästa besök
+    // går mot servern igen, vilket är det säkra utfallet.
   }
 }
 

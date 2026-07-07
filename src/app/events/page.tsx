@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { toJsonLd } from '@/lib/json-ld';
 import { EventsContent } from './EventsContent';
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ export default function EventsPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumb) }} />
       <EventsContent />
     </>
   );

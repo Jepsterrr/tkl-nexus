@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface CalendarEvent {
   id: string;
@@ -14,25 +15,32 @@ interface LuddCalendarProps {
   onDaySelect: (date: Date | null) => void;
 }
 
-const WEEK_DAYS = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
+const LOCALE_TAGS = { sv: 'sv-SE', en: 'en-GB' } as const;
 
 function mondayIndex(date: Date): number {
   return (date.getDay() + 6) % 7; // Mån=0 … Sön=6
 }
 
-export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendarProps) {
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+const hoverCls = 'hover:bg-[color-mix(in_srgb,var(--hero-text)_8%,transparent)]';
 
-  const thisMonthStart = useMemo(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
-    [today]
-  );
+export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendarProps) {
+  const { t, locale } = useLanguage();
+  const ev = t.events;
+  const localeTag = LOCALE_TAGS[locale];
+
+  // Beräknas per render (inte useMemo) — en flik som står öppen över
+  // midnatt ska inte fortsätta markera gårdagen som "idag".
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
   const [currentMonth, setCurrentMonth] = useState<Date>(thisMonthStart);
+
+  const weekDays = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(localeTag, { weekday: 'short' });
+    // 2024-01-01 är en måndag — ger Mån…Sön i rätt ordning oavsett locale
+    return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(Date.UTC(2024, 0, 1 + i, 12))));
+  }, [localeTag]);
 
   const eventDayKeys = useMemo(() => {
     const set = new Set<string>();
@@ -57,7 +65,7 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
     currentMonth.getFullYear() === thisMonthStart.getFullYear() &&
     currentMonth.getMonth() === thisMonthStart.getMonth();
 
-  const monthLabel = currentMonth.toLocaleString('sv-SE', { month: 'long', year: 'numeric' });
+  const monthLabel = currentMonth.toLocaleString(localeTag, { month: 'long', year: 'numeric' });
 
   return (
     <div
@@ -71,17 +79,17 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
       {/* Månadsnavigation */}
       <div
         className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+        style={{ borderBottom: '1px solid var(--about-card-border)' }}
       >
         <button
           onClick={() =>
             setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))
           }
           disabled={isPrevDisabled}
-          aria-label="Föregående månad"
-          className="p-2 rounded-xl transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/8"
+          aria-label={ev.calendarPrevMonth}
+          className={`p-2 rounded-xl transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed ${hoverCls}`}
         >
-          <ChevronLeft className="w-4 h-4" style={{ color: '#60A5FA' }} />
+          <ChevronLeft className="w-4 h-4" style={{ color: 'var(--text-blue)' }} />
         </button>
 
         <span className="text-sm font-semibold capitalize hero-text">{monthLabel}</span>
@@ -90,16 +98,16 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
           onClick={() =>
             setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))
           }
-          aria-label="Nästa månad"
-          className="p-2 rounded-xl transition-all duration-200 hover:bg-white/8"
+          aria-label={ev.calendarNextMonth}
+          className={`p-2 rounded-xl transition-all duration-200 ${hoverCls}`}
         >
-          <ChevronRight className="w-4 h-4" style={{ color: '#60A5FA' }} />
+          <ChevronRight className="w-4 h-4" style={{ color: 'var(--text-blue)' }} />
         </button>
       </div>
 
       {/* Veckodagsrubriker */}
       <div className="grid grid-cols-7 px-3 pt-3">
-        {WEEK_DAYS.map((d) => (
+        {weekDays.map((d) => (
           <div
             key={d}
             className="text-center text-[0.6875rem] font-semibold uppercase tracking-widest pb-2 hero-text-subtle"
@@ -128,23 +136,21 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
               onClick={() => onDaySelect(isSelected ? null : day)}
               disabled={isPast}
               aria-pressed={isSelected}
-              aria-label={day.toLocaleDateString('sv-SE')}
-              className="relative flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200 hover:bg-white/8 disabled:opacity-30 disabled:cursor-default disabled:pointer-events-none"
+              aria-label={day.toLocaleDateString(localeTag)}
+              className={`relative flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-default disabled:pointer-events-none ${hoverCls}`}
               style={{
-                background: isSelected ? 'rgba(96,165,250,0.15)' : undefined,
+                background: isSelected
+                  ? 'color-mix(in srgb, var(--text-blue) 15%, transparent)'
+                  : undefined,
                 border: isSelected
-                  ? '1px solid rgba(96,165,250,0.4)'
+                  ? '1px solid color-mix(in srgb, var(--text-blue) 40%, transparent)'
                   : '1px solid transparent',
               }}
             >
               <span
                 className="text-sm leading-none"
                 style={{
-                  color: isSelected
-                    ? '#60A5FA'
-                    : isToday
-                    ? '#93C5FD'
-                    : 'var(--hero-text)',
+                  color: isSelected || isToday ? 'var(--text-blue)' : 'var(--hero-text)',
                   fontWeight: isToday || isSelected ? 700 : 400,
                 }}
               >
@@ -154,14 +160,16 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
               {hasEvent && (
                 <span
                   className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                  style={{ background: isSelected ? '#60A5FA' : 'rgba(255,255,255,0.45)' }}
+                  style={{
+                    background: isSelected ? 'var(--text-blue)' : 'var(--hero-text-subtle)',
+                  }}
                 />
               )}
 
               {isToday && (
                 <span
                   className="absolute inset-0.5 rounded-xl pointer-events-none"
-                  style={{ border: '1px solid rgba(96,165,250,0.45)' }}
+                  style={{ border: '1px solid color-mix(in srgb, var(--text-blue) 45%, transparent)' }}
                   aria-hidden="true"
                 />
               )}

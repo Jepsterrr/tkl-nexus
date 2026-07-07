@@ -191,7 +191,7 @@ export function ProductsContent() {
   const handleToggle = useCallback(async (item: TKLProduct) => {
     setToggling((t) => ({ ...t, [item.id]: true }));
     try {
-      await toggleProductPublished(item.id, item.published);
+      await toggleProductPublished(item.id);
       setItems((all) => all.map((p) => (p.id === item.id ? { ...p, published: !p.published } : p)));
     } finally {
       setToggling((t) => ({ ...t, [item.id]: false }));

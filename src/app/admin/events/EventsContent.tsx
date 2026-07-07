@@ -78,7 +78,7 @@ export function EventsContent() {
     setToggleError(null);
     setToggling(t => ({ ...t, [event.id]: true }));
     try {
-      await togglePublished(event.id, event.published);
+      await togglePublished(event.id);
       setEvents(evs =>
         evs.map(e => (e.id === event.id ? { ...e, published: !e.published } : e))
       );

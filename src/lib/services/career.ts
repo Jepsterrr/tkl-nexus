@@ -18,7 +18,7 @@ import { db } from '@/lib/firebase';
 import { CareerSchema, CareerFormSchema, type TKLCareer, type CareerFormData } from '@/lib/schemas/career';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
 
 function careerDates(data: DocumentData): Record<string, unknown> {
   return {
@@ -94,8 +94,7 @@ export async function deleteCareer(id: string): Promise<void> {
   void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
 }
 
-export async function toggleCareerPublished(id: string, current: boolean): Promise<void> {
-  if (!id) throw new Error('toggleCareerPublished: id saknas');
-  await updateDoc(doc(db, 'career', id), { published: !current });
+export async function toggleCareerPublished(id: string): Promise<void> {
+  await togglePublishedField(['career'], id);
   void bumpCacheVersion('career').catch(e => console.warn('[cache] bump failed:', e));
 }

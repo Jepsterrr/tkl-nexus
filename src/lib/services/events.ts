@@ -17,7 +17,7 @@ import { db } from '@/lib/firebase';
 import { EventSchema, EventFormSchema, type TKLEvent, type EventFormData } from '../schemas/event';
 import { withFetchTimeout } from '../fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
 
 /** Timestamp/sträng → ISO för alla datumfält. */
 function eventDates(data: DocumentData): Record<string, unknown> {
@@ -28,11 +28,33 @@ function eventDates(data: DocumentData): Record<string, unknown> {
   };
 }
 
-export async function getPublishedEvents(): Promise<TKLEvent[]> {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const startOfTodayIso = d.toISOString();
+/**
+ * UTC-instansen för midnatt i Europe/Stockholm som ISO-sträng.
+ * Cutoffen för "pågående events" ska följa Stockholmsdygnet oavsett
+ * besökarens tidszon — inte klientens lokala midnatt.
+ */
+function startOfTodayStockholmIso(): string {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    hourCycle: 'h23',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const elapsedMs =
+    (get('hour') * 3600 + get('minute') * 60 + get('second')) * 1000 + now.getMilliseconds();
+  return new Date(now.getTime() - elapsedMs).toISOString();
+}
 
+export async function getPublishedEvents(): Promise<TKLEvent[]> {
+  const startOfTodayIso = startOfTodayStockholmIso();
+
+  // INVARIANT: date/endDate lagras alltid som ISO-strängar (EventFormSchema
+  // kräver .datetime()). Firestore matchar aldrig olika typer i range-queries
+  // — ett dokument där endDate skrivits som Timestamp (t.ex. via konsolen)
+  // försvinner TYST ur den här listan. Skriv aldrig datumfält som Timestamp.
   const q = query(
     collection(db, 'events'),
     where('published', '==', true),
@@ -96,8 +118,7 @@ export async function deleteEvent(id: string): Promise<void> {
   void bumpCacheVersion('events').catch(e => console.warn('[cache] bump failed:', e));
 }
 
-export async function togglePublished(id: string, current: boolean): Promise<void> {
-  if (!id) throw new Error('togglePublished: id saknas');
-  await updateDoc(doc(db, 'events', id), { published: !current });
+export async function togglePublished(id: string): Promise<void> {
+  await togglePublishedField(['events'], id);
   void bumpCacheVersion('events').catch(e => console.warn('[cache] bump failed:', e));
 }

@@ -9,7 +9,8 @@ import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary-url';
 
-const ORANGE = '#F59E0B';
+/** color-mix-varianter av accentfärgen — följer temat via var(--text-orange). */
+const orangeMix = (pct: number) => `color-mix(in srgb, var(--text-orange) ${pct}%, transparent)`;
 
 interface DealDrawerProps {
   deal: TKLDeal | null;
@@ -86,9 +87,12 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
+  // `{deal && …}` (inte isOpen) så TypeScript narrowar bort null i JSX:en —
+  // exit-animationen är säker ändå: AnimatePresence fryser det senast
+  // renderade trädet när deal blir null.
   return (
     <AnimatePresence>
-      {isOpen && (
+      {deal && (
         <>
           <motion.div
             key="deal-overlay"
@@ -126,14 +130,14 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
             >
               <div
                 className="absolute inset-0 light:opacity-40"
-                style={{ background: `linear-gradient(135deg, ${ORANGE}22 0%, ${ORANGE}08 60%, transparent 100%)` }}
+                style={{ background: `linear-gradient(135deg, ${orangeMix(13)} 0%, ${orangeMix(3)} 60%, transparent 100%)` }}
                 aria-hidden="true"
               />
               {/* Diagonal hatch — samma som Deals-hero */}
               <div
                 className="absolute inset-0 light:opacity-20"
                 style={{
-                  backgroundImage: 'repeating-linear-gradient(135deg, rgba(245,158,11,0.06) 0px, rgba(245,158,11,0.06) 1px, transparent 1px, transparent 24px)',
+                  backgroundImage: `repeating-linear-gradient(135deg, ${orangeMix(6)} 0px, ${orangeMix(6)} 1px, transparent 1px, transparent 24px)`,
                 }}
                 aria-hidden="true"
               />
@@ -150,28 +154,28 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
 
               {/* Logotyp + företagsnamn */}
               <div className="relative z-10 flex items-center gap-3 mb-3">
-                {deal!.logoUrl ? (
+                {deal.logoUrl ? (
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center p-1.5 shrink-0"
-                    style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
+                    style={{ background: orangeMix(8), border: `1px solid ${orangeMix(19)}` }}
                   >
-                    <img src={optimizeCloudinaryUrl(deal!.logoUrl, 400)} alt="" className="w-full h-full object-contain rounded" loading="lazy" decoding="async" />
+                    <img src={optimizeCloudinaryUrl(deal.logoUrl, 400)} alt="" className="w-full h-full object-contain rounded" loading="lazy" decoding="async" />
                   </div>
                 ) : (
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
+                    style={{ background: orangeMix(8), border: `1px solid ${orangeMix(19)}` }}
                   >
-                    <span className="text-lg font-black" style={{ color: ORANGE }}>
-                      {deal!.company.charAt(0).toUpperCase()}
+                    <span className="text-lg font-black" style={{ color: 'var(--text-orange)' }}>
+                      {deal.company.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
                 <div>
-                  <p className="text-xs hero-text-subtle">{deal!.company}</p>
-                  {deal!.discount && (
-                    <span className="text-sm font-bold" style={{ color: ORANGE }}>
-                      {deal!.discount}
+                  <p className="text-xs hero-text-subtle">{deal.company}</p>
+                  {deal.discount && (
+                    <span className="text-sm font-bold" style={{ color: 'var(--text-orange)' }}>
+                      {deal.discount}
                     </span>
                   )}
                 </div>
@@ -195,10 +199,10 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
               </p>
 
               {/* Rabattkod */}
-              {deal!.discountCode && (
+              {deal.discountCode && (
                 <div
                   className="rounded-xl p-4"
-                  style={{ background: `${ORANGE}10`, border: `1px solid ${ORANGE}25` }}
+                  style={{ background: orangeMix(6), border: `1px solid ${orangeMix(15)}` }}
                 >
                   <p className="text-xs hero-text-subtle mb-2 font-heading font-bold uppercase tracking-widest">
                     {deals.drawerCopyCode}
@@ -208,14 +212,14 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                     disabled={copied}
                     className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:cursor-default"
                     style={{
-                      background: `${ORANGE}18`,
-                      border: `1px solid ${ORANGE}40`,
-                      color: ORANGE,
+                      background: orangeMix(9),
+                      border: `1px solid ${orangeMix(25)}`,
+                      color: 'var(--text-orange)',
                     }}
-                    aria-label={`${deals.drawerCopyCode}: ${deal!.discountCode}`}
+                    aria-label={`${deals.drawerCopyCode}: ${deal.discountCode}`}
                   >
                     <span className="text-base font-bold tracking-widest font-heading">
-                      {deal!.discountCode}
+                      {deal.discountCode}
                     </span>
                     {copied ? (
                       <Check className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -227,7 +231,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                     role="status"
                     aria-live="polite"
                     className="text-xs mt-2 text-center"
-                    style={{ color: ORANGE, minHeight: '1em' }}
+                    style={{ color: 'var(--text-orange)', minHeight: '1em' }}
                   >
                     {copied ? deals.drawerCopied : ''}
                   </p>
@@ -240,13 +244,13 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
               className="shrink-0 flex items-center justify-end gap-3 px-6 py-4"
               style={{ borderTop: '1px solid var(--drawer-border)', background: 'var(--drawer-bg)' }}
             >
-              {deal!.link && (
+              {deal.link && (
                 <a
-                  href={deal!.link}
+                  href={deal.link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
-                  style={{ color: ORANGE, background: `${ORANGE}15`, border: `1px solid ${ORANGE}30` }}
+                  style={{ color: 'var(--text-orange)', background: orangeMix(8), border: `1px solid ${orangeMix(19)}` }}
                 >
                   {deals.drawerVisit}
                   <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />

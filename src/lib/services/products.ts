@@ -23,7 +23,7 @@ import {
 } from '@/lib/schemas/product';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
 
 function productDates(data: DocumentData): Record<string, unknown> {
   return { createdAt: toIso(data.createdAt) ?? new Date().toISOString() };
@@ -68,9 +68,8 @@ export async function deleteProduct(id: string): Promise<void> {
   void bumpCacheVersion('products').catch(e => console.warn('[cache] bump failed:', e));
 }
 
-export async function toggleProductPublished(id: string, current: boolean): Promise<void> {
-  if (!id) throw new Error('toggleProductPublished: id saknas');
-  await updateDoc(doc(db, 'products', id), { published: !current });
+export async function toggleProductPublished(id: string): Promise<void> {
+  await togglePublishedField(['products'], id);
   void bumpCacheVersion('products').catch(e => console.warn('[cache] bump failed:', e));
 }
 

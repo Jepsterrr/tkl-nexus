@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,15 +24,8 @@ try {
   db = getFirestore(app);
 }
 
-// Connect to emulators in development
-if (process.env.NODE_ENV === "development") {
-  const host = "127.0.0.1";
-
-  try {
-    // connectFirestoreEmulator(db, host, 8080);
-  } catch (e) {
-    console.warn("Firebase emulators already connected or failed:", e);
-  }
-}
+// Lokal emulator: importera connectFirestoreEmulator från firebase/firestore
+// och kommentera in raden nedan (körs enbart i development).
+// if (process.env.NODE_ENV === "development") connectFirestoreEmulator(db, "127.0.0.1", 8080);
 
 export { app, db };

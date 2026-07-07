@@ -73,15 +73,22 @@ export function AdminsContent() {
     setAdding(true);
     try {
       await addAdmin(trimmed);
-      await sendInvite(trimmed, window.location.origin);
-      setAddSuccess(`Inbjudan skickad till ${trimmed}.`);
-      setNewEmail('');
-      setFetchKey((k) => k + 1);
     } catch {
       setAddError('Något gick fel. Försök igen.');
-    } finally {
       setAdding(false);
+      return;
     }
+    // Admin-dokumentet är skapat — misslyckad inbjudan får inte se ut som
+    // att inget hände. Visa rätt läge och uppdatera listan oavsett.
+    try {
+      await sendInvite(trimmed, window.location.origin);
+      setAddSuccess(`Inbjudan skickad till ${trimmed}.`);
+    } catch {
+      setAddError(`${trimmed} lades till, men inbjudan kunde inte skickas — använd brevikonen i listan för att försöka igen.`);
+    }
+    setNewEmail('');
+    setFetchKey((k) => k + 1);
+    setAdding(false);
   };
 
   const handleRowAction = async (email: string, action: 'invite' | 'reset') => {

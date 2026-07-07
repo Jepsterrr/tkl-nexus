@@ -18,7 +18,7 @@ import { DealSchema, DealFormSchema, type TKLDeal, type DealFormData } from '@/l
 import { deleteFromCloudinary } from './cloudinary';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
 
 function dealDates(data: DocumentData): Record<string, unknown> {
   return { createdAt: toIso(data.createdAt) ?? new Date().toISOString() };
@@ -93,8 +93,7 @@ export async function deleteDeal(id: string, cloudinaryPublicId?: string): Promi
   void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }
 
-export async function toggleDealPublished(id: string, current: boolean): Promise<void> {
-  if (!id) throw new Error('toggleDealPublished: id saknas');
-  await updateDoc(doc(db, 'deals', id), { published: !current });
+export async function toggleDealPublished(id: string): Promise<void> {
+  await togglePublishedField(['deals'], id);
   void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }

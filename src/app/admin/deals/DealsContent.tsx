@@ -53,7 +53,7 @@ export function DealsContent() {
     setToggleError(null);
     setToggling(t => ({ ...t, [deal.id]: true }));
     try {
-      await toggleDealPublished(deal.id, deal.published);
+      await toggleDealPublished(deal.id);
       setDeals(ds => ds.map(d => d.id === deal.id ? { ...d, published: !d.published } : d));
     } catch {
       setToggleError('Kunde inte ändra publiceringsstatus. Försök igen.');

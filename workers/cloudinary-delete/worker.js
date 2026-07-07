@@ -25,7 +25,10 @@ function corsHeaders(env, origin) {
     .filter(Boolean);
   return {
     ...CORS_BASE,
-    'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : allowed[0] ?? '',
+    // Otillåtet origin får inget ACAO-eko alls — webbläsaren blockerar då
+    // svaret. Att falla tillbaka på första tillåtna origin är meningslöst
+    // och ser ut som ett hål vid granskning.
+    ...(allowed.includes(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
     Vary: 'Origin',
   };
 }
@@ -70,6 +73,15 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (request.method !== 'POST') return json(405, { error: 'method not allowed' }, cors);
 
+    // Rate limit per klient-IP FÖRE all auth — skyddar både Cloudinary och
+    // Firestore REST-anropet mot spam. Guarden gör bindningen valfri så en
+    // äldre deploy/dev-miljö utan [[ratelimits]] inte kraschar.
+    if (env.RATE_LIMITER) {
+      const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+      const { success } = await env.RATE_LIMITER.limit({ key: ip });
+      if (!success) return json(429, { error: 'too many requests' }, cors);
+    }
+
     const auth = request.headers.get('Authorization') ?? '';
     if (!auth.startsWith('Bearer ')) return json(401, { error: 'missing token' }, cors);
     const idToken = auth.slice(7);
@@ -89,6 +101,13 @@ export default {
     }
     if (typeof publicId !== 'string' || publicId.length === 0 || publicId.length > 256) {
       return json(400, { error: 'publicId saknas eller ogiltigt' }, cors);
+    }
+
+    // Valfri skyddsvall: sätt PUBLIC_ID_PREFIX (t.ex. "tkl-nexus/") i
+    // wrangler.toml så kan en komprometterad admin-session inte radera
+    // bilder utanför projektets mapp i Cloudinary-kontot.
+    if (env.PUBLIC_ID_PREFIX && !publicId.startsWith(env.PUBLIC_ID_PREFIX)) {
+      return json(403, { error: 'publicId utanför tillåten mapp' }, cors);
     }
 
     const timestamp = Math.floor(Date.now() / 1000).toString();
