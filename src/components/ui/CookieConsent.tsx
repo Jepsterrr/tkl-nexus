@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ANALYTICS_ENABLED, optInAnalytics } from '@/lib/analytics';
+import { ANALYTICS_ENABLED, CONSENT_EVENT, getConsent, setConsent, optInAnalytics } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { EASE_OUT_EXPO } from '@/lib/motion';
-
-const CONSENT_KEY = 'tkl-cookie-consent';
 
 export function CookieConsent() {
   const pathname = usePathname();
@@ -19,17 +17,18 @@ export function CookieConsent() {
 
   useEffect(() => {
     if (!ANALYTICS_ENABLED) return;
-    try {
-      const stored = localStorage.getItem(CONSENT_KEY);
-      if (stored === 'accepted') {
-        optInAnalytics();
-      } else if (!stored) {
-        setVisible(true);
-      }
-      // 'declined' → PostHog stays silent
-    } catch {
-      // localStorage not available
+    const stored = getConsent();
+    if (stored === 'accepted') {
+      optInAnalytics();
+    } else if (!stored) {
+      setVisible(true);
     }
+    // 'declined' → PostHog stays silent
+
+    // Döljer bannern om valet görs någon annanstans (toggeln på /privacy)
+    const onConsentChange = () => setVisible(false);
+    window.addEventListener(CONSENT_EVENT, onConsentChange);
+    return () => window.removeEventListener(CONSENT_EVENT, onConsentChange);
   }, []);
 
   // Ingen banner när analytiken är avstängd — det finns inget att samtycka till
@@ -39,13 +38,12 @@ export function CookieConsent() {
   if (pathname.startsWith('/admin')) return null;
 
   const accept = () => {
-    optInAnalytics();
-    try { localStorage.setItem(CONSENT_KEY, 'accepted'); } catch { /* ignore */ }
+    setConsent('accepted');
     setVisible(false);
   };
 
   const decline = () => {
-    try { localStorage.setItem(CONSENT_KEY, 'declined'); } catch { /* ignore */ }
+    setConsent('declined');
     setVisible(false);
   };
 
@@ -83,7 +81,7 @@ export function CookieConsent() {
               <button
                 onClick={accept}
                 className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                style={{ background: 'rgba(59,130,246,0.9)', color: '#fff' }}
+                style={{ background: 'var(--text-blue)', color: '#fff' }}
               >
                 {cookie.accept}
               </button>

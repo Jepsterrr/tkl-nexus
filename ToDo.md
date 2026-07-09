@@ -35,6 +35,11 @@ Den här filen fungerar som projektets övergripande road map och sprint-backlog
 
   OBS: flyttas GitHub-repot till en kår-ägd organisation (se README) måste attribute condition och principal-bindningen uppdateras med det nya repo-namnet.
 
+## Uppföljning från vibelegit-skanning 2026-07-09 (score 83/100)
+
+- [ ] Användarvillkor-sida (`/terms`) — låg prioritet, ej juridiskt krav:
+  Samma tvåfilsmönster som `/privacy` (`page.tsx` + `TermsContent.tsx`), i18n sv/en, länk i footern bredvid integritetspolicyn. Innehåll: tillåten användning, ansvarsfriskrivning, immaterialrätt, tillämplig lag (svensk), kontakt. Villkorstexten ska godkännas av kåren innan deploy.
+
 ## E2E-tester att lägga till
 
 Befintlig svit (`e2e/`) täcker: rutter/404/skip-länk, språk/tema-toggle, career-drawer, axe WCAG AA (7 sidor × 2 viewports × 2 teman), security headers. Följande saknas, i prioritetsordning:
@@ -55,7 +60,7 @@ Befintlig svit (`e2e/`) täcker: rutter/404/skip-länk, språk/tema-toggle, care
 - [x] Corporate/post — ARIA-tabbar + piltangenter, validerings-gate, success-state (`post-form.spec.ts`). OBS: mailto-`href`-innehållet asserteras inte (submit sätter `window.location.href`, inte ett `<a>` — mailto blockeras tyst i headless)
 
 ### P3 — kräver förutsättningar som saknas idag
-- [ ] CookieConsent accept/decline-flöde — blockerad tills `ANALYTICS_ENABLED=true` (bannern renderas inte alls nu)
+- [ ] CookieConsent accept/decline-flöde + CookieSettings-toggeln på `/privacy` (inkl. event-synk banner↔toggle) — blockerad tills `ANALYTICS_ENABLED=true` (ingen av dem renderas nu)
 - [ ] Admin login + AuthGuard-redirect — kräver testanvändare i Firebase Auth eller emulator-setup
 - [ ] Admin CRUD (events/career/deals/products) — kräver emulator (skriv aldrig mot live i test)
 - [ ] Visuell regression (Playwright `toHaveScreenshot`) på hero-sektionerna, bägge teman

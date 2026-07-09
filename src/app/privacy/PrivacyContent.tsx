@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { GradientOrb } from '@/components/ui/GradientOrb';
+import { CookieSettings } from '@/components/ui/CookieSettings';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
 const CARD_STYLE = {
@@ -97,6 +98,11 @@ export function PrivacyContent() {
             <SectionCard title={p.cookiesTitle}>
               <p className="hero-text-muted text-sm leading-relaxed">{p.cookiesBody}</p>
             </SectionCard>
+          </RevealItem>
+
+          {/* Cookie-inställningar — toggle för att ändra samtycke i efterhand */}
+          <RevealItem>
+            <CookieSettings />
           </RevealItem>
 
           {/* Rättslig grund */}

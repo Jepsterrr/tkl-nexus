@@ -33,3 +33,38 @@ export function optInAnalytics(): void {
     posthog.opt_in_capturing();
   });
 }
+
+/**
+ * Återkallar samtycke. Persistence flyttas tillbaka till memory —
+ * posthog-js rensar då sina ph_*-nycklar från cookie/localStorage.
+ */
+export function optOutAnalytics(): void {
+  if (!ANALYTICS_ENABLED) return;
+  void import('posthog-js').then(({ default: posthog }) => {
+    posthog.opt_out_capturing();
+    posthog.set_config({ persistence: 'memory' });
+  });
+}
+
+export const CONSENT_KEY = 'tkl-cookie-consent';
+/** Window-event som synkar cookie-bannern och toggeln på /privacy. */
+export const CONSENT_EVENT = 'tkl-consent-change';
+
+export type ConsentValue = 'accepted' | 'declined';
+
+export function getConsent(): ConsentValue | null {
+  try {
+    const stored = localStorage.getItem(CONSENT_KEY);
+    return stored === 'accepted' || stored === 'declined' ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Sparar valet, slår på/av PostHog och notifierar alla consent-UI:n. */
+export function setConsent(value: ConsentValue): void {
+  try { localStorage.setItem(CONSENT_KEY, value); } catch { /* ignore */ }
+  if (value === 'accepted') optInAnalytics();
+  else optOutAnalytics();
+  window.dispatchEvent(new CustomEvent<ConsentValue>(CONSENT_EVENT, { detail: value }));
+}

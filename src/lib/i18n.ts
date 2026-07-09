@@ -555,6 +555,12 @@ export const TRANSLATIONS = {
       cookiesTitle: 'Cookies och lokal lagring',
       cookiesBody: 'PostHog lagrar en pseudonym sessions-identifierare under nycklarna ph_* i localStorage. Vi lagrar även ditt samtyckesbeslut under nyckeln tkl-cookie-consent. Inga reklamcookies eller tredjepartscookies för profilering används.',
 
+      cookieSettingsTitle: 'Cookie-inställningar',
+      cookieSettingsBody: 'Här kan du när som helst slå på eller av analys-cookies. Nödvändig lokal lagring — tema, språk och ditt samtyckesval — påverkas inte och kräver inget samtycke.',
+      cookieSettingsLabel: 'Analys-cookies (PostHog)',
+      cookieSettingsOn: 'På',
+      cookieSettingsOff: 'Av',
+
       legalTitle: 'Rättslig grund',
       legalBody: 'Behandlingen grundar sig uteslutande på ditt samtycke (GDPR artikel 6.1 a). Du kan när som helst återkalla samtycket utan att det påverkar lagligheten av behandling som skett dessförinnan.',
 
@@ -1141,6 +1147,12 @@ export const TRANSLATIONS = {
 
       cookiesTitle: 'Cookies and local storage',
       cookiesBody: 'PostHog stores a pseudonymous session identifier under the keys ph_* in localStorage. We also store your consent decision under the key tkl-cookie-consent. No advertising cookies or third-party profiling cookies are used.',
+
+      cookieSettingsTitle: 'Cookie settings',
+      cookieSettingsBody: 'Here you can turn analytics cookies on or off at any time. Essential local storage — theme, language and your consent choice — is unaffected and requires no consent.',
+      cookieSettingsLabel: 'Analytics cookies (PostHog)',
+      cookieSettingsOn: 'On',
+      cookieSettingsOff: 'Off',
 
       legalTitle: 'Legal basis',
       legalBody: 'Processing is based solely on your consent (GDPR Article 6.1 a). You may withdraw your consent at any time without affecting the lawfulness of processing carried out before withdrawal.',
