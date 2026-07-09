@@ -28,7 +28,7 @@ const CSP = [
   // API-anrop: Firebase services + LUDD Events API + Cloudinary + Worker + PostHog
   [
     "connect-src 'self'",
-    "https://*.googleapis.com",
+    "https://firestore.googleapis.com",
     "https://identitytoolkit.googleapis.com",
     "https://securetoken.googleapis.com",
     "https://events.ludd.ltu.se",
@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
-          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
         ],
       },
     ];

@@ -3,7 +3,10 @@
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 import type { TKLEventType } from '@/lib/schemas/eventType';
+import { ACCENT_COLOR_MAP } from '@/lib/types';
 import { EASE_OUT_EXPO } from '@/lib/motion';
+
+const BLUE = ACCENT_COLOR_MAP.blue;
 
 interface EventTypeCardProps {
   eventType: TKLEventType;
@@ -40,10 +43,10 @@ export function EventTypeCard({ eventType, locale, index, selected, onSelect }: 
       aria-pressed={selected}
       className="text-left rounded-2xl p-4 space-y-2 cursor-pointer transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
       style={{
-        background: selected ? 'rgba(59,130,246,0.09)' : 'var(--about-card-bg)',
-        border: `1px solid ${selected ? 'rgba(59,130,246,0.40)' : 'var(--about-card-border)'}`,
+        background: selected ? BLUE.bg : 'var(--about-card-bg)',
+        border: `1px solid ${selected ? BLUE.glow : 'var(--about-card-border)'}`,
         backdropFilter: 'blur(12px)',
-        boxShadow: selected ? '0 0 24px rgba(59,130,246,0.12)' : 'none',
+        boxShadow: selected ? `0 0 24px ${BLUE.bg}` : 'none',
       }}
     >
 
