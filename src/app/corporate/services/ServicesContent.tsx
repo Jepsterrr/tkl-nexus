@@ -90,7 +90,7 @@ export function ServicesContent() {
                 className="text-4xl sm:text-5xl md:text-6xl font-black hero-text hero-heading"
               >
                 {s.heading}{' '}
-                <span style={{ color: '#8B5CF6' }}>{s.headingAccent}</span>
+                <span className="text-accent-purple">{s.headingAccent}</span>
               </h1>
             </div>
             <RevealItem>
@@ -111,7 +111,7 @@ export function ServicesContent() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-80"
-                style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}
+                style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}
               >
                 <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                 {s.downloadBtn}
@@ -125,17 +125,25 @@ export function ServicesContent() {
       <section className="px-4 sm:px-6 lg:px-8 py-12 pb-24">
         <div className="max-w-6xl mx-auto space-y-20">
           {loading && (
-            <p className="text-center hero-text-muted py-16">{s.loading}</p>
+            <div
+              role="status"
+              aria-label={s.loading}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-4"
+            >
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="skeleton-shimmer rounded-2xl h-56" aria-hidden="true" />
+              ))}
+            </div>
           )}
 
           {error && !loading && (
             <div className="flex justify-center py-16">
-              <div className="text-center">
+              <div className="text-center" role="alert">
                 <p className="hero-text-muted mb-4">{error}</p>
                 <button
                   onClick={() => setFetchKey((k) => k + 1)}
-                  className="px-5 py-2 rounded-xl text-sm font-semibold"
-                  style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8B5CF6' }}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:brightness-110 active:scale-95"
+                  style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: 'var(--text-purple)' }}
                 >
                   {s.retry}
                 </button>
@@ -144,7 +152,17 @@ export function ServicesContent() {
           )}
 
           {!loading && !error && products.length === 0 && (
-            <p className="text-center hero-text-muted py-16">{s.empty}</p>
+            <div className="text-center py-16">
+              <LayoutGrid className="w-8 h-8 mx-auto mb-4 hero-text-subtle" aria-hidden="true" />
+              <p className="hero-text-muted mb-6">{s.empty}</p>
+              <Link
+                href="/about#kontakt"
+                className="inline-flex items-center gap-2 text-sm font-semibold hero-text-muted hover:hero-text transition-all duration-200 hover:gap-3"
+              >
+                {s.contactBtn}
+                <ArrowRight className="w-4 h-4 text-accent-purple" aria-hidden="true" />
+              </Link>
+            </div>
           )}
 
           {!loading && !error && CATEGORY_ORDER.map((cat) => {

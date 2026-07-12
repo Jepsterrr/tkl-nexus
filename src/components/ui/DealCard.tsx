@@ -31,7 +31,8 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
 
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
-    if (!deal.discountCode) return;
+    // Ingen disabled under "Kopierad!" — disabled kastar bort tangentbordsfokus
+    if (copied || !deal.discountCode) return;
     navigator.clipboard.writeText(deal.discountCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -158,23 +159,28 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
         >
           <div>
             {deal.discountCode ? (
-              <button
-                onClick={handleCopy}
-                disabled={copied}
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95 disabled:cursor-default disabled:active:scale-100"
-                style={{
-                  background: 'color-mix(in srgb, var(--text-orange) 9%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--text-orange) 25%, transparent)',
-                  color: 'var(--text-orange)',
-                }}
-                aria-label={`${deals.copyCodeAriaLabel} ${deal.discountCode}`}
-              >
-                {copied ? (
-                  <><Check className="w-3.5 h-3.5" />{deals.codeCopied}</>
-                ) : (
-                  <><Copy className="w-3.5 h-3.5" />{deal.discountCode}</>
-                )}
-              </button>
+              <>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-95"
+                  style={{
+                    background: 'color-mix(in srgb, var(--text-orange) 9%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--text-orange) 25%, transparent)',
+                    color: 'var(--text-orange)',
+                  }}
+                  aria-label={copied ? deals.codeCopied : `${deals.copyCodeAriaLabel} ${deal.discountCode}`}
+                >
+                  {copied ? (
+                    <><Check className="w-3.5 h-3.5" aria-hidden="true" />{deals.codeCopied}</>
+                  ) : (
+                    <><Copy className="w-3.5 h-3.5" aria-hidden="true" />{deal.discountCode}</>
+                  )}
+                </button>
+                {/* Skärmläsarbekräftelse — aria-label på knappen läses inte upp vid byte */}
+                <span role="status" aria-live="polite" className="sr-only">
+                  {copied ? deals.codeCopied : ''}
+                </span>
+              </>
             ) : deal.link ? (
               <a
                 href={deal.link}

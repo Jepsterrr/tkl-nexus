@@ -54,8 +54,10 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
 
   return (
     <motion.article
+      layout
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.22, delay: entryDelay, ease: EASE_OUT_EXPO }}
       whileHover={shouldReduceMotion ? {} : { y: -4 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
@@ -77,15 +79,18 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
               <Building2 className="w-4 h-4" style={{ color: cardColor }} aria-hidden="true" />
               {job.company}
             </div>
+            {/* Temasäker badge: vit text på halvtransparent accent faller till
+                ~1,9:1 i ljust tema — accentfärgad text på kortbakgrund i stället. */}
             <span
-              className="text-[0.625rem] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+              className="text-[0.625rem] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full whitespace-nowrap"
               style={{
-                color: '#fff',
-                background: `linear-gradient(135deg, ${badgeColor}cc, ${badgeColor}88)`,
+                color: ACCENT_TEXT[badgeColor] ?? badgeColor,
+                background: 'var(--about-card-bg)',
+                border: `1px solid color-mix(in srgb, ${badgeColor} 35%, transparent)`,
                 boxShadow: `0 0 12px ${badgeColor}40`,
               }}
             >
-              {job.type}
+              {opp.filters[job.type]}
             </span>
           </div>
 
@@ -140,7 +145,7 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
               className="flex items-center gap-1 text-xs font-semibold transition-opacity duration-200 hover:opacity-80"
               style={{ color: cardTextColor }}
               onClick={(e) => e.stopPropagation()}
-              aria-label={`${displayTitle} — ${job.company}`}
+              aria-label={`${opp.drawerApply}: ${displayTitle} (${opp.opensInNewTab})`}
             >
               <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
             </a>

@@ -123,7 +123,7 @@ export function StudentsContent() {
           aria-hidden="true"
         />
 
-        {/* Depth-2: parallax orbs */}
+        {/* Depth-2: orbs */}
         <GradientOrb color="green" size={680} top="15%" left="58%" opacity={0.10} animClass="animate-orb-float" />
         <GradientOrb color="purple" size={320} top="60%" left="2%" opacity={0.08} animClass="animate-orb-float-reverse" />
         <GradientOrb color="green" size={240} top="75%" left="85%" opacity={0.06} animClass="animate-orb-float" />

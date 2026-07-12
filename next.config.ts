@@ -15,10 +15,15 @@ import type { NextConfig } from "next";
 //  - PostHog EU (script, API, inbäddad dashboard i admin)
 //  - Egna tillgångar (self)
 // ---------------------------------------------------------------------------
+// React kräver eval() ENBART i dev-läge (callstack-rekonstruktion i devtools) —
+// utan detta spammar varje sida ett konsolfel under `next dev`. Produktion
+// (firebase.json och `next start`) förblir strikt utan unsafe-eval.
+const isDev = process.env.NODE_ENV === "development";
+
 const CSP = [
   "default-src 'self'",
   // Scripts: egna + Next.js inline hattar (unsafe-inline behövs för Next.js hydration)
-  "script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://eu-assets.i.posthog.com`,
   // Styles: egna + Google Fonts CDN
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // Fonter: Google Fonts statiska tillgångar

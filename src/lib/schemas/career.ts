@@ -15,7 +15,11 @@ export const CareerSchema = z.object({
   startDate: z.string().max(120).optional(),
   startDateEn: z.string().max(120).optional(),
   deadline: z.string().datetime({ offset: true }),
-  applyUrl: z.string().url().optional().or(z.literal('')),
+  // Renderas i href — enbart http(s) (z.string().url() godkänner javascript:)
+  applyUrl: z.string().url().refine(
+    v => /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
   published: z.boolean().default(false),
   createdAt: z.string().datetime({ offset: true }),
 });

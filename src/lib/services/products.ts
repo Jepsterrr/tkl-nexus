@@ -23,7 +23,7 @@ import {
 } from '@/lib/schemas/product';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, undefinedToDeleteField, togglePublishedField } from './firestore-helpers';
 
 function productDates(data: DocumentData): Record<string, unknown> {
   return { createdAt: toIso(data.createdAt) ?? new Date().toISOString() };
@@ -58,7 +58,8 @@ export async function createProduct(data: TKLProductFormData): Promise<string> {
 export async function updateProduct(id: string, data: Partial<TKLProductFormData>): Promise<void> {
   if (!id) throw new Error('updateProduct: id saknas');
   const validated = TKLProductFormSchema.partial().parse(data);
-  await updateDoc(doc(db, 'products', id), omitUndefined(validated as Record<string, unknown>));
+  // Tömda valfria fält (undefined) ska raderas ur dokumentet — inte lämnas kvar.
+  await updateDoc(doc(db, 'products', id), undefinedToDeleteField({ ...data, ...validated } as Record<string, unknown>));
   void bumpCacheVersion('products').catch(e => console.warn('[cache] bump failed:', e));
 }
 

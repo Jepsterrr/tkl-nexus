@@ -18,7 +18,7 @@ import { DealSchema, DealFormSchema, type TKLDeal, type DealFormData } from '@/l
 import { deleteFromCloudinary } from './cloudinary';
 import { withFetchTimeout } from '@/lib/fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, undefinedToDeleteField, togglePublishedField } from './firestore-helpers';
 
 function dealDates(data: DocumentData): Record<string, unknown> {
   return { createdAt: toIso(data.createdAt) ?? new Date().toISOString() };
@@ -40,7 +40,7 @@ export async function getAllDeals(): Promise<TKLDeal[]> {
   return parseSnapshot(snapshot, DealSchema, 'deals', dealDates);
 }
 
-export async function getDealById(id: string): Promise<TKLDeal | null> {
+async function fetchDealById(id: string, requirePublished: boolean): Promise<TKLDeal | null> {
   let docSnap;
   try {
     docSnap = await withFetchTimeout(getDoc(doc(db, 'deals', id)));
@@ -51,7 +51,7 @@ export async function getDealById(id: string): Promise<TKLDeal | null> {
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
-  if (data.published !== true) return null;
+  if (requirePublished && data.published !== true) return null;
 
   const parsed = DealSchema.safeParse({ id: docSnap.id, ...data, ...dealDates(data) });
   if (!parsed.success) {
@@ -59,6 +59,16 @@ export async function getDealById(id: string): Promise<TKLDeal | null> {
     return null;
   }
   return parsed.data;
+}
+
+/** Publik hämtning — endast publicerade deals (drawer-deeplinks). */
+export async function getDealById(id: string): Promise<TKLDeal | null> {
+  return fetchDealById(id, true);
+}
+
+/** Admin-hämtning — inkluderar opublicerade utkast (edit-sidan). */
+export async function getDealByIdAdmin(id: string): Promise<TKLDeal | null> {
+  return fetchDealById(id, false);
 }
 
 export async function createDeal(data: DealFormData): Promise<string> {
@@ -74,7 +84,8 @@ export async function createDeal(data: DealFormData): Promise<string> {
 export async function updateDeal(id: string, data: Partial<DealFormData>): Promise<void> {
   if (!id) throw new Error('updateDeal: id saknas');
   const validated = DealFormSchema.partial().parse(data);
-  await updateDoc(doc(db, 'deals', id), omitUndefined(validated as Record<string, unknown>));
+  // Tömda valfria fält (undefined) ska raderas ur dokumentet — inte lämnas kvar.
+  await updateDoc(doc(db, 'deals', id), undefinedToDeleteField({ ...data, ...validated } as Record<string, unknown>));
   void bumpCacheVersion('deals').catch(e => console.warn('[cache] bump failed:', e));
 }
 

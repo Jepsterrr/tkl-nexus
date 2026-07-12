@@ -26,6 +26,10 @@ on:
   pull_request:
     branches: [master]
 
+# Minsta möjliga GITHUB_TOKEN-behörighet — jobbet läser bara repot.
+permissions:
+  contents: read
+
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true

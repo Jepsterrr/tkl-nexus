@@ -91,7 +91,8 @@ export function CookieConsent() {
                 style={{
                   background: 'var(--glass-bg-subtle)',
                   border: '1px solid var(--glass-border-subtle)',
-                  color: 'var(--text-muted)',
+                  // --text-muted existerar inte i temat — använd hero-text-muted
+                  color: 'var(--hero-text-muted)',
                 }}
               >
                 {cookie.decline}

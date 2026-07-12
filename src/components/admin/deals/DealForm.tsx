@@ -67,12 +67,33 @@ export function DealForm({ mode, initialData }: DealFormProps) {
         if (field && !fieldErrors[field]) fieldErrors[field] = err.message;
       }
       setErrors(fieldErrors);
+      // Fokusera första felfältet — annars händer "ingenting" hörbart för
+      // skärmläsaranvändare när submit misslyckas.
+      const fieldIds: Partial<Record<keyof DealFormData, string>> = {
+        company: 'df-company',
+        title: 'df-title',
+        titleEn: 'df-title-en',
+        description: 'df-description',
+        descriptionEn: 'df-description-en',
+        link: 'df-link',
+        discountCode: 'df-discount-code',
+        discount: 'df-discount',
+      };
+      const firstField = (Object.keys(fieldIds) as (keyof DealFormData)[]).find(k => fieldErrors[k]);
+      if (firstField) document.getElementById(fieldIds[firstField]!)?.focus();
       return;
     }
 
     setErrors({});
     setSubmitting(true);
     try {
+      if (mode === 'create') {
+        await createDeal(result.data);
+      } else {
+        await updateDeal(initialData!.id, result.data);
+      }
+      // Rensa den ersatta bilden först EFTER lyckad skrivning — annars kan
+      // dokumentet peka på en raderad bild (en orphan är billigare).
       if (
         mode === 'edit' &&
         initialData?.cloudinaryPublicId &&
@@ -83,11 +104,6 @@ export function DealForm({ mode, initialData }: DealFormProps) {
         } catch {
           console.warn('[cloudinary] Kunde inte radera gammal bild vid uppdatering av deal');
         }
-      }
-      if (mode === 'create') {
-        await createDeal(result.data);
-      } else {
-        await updateDeal(initialData!.id, result.data);
       }
       router.push('/admin/deals');
     } catch {
@@ -156,8 +172,11 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                   value={company}
                   onChange={e => setCompany(e.target.value)}
                   className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.company ? true : undefined}
+                  aria-describedby={errors.company ? 'df-company-error' : undefined}
                 />
-                {errors.company && <p className={errorCls}>{errors.company}</p>}
+                {errors.company && <p id="df-company-error" role="alert" className={errorCls}>{errors.company}</p>}
               </div>
               <div>
                 <ImageUploadField
@@ -182,8 +201,11 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.title ? true : undefined}
+                  aria-describedby={errors.title ? 'df-title-error' : undefined}
                 />
-                {errors.title && <p className={errorCls}>{errors.title}</p>}
+                {errors.title && <p id="df-title-error" role="alert" className={errorCls}>{errors.title}</p>}
               </div>
               <div>
                 <label htmlFor="df-title-en" className={labelCls}>Titel (en, valfritt)</label>
@@ -213,8 +235,11 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                 onChange={e => setDescription(e.target.value)}
                 rows={4}
                 className={inputCls}
+                aria-required="true"
+                aria-invalid={errors.description ? true : undefined}
+                aria-describedby={errors.description ? 'df-description-error' : undefined}
               />
-              {errors.description && <p className={errorCls}>{errors.description}</p>}
+              {errors.description && <p id="df-description-error" role="alert" className={errorCls}>{errors.description}</p>}
             </div>
             <div>
               <label htmlFor="df-description-en" className={labelCls}>Beskrivning (en, valfritt)</label>
@@ -242,8 +267,10 @@ export function DealForm({ mode, initialData }: DealFormProps) {
                 onChange={e => setLink(e.target.value)}
                 placeholder="https://"
                 className={inputCls}
+                aria-invalid={errors.link ? true : undefined}
+                aria-describedby={errors.link ? 'df-link-error' : undefined}
               />
-              {errors.link && <p className={errorCls}>{errors.link}</p>}
+              {errors.link && <p id="df-link-error" role="alert" className={errorCls}>{errors.link}</p>}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

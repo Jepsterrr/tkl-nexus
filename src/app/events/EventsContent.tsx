@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useDeferredValue } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, Loader2, Search, Sparkles, X, PlusCircle, ArrowRight } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, Search, Sparkles, X, PlusCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
@@ -37,7 +37,9 @@ const LuddItemSchema = z.object({
   place_name: z.string().nullable().optional(),
   place_address: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
-  url: z.string().optional(),
+  // Renderas i href — annat schema än http(s) (t.ex. javascript:) förkastas
+  // och fallback-URL:en till events.ludd.ltu.se används i stället.
+  url: z.string().refine((v) => /^https?:\/\//i.test(v)).optional().catch(undefined),
   slug: z.string().optional(),
 });
 
@@ -57,6 +59,16 @@ const SECTION_COLORS: Record<Section, string> = {
   maskin: '#5c0d0d',
   general: '#8B5CF6',
 };
+
+/**
+ * Temasäker textvariant av sektionsfärgen. Rå hex som textfärg är oläslig —
+ * marinblå (#172191) och mörkröd (#5c0d0d) ger ~1,3:1 på mörk bakgrund och
+ * gul (#f7cf3b) fallerar i ljust tema. Blandning mot --hero-text drar färgen
+ * till läsbar luminans i bägge teman utan att tappa kulören.
+ * Rå hex får enbart användas för bg/border/glow.
+ */
+const sectionText = (color: string) =>
+  `color-mix(in srgb, ${color} 45%, var(--hero-text))`;
 
 type FilterKey = Section | 'all';
 type ExtendedEvent = TKLEvent & { externalUrl?: string };
@@ -89,10 +101,13 @@ function EventCard({
 
   return (
     <motion.article
+      layout
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      whileHover={shouldReduceMotion ? {} : { y: -4 }}
       transition={{ duration: 0.22, delay: entryDelay, ease: EASE_OUT_EXPO }}
-      className="glass-card group relative overflow-hidden rounded-2xl flex flex-col hover:-translate-y-1 transition-transform duration-300"
+      className="glass-card group relative overflow-hidden rounded-2xl flex flex-col"
     >
 
       {/* Hover glow - pointer-events-none ser till att glöden aldrig blockerar klick */}
@@ -103,11 +118,11 @@ function EventCard({
       />
 
       <div className="pl-5 pr-5 pt-5 pb-5 flex gap-5 flex-1 relative z-10">
-        <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-xl text-white font-bold"
+        <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-xl font-bold"
           style={{ background: `${color}22`, border: `1px solid ${color}44` }}
         >
-          <span className="text-xl leading-none" style={{ color }}>{day}</span>
-          <span className="text-[0.625rem] uppercase tracking-widest opacity-70">{month}</span>
+          <span className="text-xl leading-none" style={{ color: sectionText(color) }}>{day}</span>
+          <span className="hero-text-subtle text-[0.625rem] uppercase tracking-widest">{month}</span>
         </div>
 
         <div className="flex-1 min-w-0">
@@ -125,7 +140,7 @@ function EventCard({
             )}
             <span
               className="text-[0.6875rem] font-semibold uppercase tracking-widest"
-              style={{ color }}
+              style={{ color: sectionText(color) }}
             >
               {ev.sections[event.section]}
             </span>
@@ -168,7 +183,7 @@ function EventCard({
           onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
           aria-label={`${ev.visaMer}: ${displayTitle}`}
           className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
-          style={{ color, background: `${color}12`, border: `1px solid ${color}28` }}
+          style={{ color: sectionText(color), background: `${color}12`, border: `1px solid ${color}28` }}
         >
           {ev.visaMer}
           <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -327,11 +342,11 @@ export function EventsContent() {
               // Stabil key-fallback — Math.random() ger ny identitet per render
               // och bryter Reacts reconciliation (omount + tappade animationer)
               id: `ludd-${item.id ?? item.slug ?? `idx-${rawIndex}`}`,
-              title: item.title || 'Campus Event',
+              title: item.title || ev.luddFallbackTitle,
               description: item.description ? item.description.replace(/<[^>]*>?/gm, '').trim() : '',
               date: new Date(timeMs).toISOString(),
               endDate: new Date(timeMs).toISOString(),
-              location: item.place_name || item.place_address || 'LUDD (Campus)',
+              location: item.place_name || item.place_address || ev.luddFallbackLocation,
               tags: item.tags ?? [],
               section: 'general' as const,
               published: true,
@@ -353,7 +368,9 @@ export function EventsContent() {
 
       return () => { isMounted = false; controller.abort(); clearTimeout(timeoutId); };
     }
-  }, [calendarView, luddEvents.length]);
+  // ev med i deps för i18n-fallbacks — guarden luddEvents.length === 0
+  // förhindrar omhämtning vid språkbyte.
+  }, [calendarView, luddEvents.length, ev]);
 
   // Deferred sök — inputfältet uppdateras direkt, medan grid-filtreringen
   // (AnimatePresence + layout-animationer) får släpa efter utan att blockera skrivandet.
@@ -612,8 +629,15 @@ export function EventsContent() {
                   </div>
                 </div>
                 {loading && (
-                  <div className="flex justify-center py-24" role="status" aria-busy="true" aria-label={ev.loading}>
-                    <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#8B5CF6' }} aria-hidden="true" />
+                  <div
+                    role="status"
+                    aria-busy="true"
+                    aria-label={ev.loading}
+                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+                  >
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="skeleton-shimmer rounded-2xl h-44" aria-hidden="true" />
+                    ))}
                   </div>
                 )}
                 {error && !loading && (
@@ -655,14 +679,11 @@ export function EventsContent() {
                   </motion.div>
                 )}
                 {!loading && !error && filtered.length > 0 && (
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={filter}
-                      initial={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.08 }}
-                      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-                    >
+                  // AnimatePresence + layout (epic design-kravet): korten
+                  // exit-animeras individuellt och gridet flödar om — även vid
+                  // sökning, som tidigare bytte kort helt utan animation.
+                  <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <AnimatePresence mode="popLayout">
                       {filtered.map((event, idx) => (
                         <EventCard
                           key={event.id}
@@ -671,8 +692,8 @@ export function EventsContent() {
                           onViewDetails={(e) => handleOpenEvent(event, e.currentTarget)}
                         />
                       ))}
-                    </motion.div>
-                  </AnimatePresence>
+                    </AnimatePresence>
+                  </motion.div>
                 )}
               </motion.div>
             )}
@@ -692,15 +713,22 @@ export function EventsContent() {
                     href="https://www.ludd.ltu.se/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium hero-text-subtle hover:text-[#60A5FA] transition-colors flex items-center gap-1.5"
+                    className="text-xs font-medium hero-text-subtle hover:text-(--text-blue) transition-colors flex items-center gap-1.5"
                   >
                     {ev.luddPoweredBy} <span className="font-bold text-white light:text-black tracking-wide">/LUDD/</span>
                   </a>
                 </div>
 
                 {luddLoading && (
-                  <div className="flex justify-center py-24" role="status" aria-busy="true" aria-label={ev.loading}>
-                    <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#60A5FA' }} aria-hidden="true" />
+                  <div
+                    role="status"
+                    aria-busy="true"
+                    aria-label={ev.loading}
+                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+                  >
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="skeleton-shimmer rounded-2xl h-44" aria-hidden="true" />
+                    ))}
                   </div>
                 )}
 
@@ -719,9 +747,14 @@ export function EventsContent() {
                   </div>
                 )}
                 {!luddLoading && !luddError && luddEvents.length === 0 && (
-                  <p role="status" className="text-center hero-text-muted py-16">
-                    {ev.luddNoEvents}
-                  </p>
+                  <div
+                    role="status"
+                    className="flex flex-col items-center justify-center py-24 text-center rounded-3xl"
+                    style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
+                  >
+                    <CalendarDays className="w-12 h-12 mb-4 opacity-35" style={{ color: 'var(--text-blue)' }} aria-hidden="true" />
+                    <p className="text-lg hero-text-muted">{ev.luddNoEvents}</p>
+                  </div>
                 )}
 
                 {!luddLoading && luddEvents.length > 0 && (
@@ -739,14 +772,8 @@ export function EventsContent() {
                     )}
 
                     {calendarSelectedDate !== null && filteredLuddEvents.length > 0 && (
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={calendarSelectedDate.toDateString()}
-                          initial={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.08 }}
-                          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6"
-                        >
+                      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
+                        <AnimatePresence mode="popLayout">
                           {filteredLuddEvents.map((event, idx) => (
                             <EventCard
                               key={`ludd-${event.id}`}
@@ -755,8 +782,8 @@ export function EventsContent() {
                               onViewDetails={(e) => handleOpenEvent(event, e.currentTarget)}
                             />
                           ))}
-                        </motion.div>
-                      </AnimatePresence>
+                        </AnimatePresence>
+                      </motion.div>
                     )}
                   </>
                 )}

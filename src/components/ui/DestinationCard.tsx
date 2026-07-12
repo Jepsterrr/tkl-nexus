@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight, type LucideIcon } from 'lucide-react';
+import { EASE_OUT_EXPO } from '@/lib/motion';
 
 interface DestinationCardProps {
   href: string;
@@ -28,11 +29,13 @@ export function DestinationCard({
   const ctaColor = ctaTextColor ?? accentColor;
 
   return (
+    // initial ovillkorlig — SSR-renderad, useReducedMotion() i initial ger
+    // hydration mismatch.
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: EASE_OUT_EXPO }}
       className="group relative"
     >
       <Link

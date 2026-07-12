@@ -16,6 +16,14 @@ const TYPE_COLORS: Record<CareerType, string> = {
   trainee: '#F59E0B',
 };
 
+// WCAG-säkra textvarianter av accenthexen (ljust tema mappar till mörkare nyans)
+const TYPE_TEXT: Record<CareerType, string> = {
+  exjobb:  'var(--text-purple)',
+  jobb:    'var(--text-blue)',
+  praktik: 'var(--text-green)',
+  trainee: 'var(--text-orange)',
+};
+
 interface CareerDrawerProps {
   job: TKLCareer | null;
   onClose: () => void;
@@ -147,9 +155,15 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
               </button>
 
               <div className="relative z-10 flex items-center gap-2 mb-2.5">
+                {/* Temasäker badge: vit på halvtransparent accent underkänns i ljust tema */}
                 <span
                   className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
-                  style={{ color: '#fff', background: `${color}cc`, boxShadow: `0 0 12px ${color}40` }}
+                  style={{
+                    color: TYPE_TEXT[job!.type],
+                    background: 'var(--about-card-bg)',
+                    border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
+                    boxShadow: `0 0 12px ${color}40`,
+                  }}
                 >
                   {opp.filters[job!.type]}
                 </span>

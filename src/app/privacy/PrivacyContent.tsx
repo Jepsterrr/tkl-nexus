@@ -44,6 +44,8 @@ export function PrivacyContent() {
       <GradientOrb color="red" size={500} top="10%" left="60%" opacity={0.05} />
 
       <div className="relative max-w-2xl mx-auto z-10">
+        {/* initial ovillkorlig — SSR-renderad, useReducedMotion() i initial
+            ger hydration mismatch. */}
         <motion.div
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}

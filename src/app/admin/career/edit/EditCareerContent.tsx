@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CareerForm } from '@/components/admin/career/CareerForm';
-import { getCareerById } from '@/lib/services/career';
+import { getCareerByIdAdmin } from '@/lib/services/career';
 import type { TKLCareer } from '@/lib/schemas/career';
 
 export function EditCareerContent() {
@@ -16,7 +16,7 @@ export function EditCareerContent() {
   useEffect(() => {
     if (!id) return; // saknat id hanteras direkt i render
     let cancelled = false;
-    getCareerById(id)
+    getCareerByIdAdmin(id)
       .then(data => {
         if (!cancelled) { setCareer(data); setLoading(false); }
       })

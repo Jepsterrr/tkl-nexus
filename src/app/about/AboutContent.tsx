@@ -165,12 +165,9 @@ export function AboutContent() {
         <motion.div style={{ y: heroTextY }} className="relative max-w-4xl mx-auto w-full z-20">
           <StaggerReveal className="text-left" delay={0.1}>
 
-            {/* Typografisk caption — ersätter badge-pill */}
+            {/* Typografisk caption — ersätter badge-pill + temasäker röd */}
             <RevealItem>
-              <p
-                className="text-xs font-mono uppercase tracking-[0.2em] mb-5 opacity-55"
-                style={{ color: '#E30613' }}
-              >
+              <p className="text-accent-red text-xs font-mono uppercase tracking-[0.2em] mb-5">
                 Est. 2025 · TKL NEXUS
               </p>
             </RevealItem>
@@ -250,15 +247,16 @@ export function AboutContent() {
                   className="absolute inset-0"
                   style={{ background: 'linear-gradient(to right, var(--cosmic-bg), transparent 20%, transparent 80%, var(--cosmic-bg))' }}
                 />
+                {/* Temavariabler — hårdkodad vit caption försvann mot ljusa
+                    temats nästan vita gradient (--cosmic-bg: #f0eefb). */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 z-10">
                   <p
                     id="campus-photo-heading"
-                    className="text-xs font-mono uppercase tracking-widest mb-1"
-                    style={{ color: 'rgba(255,255,255,0.45)' }}
+                    className="hero-text-subtle text-xs font-mono uppercase tracking-widest mb-1"
                   >
                     {about.campusLabel}
                   </p>
-                  <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                  <p className="hero-text-muted text-sm sm:text-base">
                     {about.campusSubtitle}
                   </p>
                 </div>

@@ -78,6 +78,10 @@ export default function RootLayout({
       height: 630,
     },
     description: 'TKL NEXUS är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
+    sameAs: [
+      'https://linkedin.com/in/tkl-nexus/',
+      'https://www.teknologkaren.se',
+    ],
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Luleå',
@@ -120,11 +124,13 @@ export default function RootLayout({
                 <NavbarStateProvider>
                   <ScrollProvider>
                     <ScrollResetter />
-                    <GlobalBanner />
-                    <CookieConsent />
-                    <a href="#main-content" className="skip-nav">
+                    {/* Skip-länken måste vara första tabbstoppet — före banner
+                        och cookie-dialog. lang="sv": texten är alltid svensk
+                        även när html lang byts till en (server component). */}
+                    <a href="#main-content" className="skip-nav" lang="sv">
                       Hoppa till innehåll
                     </a>
+                    <GlobalBanner />
                     <Navbar />
                     <ScrollContainer>
                       <main id="main-content" className="relative overflow-x-hidden">
@@ -132,6 +138,9 @@ export default function RootLayout({
                       </main>
                       <Footer />
                     </ScrollContainer>
+                    {/* Visuellt fixerad i botten — sist i DOM så tabbordningen
+                        matchar den visuella ordningen. */}
+                    <CookieConsent />
                   </ScrollProvider>
                 </NavbarStateProvider>
               </ThemeProvider>

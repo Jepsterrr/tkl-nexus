@@ -34,7 +34,8 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
     : '';
 
   const handleCopy = () => {
-    if (!deal?.discountCode) return;
+    // Ingen disabled under "Kopierad!" — disabled kastar fokus ur fokusfällan
+    if (copied || !deal?.discountCode) return;
     navigator.clipboard.writeText(deal.discountCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -209,8 +210,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
                   </p>
                   <button
                     onClick={handleCopy}
-                    disabled={copied}
-                    className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:cursor-default"
+                    className="flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
                     style={{
                       background: orangeMix(9),
                       border: `1px solid ${orangeMix(25)}`,

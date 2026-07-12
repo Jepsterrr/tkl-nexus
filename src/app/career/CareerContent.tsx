@@ -352,26 +352,36 @@ export function CareerContent() {
                 aria-busy="true"
                 aria-label={opportunity.loading}
               >
-                {/* count=2: mobilstaplad höjd ≈ min-h-wrappern → ingen CLS vid swap */}
+                {/* count=2: mobilstaplad höjd ≈ min-h-wrappern → ingen CLS vid swap.
+                    Tredje skelettet fyller desktopgridets tredje kolumn utan att
+                    påverka mobilhöjden. */}
                 <JobCardSkeleton count={2} accentColor="blue" />
+                <div className="hidden lg:block">
+                  <JobCardSkeleton count={1} accentColor="blue" />
+                </div>
               </motion.div>
             ) : !error && filteredItems.length > 0 ? (
+              // Stabil key + AnimatePresence popLayout (epic design-kravet):
+              // filter/sök exit-animerar korten individuellt i stället för remount.
               <motion.div
-                key={`grid-${filter}`}
+                key="grid"
+                layout
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.2 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
-                {filteredItems.map((job, idx) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    color={FILTER_COLORS[job.type]}
-                    entryDelay={idx * 0.03}
-                    onViewDetails={(e) => handleOpenJob(job, e.currentTarget)}
-                  />
-                ))}
+                <AnimatePresence mode="popLayout">
+                  {filteredItems.map((job, idx) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      color={FILTER_COLORS[job.type]}
+                      entryDelay={idx * 0.03}
+                      onViewDetails={(e) => handleOpenJob(job, e.currentTarget)}
+                    />
+                  ))}
+                </AnimatePresence>
               </motion.div>
             ) : null}
           </AnimatePresence>

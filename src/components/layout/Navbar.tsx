@@ -68,6 +68,20 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, [settingsOpen]);
 
+  // Escape stänger settings-popovern och mobilmenyn (tangentbordsanvändare
+  // har annars ingen väg att stänga dem utan att navigera bort).
+  useEffect(() => {
+    if (!settingsOpen && !mobileOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSettingsOpen(false);
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [settingsOpen, mobileOpen]);
+
   if (pathname.startsWith('/admin')) return null;
 
   const NAV_LINKS: NavLinkItem[] = [
@@ -100,6 +114,9 @@ export function Navbar() {
 
   return (
     <>
+      {/* OBS: villkora ALDRIG initial på useReducedMotion() i SSR-renderade
+          komponenter — servern renderar false, klienten kan läsa true →
+          hydration mismatch. */}
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: isDrawerOpen ? '-140%' : 0, opacity: isDrawerOpen ? 0 : 1 }}
@@ -155,6 +172,8 @@ export function Navbar() {
                   >
                     <Link
                       href={href}
+                      aria-haspopup={children ? 'true' : undefined}
+                      aria-expanded={children ? isOpen : undefined}
                       className={`relative px-4 py-2.5 rounded-xl text-sm font-medium tracking-wide transition-colors duration-200 flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] ${
                         isActive ? 'nav-text' : 'nav-text-muted hover:nav-text hover:bg-white/5 light:hover:bg-black/5'
                       }`}

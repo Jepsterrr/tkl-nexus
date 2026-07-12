@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { BenefitCard } from '@/lib/types';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
+import { EASE_OUT_EXPO } from '@/lib/motion';
 import {
   BookOpen, Rocket, Target, Building2, GraduationCap, Handshake,
   CalendarDays, LayoutGrid, Gift, LucideIcon, ArrowRight,
@@ -30,15 +31,18 @@ export function BenefitCardComponent({
 }: BenefitCardComponentProps) {
   const colors = ACCENT_COLOR_MAP[accentColor];
   const Icon = ICON_MAP[iconName] ?? LayoutGrid;
+  const shouldReduceMotion = useReducedMotion();
 
   if (featured) {
     return (
+      // initial är ALLTID ovillkorlig — SSR-renderad komponent, useReducedMotion()
+      // i initial ger hydration mismatch. Reduced motion guardar enbart hover.
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -3, transition: { duration: 0.18, ease: 'easeOut' } }}
+        whileHover={shouldReduceMotion ? {} : { y: -3, transition: { duration: 0.18, ease: 'easeOut' } }}
         viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.55, delay: 0, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.55, delay: 0, ease: EASE_OUT_EXPO }}
         className="group relative rounded-2xl overflow-hidden p-7 sm:p-8 h-full"
         style={{
           background: `linear-gradient(135deg, ${colors.bgStrong}, ${colors.bg})`,
@@ -122,9 +126,9 @@ export function BenefitCardComponent({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2, transition: { duration: 0.18, ease: 'easeOut' } }}
+      whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.18, ease: 'easeOut' } }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: EASE_OUT_EXPO }}
       className="group relative rounded-2xl overflow-hidden p-6 h-full"
       style={{
         background: `linear-gradient(135deg, ${colors.bgStrong}, ${colors.bg})`,

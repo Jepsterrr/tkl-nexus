@@ -22,32 +22,31 @@ const RootNetwork = dynamic(
   { ssr: false },
 );
 
-// Module-level style constants — avoids recreating objects on every scroll-driven render
+// Module-level style constants — avoids recreating objects on every scroll-driven render.
+// Textfärger via --text-*-variablerna (temasäkra AA-nyanser) — aldrig rå accenthex.
 const PILL_STYLE_GREEN: React.CSSProperties = {
   background: 'rgba(16,185,129,0.10)',
   border: '1px solid rgba(16,185,129,0.22)',
-  color: '#10B981',
+  color: 'var(--text-green)',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 };
 const PILL_STYLE_PURPLE: React.CSSProperties = {
   background: 'rgba(139,92,246,0.10)',
   border: '1px solid rgba(139,92,246,0.22)',
-  color: '#8B5CF6',
+  color: 'var(--text-purple)',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 };
 const PILL_STYLE_RED: React.CSSProperties = {
   background: 'rgba(227,6,19,0.08)',
   border: '1px solid rgba(227,6,19,0.20)',
-  color: '#E30613',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 };
 const BADGE_STYLE: React.CSSProperties = {
   background: 'rgba(227,6,19,0.12)',
   border: '1px solid rgba(227,6,19,0.28)',
-  color: '#E30613',
   boxShadow: '0 0 20px rgba(227,6,19,0.10)',
 };
 
@@ -191,7 +190,7 @@ export function HomeContent() {
 
           {/* Floating stat pill: opportunity types */}
           <motion.div
-            className="absolute bottom-[30%] right-[6%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold"
+            className="text-accent-red absolute bottom-[30%] right-[6%] hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold"
             style={PILL_STYLE_RED}
             animate={shouldReduceMotion ? {} : { y: [0, 8, 0] }}
             transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
@@ -209,7 +208,7 @@ export function HomeContent() {
             {/* Badge */}
             <RevealItem className="flex justify-center mb-8">
               <span
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
+                className="text-accent-red inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
                 style={BADGE_STYLE}
               >
                 <span aria-hidden="true">⬡</span>

@@ -17,7 +17,7 @@ import { db } from '@/lib/firebase';
 import { EventSchema, EventFormSchema, type TKLEvent, type EventFormData } from '../schemas/event';
 import { withFetchTimeout } from '../fetch-timeout';
 import { bumpCacheVersion } from './cacheVersion';
-import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, togglePublishedField } from './firestore-helpers';
+import { getDocsWithCacheStrategy, parseSnapshot, toIso, omitUndefined, undefinedToDeleteField, togglePublishedField, startOfTodayStockholmIso } from './firestore-helpers';
 
 /** Timestamp/sträng → ISO för alla datumfält. */
 function eventDates(data: DocumentData): Record<string, unknown> {
@@ -26,26 +26,6 @@ function eventDates(data: DocumentData): Record<string, unknown> {
     endDate: toIso(data.endDate) ?? data.endDate,
     createdAt: toIso(data.createdAt) ?? data.createdAt,
   };
-}
-
-/**
- * UTC-instansen för midnatt i Europe/Stockholm som ISO-sträng.
- * Cutoffen för "pågående events" ska följa Stockholmsdygnet oavsett
- * besökarens tidszon — inte klientens lokala midnatt.
- */
-function startOfTodayStockholmIso(): string {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Europe/Stockholm',
-    hourCycle: 'h23',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).formatToParts(now);
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
-  const elapsedMs =
-    (get('hour') * 3600 + get('minute') * 60 + get('second')) * 1000 + now.getMilliseconds();
-  return new Date(now.getTime() - elapsedMs).toISOString();
 }
 
 export async function getPublishedEvents(): Promise<TKLEvent[]> {
@@ -73,7 +53,7 @@ export async function getAllEvents(): Promise<TKLEvent[]> {
   return parseSnapshot(snapshot, EventSchema, 'events', eventDates);
 }
 
-export async function getEventById(id: string): Promise<TKLEvent | null> {
+async function fetchEventById(id: string, requirePublished: boolean): Promise<TKLEvent | null> {
   let docSnap;
   try {
     docSnap = await withFetchTimeout(getDoc(doc(db, 'events', id)));
@@ -85,7 +65,7 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
-  if (data.published !== true) return null;
+  if (requirePublished && data.published !== true) return null;
 
   const parsed = EventSchema.safeParse({ id: docSnap.id, ...data, ...eventDates(data) });
   if (!parsed.success) {
@@ -93,6 +73,16 @@ export async function getEventById(id: string): Promise<TKLEvent | null> {
     return null;
   }
   return parsed.data;
+}
+
+/** Publik hämtning — endast publicerade event (drawer-deeplinks). */
+export async function getEventById(id: string): Promise<TKLEvent | null> {
+  return fetchEventById(id, true);
+}
+
+/** Admin-hämtning — inkluderar opublicerade utkast (edit-sidan). */
+export async function getEventByIdAdmin(id: string): Promise<TKLEvent | null> {
+  return fetchEventById(id, false);
 }
 
 export async function createEvent(data: EventFormData): Promise<string> {
@@ -108,7 +98,8 @@ export async function createEvent(data: EventFormData): Promise<string> {
 export async function updateEvent(id: string, data: Partial<EventFormData>): Promise<void> {
   if (!id) throw new Error('updateEvent: id saknas');
   const validated = EventFormSchema.partial().parse(data);
-  await updateDoc(doc(db, 'events', id), omitUndefined(validated as Record<string, unknown>));
+  // Tömda valfria fält (undefined) ska raderas ur dokumentet — inte lämnas kvar.
+  await updateDoc(doc(db, 'events', id), undefinedToDeleteField({ ...data, ...validated } as Record<string, unknown>));
   void bumpCacheVersion('events').catch(e => console.warn('[cache] bump failed:', e));
 }
 

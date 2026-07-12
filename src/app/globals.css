@@ -51,6 +51,9 @@
   --skeleton-base:      rgba(255, 255, 255, 0.07);
   --skeleton-highlight: rgba(255, 255, 255, 0.15);
 
+  /* Formulärfält — default (light) innan temaklass hunnit sättas */
+  --input-border: rgba(13, 11, 26, 0.45);
+
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -167,11 +170,16 @@
   /* CTA Banner */
   --cta-banner-bg: rgba(10, 1, 24, 0.8);
 
-  /* Themed accent text — WCAG AA on dark backgrounds */
+  /* Themed accent text — WCAG AA on dark backgrounds.
+     purple: #8B5CF6 föll till ~4,1:1 på glasskort — #A78BFA ger >6:1. */
   --text-green: #10B981;
   --text-orange: #F59E0B;
   --text-blue: #3B82F6;
-  --text-purple: #8B5CF6;
+  --text-purple: #A78BFA;
+  --text-red: #fb2c36; /* red-500 — 5,0:1 på cosmic-bg (tkl-red ger bara ~3,4:1) */
+
+  /* Formulärfält — kant måste nå 3:1 mot bakgrunden (WCAG 1.4.11) */
+  --input-border: rgba(255, 255, 255, 0.35);
 }
 
 /* Light */
@@ -272,6 +280,10 @@
   --text-orange: #92400E;
   --text-blue: #1d4ed8;
   --text-purple: #5b21b6;
+  --text-red: #E30613; /* varumärkesröd — 4,6:1 på ljus bg */
+
+  /* Formulärfält — kant måste nå 3:1 mot bakgrunden (WCAG 1.4.11) */
+  --input-border: rgba(13, 11, 26, 0.45);
 }
 
 
@@ -472,6 +484,19 @@
   animation: orb-float-reverse 10s ease-in-out infinite;
 }
 
+/* Eviga loopar och smooth scroll ska respektera reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll,
+  .animate-orb-float,
+  .animate-orb-float-reverse {
+    animation: none;
+  }
+  html,
+  .scroll-container {
+    scroll-behavior: auto;
+  }
+}
+
 /* Glassmorphism utility */
 .glass {
   background: var(--glass-bg-subtle);
@@ -514,9 +539,10 @@
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--nav-control-border, rgba(255,255,255,0.10));
 }
-.nav-text        { color: var(--nav-text, rgba(255,255,255,1)); }
-.nav-text-muted  { color: var(--nav-text-muted, rgba(255,255,255,0.6)); }
-.nav-text-subtle { color: var(--nav-text-subtle, rgba(255,255,255,0.5)); }
+/* @utility — hover:nav-text m.fl. används i Navbar och måste kompilera */
+@utility nav-text        { color: var(--nav-text, rgba(255,255,255,1)); }
+@utility nav-text-muted  { color: var(--nav-text-muted, rgba(255,255,255,0.6)); }
+@utility nav-text-subtle { color: var(--nav-text-subtle, rgba(255,255,255,0.5)); }
 .nav-control-bg  { background: var(--nav-control-bg, rgba(255,255,255,0.05)); }
 .nav-control-border { border-color: var(--nav-control-border, rgba(255,255,255,0.10)); }
 .nav-control-active {
@@ -524,21 +550,23 @@
   color: var(--nav-control-active-text, rgba(255,255,255,1));
 }
 
-/* Hero / Page */
-.hero-text        { color: var(--hero-text, #0d0b1a); }
-.hero-text-muted  { color: var(--hero-text-muted, #2a2840); }
-.hero-text-subtle { color: var(--hero-text-subtle, #4e4b68); }
+/* Hero / Page — @utility (inte vanliga klasser) så att hover:/focus:-
+   varianter kompilerar. `hover:hero-text` på en vanlig CSS-klass genererar
+   INGENTING i Tailwind v4 — det var döda hover-states på hela sajten. */
+@utility hero-text        { color: var(--hero-text, #0d0b1a); }
+@utility hero-text-muted  { color: var(--hero-text-muted, #2a2840); }
+@utility hero-text-subtle { color: var(--hero-text-subtle, #4e4b68); }
 
 /* Card text — neutral greys, no purple tint, readable on any accent background */
-.card-text        { color: var(--card-text, #1a1832); }
-.card-text-muted  { color: var(--card-text-muted, #3d3a56); }
-.card-text-subtle { color: var(--card-text-subtle, #65627a); }
+@utility card-text        { color: var(--card-text, #1a1832); }
+@utility card-text-muted  { color: var(--card-text-muted, #3d3a56); }
+@utility card-text-subtle { color: var(--card-text-subtle, #65627a); }
 
 /* Footer */
 .footer-theme       { background: var(--nav-bg, rgba(0,0,0,0.30)); }
-.footer-text        { color: var(--footer-text, rgba(255,255,255,1)); }
-.footer-text-muted  { color: var(--footer-text-muted, rgba(255,255,255,0.50)); }
-.footer-text-subtle { color: var(--footer-text-subtle, rgba(255,255,255,0.30)); }
+@utility footer-text        { color: var(--footer-text, rgba(255,255,255,1)); }
+@utility footer-text-muted  { color: var(--footer-text-muted, rgba(255,255,255,0.50)); }
+@utility footer-text-subtle { color: var(--footer-text-subtle, rgba(255,255,255,0.30)); }
 
 /* CTA Banner */
 .cta-banner-bg { background: var(--cta-banner-bg, rgba(10,1,24,0.80)); }
@@ -551,18 +579,26 @@
 .glow-blue   { box-shadow: 0 0 30px rgba(59, 130, 246, 0.4),  0 0 60px rgba(59, 130, 246, 0.15); }
 .glow-orange { box-shadow: 0 0 30px rgba(245, 158, 11, 0.4),  0 0 60px rgba(245, 158, 11, 0.15); }
 
-/* Accent text utilities */
-.text-accent-red    { color: #E30613; }
-.text-accent-purple { color: #8B5CF6; }
-.text-accent-green  { color: #10B981; }
-.text-accent-blue   { color: #3B82F6; }
-.text-accent-orange { color: #F59E0B; }
+/* Accent text utilities — temasäkra: mappar till --text-* som har mörkare
+   AA-nyanser i ljust tema. Rå accenthex får ALDRIG användas som textfärg. */
+.text-accent-red    { color: var(--text-red, #E30613); }
+.text-accent-purple { color: var(--text-purple, #8B5CF6); }
+.text-accent-green  { color: var(--text-green, #10B981); }
+.text-accent-blue   { color: var(--text-blue, #3B82F6); }
+.text-accent-orange { color: var(--text-orange, #F59E0B); }
 
-/* Hero heading — Unbounded at display sizes: aggressive tracking, tight leading */
+/* Typsnittsutilities — `font-heading`/`font-display` används som klasser i
+   komponenter (MegaStat, Timeline, EventDrawer m.fl.) men fanns inte som
+   tokens: de renderade tyst i brödtextfonten. */
+@utility font-heading { font-family: var(--font-heading), system-ui, sans-serif; }
+@utility font-display { font-family: var(--font-heading), system-ui, sans-serif; }
+
+/* Hero heading — Unbounded at display sizes (spec: 800 / -0.04em / 1.05).
+   Ingen !important — sidor ska använda den här klassen, inte slåss mot den. */
 .hero-heading {
   font-family: var(--font-heading), system-ui, sans-serif;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   line-height: 1.05;
   text-wrap: balance;
 }

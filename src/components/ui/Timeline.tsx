@@ -49,7 +49,8 @@ export function Timeline({ items }: TimelineProps) {
                   isLeft ? "sm:pr-8 sm:text-right" : "sm:pl-8 sm:text-left"
                 }`}
               >
-                <span className="font-mono text-xs text-tkl-red tracking-wider">{item.year}</span>
+                {/* text-accent-red är temasäker (dark: red-500) — rå tkl-red ger ~3,7:1 */}
+                <span className="font-mono text-xs text-accent-red tracking-wider">{item.year}</span>
                 <h3 className="text-foreground font-display font-semibold text-base mt-1">
                   {item.title}
                 </h3>

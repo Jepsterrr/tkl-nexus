@@ -210,11 +210,13 @@ function isDealValid(f: DealForm): boolean {
 
 // Shared styles
 
+// --input-border (3:1, WCAG 1.4.11) — inte glass-border-subtle (~1,2:1, osynlig kant).
+// Fokusring 2px i solid accent — 1px/40% opak var knappt urskiljbar.
 const inputCls =
   'w-full rounded-xl px-4 py-3 text-sm transition-all duration-150 outline-none ' +
-  'bg-(--glass-bg-subtle) border border-(--glass-border-subtle) ' +
+  'bg-(--glass-bg-subtle) border border-(--input-border) ' +
   'text-(--foreground) placeholder:text-(--muted-foreground) ' +
-  'focus:ring-1 focus:ring-[rgba(59,130,246,0.4)]';
+  'focus:ring-2 focus:ring-(--text-blue)';
 
 const labelCls = 'block text-xs font-semibold tracking-wide text-(--hero-text-muted) mb-1.5';
 
@@ -284,7 +286,62 @@ export function PostContent() {
   const selectedEventType = eventTypes.find((et) => et.id === selectedEventTypeId) ?? null;
   const eventHidden = selectedEventType?.hiddenFields ?? [];
 
+  // Alla obligatoriska fält för aktiv flik, i dokumentordning — används för
+  // att visa fel och flytta fokus när submit trycks med ogiltigt formulär.
+  function requiredFields(): { id: string; invalid: boolean }[] {
+    const emailInvalid = !contactEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail);
+    const shared = [
+      { id: 'contactName', invalid: !contactName.trim() },
+      { id: 'contactEmail', invalid: emailInvalid },
+    ];
+    if (activeTab === 'opportunity') {
+      return [
+        ...shared,
+        { id: 'opp-title', invalid: !opp.title.trim() },
+        { id: 'opp-company', invalid: !opp.company.trim() },
+        { id: 'opp-type', invalid: !opp.type },
+        { id: 'opp-location', invalid: !opp.location.trim() },
+        { id: 'opp-deadline', invalid: !opp.deadline.trim() },
+      ];
+    }
+    if (activeTab === 'event') {
+      return [
+        ...shared,
+        { id: 'evt-type-label', invalid: !selectedEventType },
+        { id: 'evt-title', invalid: !evt.title.trim() },
+        { id: 'evt-date', invalid: !evt.date.trim() },
+        ...(eventHidden.includes('endDate') ? [] : [{ id: 'evt-endDate', invalid: !evt.endDate.trim() }]),
+        ...(eventHidden.includes('location') ? [] : [{ id: 'evt-location', invalid: !evt.location.trim() }]),
+        ...(eventHidden.includes('section') ? [] : [{ id: 'evt-section', invalid: !evt.section }]),
+        { id: 'evt-desc', invalid: !evt.description.trim() },
+      ];
+    }
+    return [
+      ...shared,
+      { id: 'deal-company', invalid: !deal.company.trim() },
+      { id: 'deal-title', invalid: !deal.title.trim() },
+      { id: 'deal-desc', invalid: !deal.description.trim() },
+    ];
+  }
+
+  function focusFirstInvalid(fields: { id: string; invalid: boolean }[]) {
+    const first = fields.find((f) => f.invalid);
+    if (!first) return;
+    const el = document.getElementById(first.id);
+    if (!el) return;
+    if (!/^(input|select|textarea|button|a)$/i.test(el.tagName)) el.tabIndex = -1;
+    el.focus();
+  }
+
   function handleSubmit() {
+    // Submit är aldrig disabled — en död knapp utan felmeddelanden förklarar
+    // inte VARFÖR den inte fungerar. Visa felen och fokusera första i stället.
+    if (!isValid) {
+      const fields = requiredFields();
+      setTouched((prev) => new Set([...prev, ...fields.map((f) => f.id)]));
+      focusFirstInvalid(fields);
+      return;
+    }
     let url = '';
     if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
     else if (activeTab === 'event') url = buildEventMailto(
@@ -313,6 +370,8 @@ export function PostContent() {
     let nextIdx = idx;
     if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
     else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') nextIdx = 0;
+    else if (e.key === 'End') nextIdx = tabs.length - 1;
     else return;
     e.preventDefault();
     const nextId = tabs[nextIdx];
@@ -432,6 +491,8 @@ export function PostContent() {
                   aria-selected={isActive}
                   aria-controls={`panel-${id}`}
                   id={`tab-${id}`}
+                  // Roving tabindex — Tab ska bara stanna på aktiv flik (APG tabs)
+                  tabIndex={isActive ? 0 : -1}
                   onClick={() => switchTab(id)}
                   onKeyDown={(e) => handleTabKeyDown(e, id)}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 min-h-11"
@@ -1035,9 +1096,8 @@ export function PostContent() {
                       <button
                         type="button"
                         onClick={handleSubmit}
-                        disabled={!isValid}
                         aria-label={cp.submitAriaLabel}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 hover:scale-[1.02] active:scale-95"
                         style={
                           isValid
                             ? {

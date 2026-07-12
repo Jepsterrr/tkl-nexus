@@ -137,7 +137,7 @@ export function CorporateContent() {
                 style={{
                   background: 'rgba(139,92,246,0.15)',
                   border: '1px solid rgba(139,92,246,0.35)',
-                  color: '#8B5CF6',
+                  color: 'var(--text-purple)',
                 }}
               >
                 <Building2 className="w-4 h-4" aria-hidden="true" />
@@ -157,7 +157,7 @@ export function CorporateContent() {
                 <span
                   key={label}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}
+                  style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}
                 >
                   <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />
                   {label}
@@ -179,7 +179,7 @@ export function CorporateContent() {
               <Link
                 href="#tjanster"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl hero-text-muted font-semibold text-sm sm:text-base hover:hero-text active:scale-95"
-                style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+                style={{ border: '1px solid var(--glass-border-strong)' }}
               >
                 {corporate.ctaServices}
               </Link>
@@ -196,7 +196,7 @@ export function CorporateContent() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8" aria-label="Statistik om Teknologkåren">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8" aria-label={corporate.statsAriaLabel}>
         <div className="max-w-6xl mx-auto">
           <dl className="flex flex-wrap justify-between gap-8 sm:gap-4">
             {STATS.map((stat, i) => (
@@ -216,7 +216,7 @@ export function CorporateContent() {
         <div className="max-w-6xl mx-auto">
           <StaggerReveal className="mb-10">
             <RevealItem>
-              <h2 id="services-heading" className="text-2xl sm:text-3xl font-bold hero-text text-center mt-10">
+              <h2 id="services-heading" className="text-2xl sm:text-3xl font-bold hero-text text-center">
                 {corporate.servicesTitle}
               </h2>
             </RevealItem>

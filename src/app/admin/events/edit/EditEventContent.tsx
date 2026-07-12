@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { EventForm } from '@/components/admin/events/EventForm';
-import { getEventById } from '@/lib/services/events';
+import { getEventByIdAdmin } from '@/lib/services/events';
 import type { TKLEvent } from '@/lib/schemas/event';
 
 export function EditEventContent() {
@@ -16,7 +16,7 @@ export function EditEventContent() {
   useEffect(() => {
     if (!id) return; // saknat id hanteras direkt i render
     let cancelled = false;
-    getEventById(id)
+    getEventByIdAdmin(id)
       .then(data => {
         if (!cancelled) { setEvent(data); setLoading(false); }
       })

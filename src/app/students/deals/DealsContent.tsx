@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion, LayoutGroup } from 'framer-motion';
-import { Loader2, Tag, PlusCircle, Building2 } from 'lucide-react';
+import { Tag, PlusCircle, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
@@ -119,7 +119,7 @@ export function DealsContent() {
       .catch((err) => {
         if (isMounted) {
           console.error('[DealsContent]', err);
-          setError(deals?.error ?? 'Kunde inte hämta deals.');
+          setError(deals.error);
           setLoading(false);
         }
       });
@@ -191,13 +191,13 @@ export function DealsContent() {
 
             {/* Vänster: rubrik */}
             <StaggerReveal delay={0.05}>
+              {/* Inte aria-hidden — eyebrown är innehåll, enda sidan som gömde sin */}
               <RevealItem>
                 <p
-                  className="text-xs font-mono uppercase tracking-[0.2em] mb-5 opacity-50"
-                  style={{ color: '#F59E0B' }}
-                  aria-hidden="true"
+                  className="text-xs font-mono uppercase tracking-[0.2em] mb-5"
+                  style={{ color: 'var(--text-orange)' }}
                 >
-                  {deals?.badge ?? 'NEXUS Deals'}
+                  {deals.badge}
                 </p>
               </RevealItem>
               {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
@@ -207,9 +207,9 @@ export function DealsContent() {
                   className="hero-text hero-heading"
                   style={{ fontSize: 'clamp(3rem, 8vw + 0.5rem, 8rem)', lineHeight: 0.92 }}
                 >
-                  {deals?.heading ?? 'Exklusiva'}
+                  {deals.heading}
                   <br />
-                  <span className="text-accent-orange">{deals?.headingAccent ?? 'kårförmåner'}</span>
+                  <span className="text-accent-orange">{deals.headingAccent}</span>
                 </h1>
               </div>
               {/* Separator */}
@@ -226,11 +226,11 @@ export function DealsContent() {
             <StaggerReveal delay={0.25} className="mt-8 lg:mt-0 lg:pb-4">
               <RevealItem>
                 <p className="text-base sm:text-lg hero-text-muted leading-relaxed max-w-[42ch]">
-                  {deals?.description ?? 'Exklusiva rabatter och förmåner för dig som är kårmedlem i Teknologkåren.'}
+                  {deals.description}
                 </p>
               </RevealItem>
               <RevealItem className="flex flex-wrap gap-2 mt-6">
-                {[deals?.pills?.exclusive, deals?.pills?.name].filter(Boolean).map((label) => (
+                {[deals.pills.exclusive, deals.pills.name].map((label) => (
                   <span
                     key={label}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -262,7 +262,7 @@ export function DealsContent() {
       </section>
 
       {/* DEALS-LISTA */}
-      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label={deals?.badge ?? 'NEXUS Deals'}>
+      <section className="relative px-4 sm:px-6 lg:px-8 pb-24" aria-label={deals.badge}>
         <div className="max-w-4xl mx-auto">
 
           {/* View toggle */}
@@ -276,7 +276,7 @@ export function DealsContent() {
                     border: '1px solid var(--about-card-border)',
                   }}
                   role="group"
-                  aria-label={deals?.viewToggleAriaLabel ?? 'Välj visningsläge'}
+                  aria-label={deals.viewToggleAriaLabel}
                 >
                   {(['icon', 'detail'] as const).map((mode) => (
                     <button
@@ -286,7 +286,8 @@ export function DealsContent() {
                       aria-pressed={viewMode === mode}
                       className="relative px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-200 z-10"
                       style={{
-                        color: viewMode === mode ? '#0a0a0a' : 'var(--text-muted, #6b7280)',
+                        // --text-muted existerar inte i temat — hero-text-muted är temasäker
+                        color: viewMode === mode ? '#0a0a0a' : 'var(--hero-text-muted)',
                       }}
                     >
                       {viewMode === mode && (
@@ -299,9 +300,7 @@ export function DealsContent() {
                         />
                       )}
                       <span className="relative">
-                        {mode === 'icon'
-                          ? (deals?.viewIcons ?? 'Ikoner')
-                          : (deals?.viewDetails ?? 'Detaljer')}
+                        {mode === 'icon' ? deals.viewIcons : deals.viewDetails}
                       </span>
                     </button>
                   ))}
@@ -310,13 +309,17 @@ export function DealsContent() {
             </div>
           )}
 
-          {/* Laddning */}
+          {/* Laddning — skeleton i ikonrastrets form (samma mönster som Career) */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-24 gap-4" aria-live="polite" aria-busy="true">
-              <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#F59E0B' }} />
-              <p className="text-sm hero-text-subtle animate-pulse">
-                {deals?.loading ?? 'Hämtar deals...'}
-              </p>
+            <div
+              role="status"
+              aria-busy="true"
+              aria-label={deals.loading}
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
+            >
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="skeleton-shimmer rounded-2xl aspect-square" aria-hidden="true" />
+              ))}
             </div>
           )}
 
@@ -330,7 +333,7 @@ export function DealsContent() {
                   className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
                   style={{ background: 'linear-gradient(135deg, #B45309, #C2410C)' }}
                 >
-                  {deals?.retry ?? 'Försök igen'}
+                  {deals.retry}
                 </button>
               </div>
             </div>
@@ -353,10 +356,10 @@ export function DealsContent() {
                 <Tag className="w-12 h-12 mb-4 opacity-35" style={{ color: '#F59E0B' }} />
               </motion.div>
               <p className="text-lg hero-text-muted">
-                {deals?.noDeals ?? 'Inga deals tillgängliga.'}
+                {deals.noDeals}
               </p>
               <p className="text-sm hero-text-subtle mt-2">
-                {deals?.noDealsHint ?? 'Fler förmåner är på väg!'}
+                {deals.noDealsHint}
               </p>
               <Link
                 href="/corporate/post"
@@ -364,7 +367,7 @@ export function DealsContent() {
                 style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: 'var(--text-orange)' }}
               >
                 <PlusCircle className="w-4 h-4" aria-hidden="true" />
-                {deals?.emptyStateCta ?? 'Är du företag? Publicera ett erbjudande'}
+                {deals.emptyStateCta}
               </Link>
             </motion.div>
           )}
@@ -406,7 +409,7 @@ export function DealsContent() {
             }}
           >
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.28)' }}>
-              <Building2 className="w-6 h-6" style={{ color: '#8B5CF6' }} aria-hidden="true" />
+              <Building2 className="w-6 h-6" style={{ color: 'var(--text-purple)' }} aria-hidden="true" />
             </div>
             <div className="flex-1 text-center sm:text-left">
               <p className="font-bold hero-text text-base">{t.corporateCta.title}</p>
@@ -415,7 +418,7 @@ export function DealsContent() {
             <Link
               href="/corporate/post"
               className="shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-              style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.35)', color: '#8B5CF6' }}
+              style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.35)', color: 'var(--text-purple)' }}
             >
               {t.corporateCta.btn}
             </Link>

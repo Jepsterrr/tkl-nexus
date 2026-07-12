@@ -6,12 +6,15 @@ import { BannerSettingsSchema } from "@/lib/schemas/settings";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
+// Bannern renderas alltid med vit text — alla swatches måste hålla
+// AA-kontrast (≥4,5:1) mot vitt, dvs L ≤ ~48% i oklch. Ljusa nyanser
+// (gul, ljusgrön, ljusblå) är förbjudna här.
 const SWATCHES = [
-  { label: "Blå",  value: "oklch(62% 0.21 255)" },
-  { label: "Röd",  value: "oklch(48% 0.25 28)"  },
-  { label: "Grön", value: "oklch(70% 0.17 163)"  },
-  { label: "Gul",  value: "oklch(77% 0.17 77)"   },
-  { label: "Lila", value: "oklch(60% 0.22 291)"  },
+  { label: "Blå",   value: "oklch(48% 0.19 255)" },
+  { label: "Röd",   value: "oklch(48% 0.25 28)"  },
+  { label: "Grön",  value: "oklch(46% 0.12 163)" },
+  { label: "Brons", value: "oklch(47% 0.11 77)"  },
+  { label: "Lila",  value: "oklch(46% 0.21 291)" },
 ];
 
 import { inputCls, labelCls } from "@/components/admin/shared/formStyles";

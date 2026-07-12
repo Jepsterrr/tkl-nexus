@@ -81,18 +81,24 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
         className="flex items-center justify-between px-5 py-4"
         style={{ borderBottom: '1px solid var(--about-card-border)' }}
       >
+        {/* aria-disabled i stället för disabled — knappen man står på ska inte
+            tappa fokus när man navigerar tillbaka till innevarande månad */}
         <button
-          onClick={() =>
-            setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))
-          }
-          disabled={isPrevDisabled}
+          onClick={() => {
+            if (isPrevDisabled) return;
+            setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1));
+          }}
+          aria-disabled={isPrevDisabled}
           aria-label={ev.calendarPrevMonth}
-          className={`p-2 rounded-xl transition-all duration-200 disabled:opacity-20 disabled:cursor-not-allowed ${hoverCls}`}
+          className={`p-2 rounded-xl transition-all duration-200 ${
+            isPrevDisabled ? 'opacity-20 cursor-not-allowed' : hoverCls
+          }`}
         >
           <ChevronLeft className="w-4 h-4" style={{ color: 'var(--text-blue)' }} />
         </button>
 
-        <span className="text-sm font-semibold capitalize hero-text">{monthLabel}</span>
+        {/* aria-live: månadsbytet ska annonseras för skärmläsare */}
+        <span aria-live="polite" className="text-sm font-semibold capitalize hero-text">{monthLabel}</span>
 
         <button
           onClick={() =>
@@ -136,7 +142,8 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
               onClick={() => onDaySelect(isSelected ? null : day)}
               disabled={isPast}
               aria-pressed={isSelected}
-              aria-label={day.toLocaleDateString(localeTag)}
+              aria-current={isToday ? 'date' : undefined}
+              aria-label={`${day.toLocaleDateString(localeTag)}${hasEvent ? `, ${ev.calendarDayHasEvents}` : ''}`}
               className={`relative flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-default disabled:pointer-events-none ${hoverCls}`}
               style={{
                 background: isSelected
@@ -163,6 +170,7 @@ export function LuddCalendar({ events, selectedDate, onDaySelect }: LuddCalendar
                   style={{
                     background: isSelected ? 'var(--text-blue)' : 'var(--hero-text-subtle)',
                   }}
+                  aria-hidden="true"
                 />
               )}
 

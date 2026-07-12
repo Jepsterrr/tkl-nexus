@@ -1,4 +1,5 @@
 import {
+  deleteField,
   doc,
   getDocsFromCache,
   getDocsFromServer,
@@ -43,6 +44,42 @@ export async function togglePublishedField(pathSegments: [string, ...string[]], 
 /** Firestore accepterar inte undefined-värden — filtrera bort dem före skrivning. */
 export function omitUndefined(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+}
+
+/**
+ * För update-skrivningar: formulären sätter tömda valfria fält till undefined.
+ * omitUndefined skulle tyst lämna det gamla värdet kvar i dokumentet — här
+ * konverteras undefined i stället till deleteField() så fältet raderas.
+ */
+export function undefinedToDeleteField(obj: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [k, v === undefined ? deleteField() : v]),
+  );
+}
+
+/**
+ * UTC-instansen för midnatt i Europe/Stockholm som ISO-sträng.
+ * Cutoffen för "pågående" dokument ska följa Stockholmsdygnet oavsett
+ * besökarens tidszon — inte klientens lokala midnatt.
+ *
+ * INVARIANT: datumfält (events.date/endDate, career.deadline) lagras alltid
+ * som ISO-strängar. Firestore matchar aldrig olika typer i range-queries —
+ * ett dokument där fältet skrivits som Timestamp (t.ex. via konsolen)
+ * försvinner TYST ur listorna. Skriv aldrig datumfält som Timestamp.
+ */
+export function startOfTodayStockholmIso(): string {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    hourCycle: 'h23',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const elapsedMs =
+    (get('hour') * 3600 + get('minute') * 60 + get('second')) * 1000 + now.getMilliseconds();
+  return new Date(now.getTime() - elapsedMs).toISOString();
 }
 
 /**

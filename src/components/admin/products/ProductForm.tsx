@@ -44,6 +44,7 @@ function HighlightListInput({
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
           className={inputCls}
           placeholder="Skriv en punkt och tryck Enter"
+          aria-label={label}
         />
         <button
           type="button"
@@ -130,29 +131,30 @@ export function ProductForm({ initial }: ProductFormProps) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Namn (sv) *</label>
-          <input required className={inputCls} value={form.name} onChange={(e) => set('name', e.target.value)} />
+          <label htmlFor="pf-name" className={labelCls}>Namn (sv) *</label>
+          <input id="pf-name" required className={inputCls} value={form.name} onChange={(e) => set('name', e.target.value)} />
         </div>
         <div>
-          <label className={labelCls}>Name (EN)</label>
-          <input className={inputCls} value={form.nameEn} onChange={(e) => set('nameEn', e.target.value)} />
+          <label htmlFor="pf-name-en" className={labelCls}>Name (EN)</label>
+          <input id="pf-name-en" className={inputCls} value={form.nameEn} onChange={(e) => set('nameEn', e.target.value)} />
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Beskrivning (sv)</label>
-          <textarea rows={3} className={inputCls} value={form.description} onChange={(e) => set('description', e.target.value)} />
+          <label htmlFor="pf-desc" className={labelCls}>Beskrivning (sv)</label>
+          <textarea id="pf-desc" rows={3} className={inputCls} value={form.description} onChange={(e) => set('description', e.target.value)} />
         </div>
         <div>
-          <label className={labelCls}>Description (EN)</label>
-          <textarea rows={3} className={inputCls} value={form.descriptionEn} onChange={(e) => set('descriptionEn', e.target.value)} />
+          <label htmlFor="pf-desc-en" className={labelCls}>Description (EN)</label>
+          <textarea id="pf-desc-en" rows={3} className={inputCls} value={form.descriptionEn} onChange={(e) => set('descriptionEn', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className={labelCls}>Kategori *</label>
+        <label htmlFor="pf-category" className={labelCls}>Kategori *</label>
         <select
+          id="pf-category"
           className={inputCls}
           value={form.category}
           onChange={(e) => set('category', e.target.value as TKLProductFormData['category'])}
@@ -170,19 +172,19 @@ export function ProductForm({ initial }: ProductFormProps) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Pris (sv)</label>
-          <input className={inputCls} placeholder="T.ex. 12 500 kr exkl. förtäring" value={form.price} onChange={(e) => set('price', e.target.value)} />
+          <label htmlFor="pf-price" className={labelCls}>Pris (sv)</label>
+          <input id="pf-price" className={inputCls} placeholder="T.ex. 12 500 kr exkl. förtäring" value={form.price} onChange={(e) => set('price', e.target.value)} />
         </div>
         <div>
-          <label className={labelCls}>Price (EN)</label>
-          <input className={inputCls} placeholder="E.g. 12 500 SEK excl. food" value={form.priceEn} onChange={(e) => set('priceEn', e.target.value)} />
+          <label htmlFor="pf-price-en" className={labelCls}>Price (EN)</label>
+          <input id="pf-price-en" className={inputCls} placeholder="E.g. 12 500 SEK excl. food" value={form.priceEn} onChange={(e) => set('priceEn', e.target.value)} />
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Ordning (lägre = visas först)</label>
-          <input type="number" className={inputCls} value={form.order} onChange={(e) => set('order', Number(e.target.value))} />
+          <label htmlFor="pf-order" className={labelCls}>Ordning (lägre = visas först)</label>
+          <input id="pf-order" type="number" className={inputCls} value={form.order} onChange={(e) => set('order', Number(e.target.value))} />
         </div>
         <div className="flex items-center gap-3 pt-5">
           <input

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DealForm } from '@/components/admin/deals/DealForm';
-import { getDealById } from '@/lib/services/deals';
+import { getDealByIdAdmin } from '@/lib/services/deals';
 import type { TKLDeal } from '@/lib/schemas/deal';
 
 export function EditDealContent() {
@@ -16,7 +16,7 @@ export function EditDealContent() {
   useEffect(() => {
     if (!id) return; // saknat id hanteras direkt i render
     let cancelled = false;
-    getDealById(id)
+    getDealByIdAdmin(id)
       .then(data => {
         if (!cancelled) { setDeal(data); setLoading(false); }
       })

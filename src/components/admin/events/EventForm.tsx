@@ -91,6 +91,19 @@ export function EventForm({ mode, initialData }: EventFormProps) {
         if (field && !fieldErrors[field]) fieldErrors[field] = err.message;
       }
       setErrors(fieldErrors);
+      // Fokusera första felfältet — annars händer "ingenting" hörbart för
+      // skärmläsaranvändare när submit misslyckas.
+      const fieldIds: Partial<Record<keyof EventFormData, string>> = {
+        title: 'ef-title',
+        titleEn: 'ef-title-en',
+        date: 'ef-date',
+        endDate: 'ef-end-date',
+        location: 'ef-location',
+        description: 'ef-description',
+        descriptionEn: 'ef-description-en',
+      };
+      const firstField = (Object.keys(fieldIds) as (keyof EventFormData)[]).find(k => fieldErrors[k]);
+      if (firstField) document.getElementById(fieldIds[firstField]!)?.focus();
       return;
     }
 
@@ -168,8 +181,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={inputCls}
+                aria-required="true"
+                aria-invalid={errors.title ? true : undefined}
+                aria-describedby={errors.title ? 'ef-title-error' : undefined}
               />
-              {errors.title && <p className={errorCls}>{errors.title}</p>}
+              {errors.title && <p id="ef-title-error" role="alert" className={errorCls}>{errors.title}</p>}
             </div>
             <div>
               <label htmlFor="ef-title-en" className={labelCls}>Titel (en)</label>
@@ -198,8 +214,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className={inputCls}
+                aria-required="true"
+                aria-invalid={errors.date ? true : undefined}
+                aria-describedby={errors.date ? 'ef-date-error' : undefined}
               />
-              {errors.date && <p className={errorCls}>{errors.date}</p>}
+              {errors.date && <p id="ef-date-error" role="alert" className={errorCls}>{errors.date}</p>}
             </div>
             <div>
               <label htmlFor="ef-end-date" className={labelCls}>Slutdatum {reqMark}</label>
@@ -209,8 +228,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className={inputCls}
+                aria-required="true"
+                aria-invalid={errors.endDate ? true : undefined}
+                aria-describedby={errors.endDate ? 'ef-end-date-error' : undefined}
               />
-              {errors.endDate && <p className={errorCls}>{errors.endDate}</p>}
+              {errors.endDate && <p id="ef-end-date-error" role="alert" className={errorCls}>{errors.endDate}</p>}
             </div>
           </div>
           <div>
@@ -223,8 +245,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className={inputCls}
+              aria-required="true"
+              aria-invalid={errors.location ? true : undefined}
+              aria-describedby={errors.location ? 'ef-location-error' : undefined}
             />
-            {errors.location && <p className={errorCls}>{errors.location}</p>}
+            {errors.location && <p id="ef-location-error" role="alert" className={errorCls}>{errors.location}</p>}
           </div>
         </section>
 
@@ -242,8 +267,11 @@ export function EventForm({ mode, initialData }: EventFormProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}
                 className={inputCls}
+                aria-required="true"
+                aria-invalid={errors.description ? true : undefined}
+                aria-describedby={errors.description ? 'ef-description-error' : undefined}
               />
-              {errors.description && <p className={errorCls}>{errors.description}</p>}
+              {errors.description && <p id="ef-description-error" role="alert" className={errorCls}>{errors.description}</p>}
             </div>
             <div>
               <label htmlFor="ef-description-en" className={labelCls}>Beskrivning (en, valfritt)</label>

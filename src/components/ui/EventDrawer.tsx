@@ -18,6 +18,11 @@ const SECTION_COLORS: Record<Section, string> = {
   general: '#8B5CF6',
 };
 
+// Temasäker text — rå sektionshex (marinblå/mörkröd) är ~1,3:1 på mörk bg.
+// Samma helper som i EventsContent; rå hex enbart för bg/border/glow.
+const sectionText = (color: string) =>
+  `color-mix(in srgb, ${color} 45%, var(--hero-text))`;
+
 const SECTION_LOGOS: Record<Section, string | null> = {
   data: '/Logo/Data.png',
   geo: '/Logo/Geo.png',
@@ -179,7 +184,7 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                 {logo && <img src={logo} alt="" className="w-4 h-4 object-contain" aria-hidden="true" loading="lazy" decoding="async" />}
                 <span
                   className="text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
-                  style={{ color, background: `${color}18`, border: `1px solid ${color}30` }}
+                  style={{ color: sectionText(color), background: `${color}18`, border: `1px solid ${color}30` }}
                 >
                   {ev.sections[event!.section]}
                 </span>
@@ -244,7 +249,7 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
-                  style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
+                  style={{ color: sectionText(color), background: `${color}15`, border: `1px solid ${color}30` }}
                 >
                   {ev.readOnLudd}
                   <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />

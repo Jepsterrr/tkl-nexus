@@ -25,6 +25,10 @@ on:
     types: [completed]
     branches: [master]
 
+# Deployen autentiserar via service account — GITHUB_TOKEN behöver bara läsa.
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-production
   cancel-in-progress: false
@@ -64,6 +68,9 @@ jobs:
           cat > "$GOOGLE_APPLICATION_CREDENTIALS" <<'EOF'
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           EOF
+
+      - name: Stämpla sitemap lastmod till deploy-datum
+        run: node scripts/stamp-sitemap.mjs
 
       - name: Aktivera web frameworks-stöd
         run: npx --yes firebase-tools experiments:enable webframeworks

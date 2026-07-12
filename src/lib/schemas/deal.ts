@@ -3,13 +3,20 @@ import { z } from 'zod';
 export const DealSchema = z.object({
   id: z.string(),
   company: z.string().min(1),
-  logoUrl: z.string().url().optional().or(z.literal('')),
+  // Renderas i src/href — enbart http(s) (z.string().url() godkänner javascript:)
+  logoUrl: z.string().url().refine(
+    v => /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
   cloudinaryPublicId: z.string().optional(),
   title: z.string().min(1),
   titleEn: z.string().optional(),
   description: z.string().min(1),
   descriptionEn: z.string().optional(),
-  link: z.string().url().optional().or(z.literal('')),
+  link: z.string().url().refine(
+    v => /^https?:\/\//i.test(v),
+    { message: 'URL måste börja med https://' }
+  ).optional().or(z.literal('')),
   discountCode: z.string().optional(),
   discount: z.string().optional(),
   published: z.boolean(),

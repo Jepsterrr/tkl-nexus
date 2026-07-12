@@ -89,6 +89,22 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
         if (field && !fieldErrors[field]) fieldErrors[field] = err.message;
       }
       setErrors(fieldErrors);
+      // Fokusera första felfältet — annars händer "ingenting" hörbart för
+      // skärmläsaranvändare när submit misslyckas.
+      const fieldIds: Partial<Record<keyof CareerFormData, string>> = {
+        title: 'cf-title',
+        titleEn: 'cf-title-en',
+        company: 'cf-company',
+        location: 'cf-location',
+        description: 'cf-description',
+        descriptionEn: 'cf-description-en',
+        startDate: 'cf-start-date',
+        startDateEn: 'cf-start-date-en',
+        deadline: 'cf-deadline',
+        applyUrl: 'cf-apply-url',
+      };
+      const firstField = (Object.keys(fieldIds) as (keyof CareerFormData)[]).find(k => fieldErrors[k]);
+      if (firstField) document.getElementById(fieldIds[firstField]!)?.focus();
       return;
     }
 
@@ -156,8 +172,11 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
               <div>
                 <label htmlFor="cf-title" className={labelCls}>Titel (sv) {reqMark}</label>
                 <input id="cf-title" type="text" value={title}
-                  onChange={e => setTitle(e.target.value)} className={inputCls} />
-                {errors.title && <p className={errorCls}>{errors.title}</p>}
+                  onChange={e => setTitle(e.target.value)} className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.title ? true : undefined}
+                  aria-describedby={errors.title ? 'cf-title-error' : undefined} />
+                {errors.title && <p id="cf-title-error" role="alert" className={errorCls}>{errors.title}</p>}
               </div>
               <div>
                 <label htmlFor="cf-title-en" className={labelCls}>Titel (en, valfritt)</label>
@@ -169,14 +188,20 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
               <div>
                 <label htmlFor="cf-company" className={labelCls}>Företag {reqMark}</label>
                 <input id="cf-company" type="text" value={company}
-                  onChange={e => setCompany(e.target.value)} className={inputCls} />
-                {errors.company && <p className={errorCls}>{errors.company}</p>}
+                  onChange={e => setCompany(e.target.value)} className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.company ? true : undefined}
+                  aria-describedby={errors.company ? 'cf-company-error' : undefined} />
+                {errors.company && <p id="cf-company-error" role="alert" className={errorCls}>{errors.company}</p>}
               </div>
               <div>
                 <label htmlFor="cf-location" className={labelCls}>Ort {reqMark}</label>
                 <input id="cf-location" type="text" value={location}
-                  onChange={e => setLocation(e.target.value)} className={inputCls} />
-                {errors.location && <p className={errorCls}>{errors.location}</p>}
+                  onChange={e => setLocation(e.target.value)} className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.location ? true : undefined}
+                  aria-describedby={errors.location ? 'cf-location-error' : undefined} />
+                {errors.location && <p id="cf-location-error" role="alert" className={errorCls}>{errors.location}</p>}
               </div>
             </div>
             <div>
@@ -239,15 +264,20 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
               <div>
                 <label htmlFor="cf-deadline" className={labelCls}>Deadline {reqMark}</label>
                 <input id="cf-deadline" type="datetime-local" value={deadline}
-                  onChange={e => setDeadline(e.target.value)} className={inputCls} />
-                {errors.deadline && <p className={errorCls}>{errors.deadline}</p>}
+                  onChange={e => setDeadline(e.target.value)} className={inputCls}
+                  aria-required="true"
+                  aria-invalid={errors.deadline ? true : undefined}
+                  aria-describedby={errors.deadline ? 'cf-deadline-error' : undefined} />
+                {errors.deadline && <p id="cf-deadline-error" role="alert" className={errorCls}>{errors.deadline}</p>}
               </div>
               <div>
                 <label htmlFor="cf-apply-url" className={labelCls}>Ansökningslänk (valfritt)</label>
                 <input id="cf-apply-url" type="url" value={applyUrl}
                   onChange={e => setApplyUrl(e.target.value)}
-                  placeholder="https://" className={inputCls} />
-                {errors.applyUrl && <p className={errorCls}>{errors.applyUrl}</p>}
+                  placeholder="https://" className={inputCls}
+                  aria-invalid={errors.applyUrl ? true : undefined}
+                  aria-describedby={errors.applyUrl ? 'cf-apply-url-error' : undefined} />
+                {errors.applyUrl && <p id="cf-apply-url-error" role="alert" className={errorCls}>{errors.applyUrl}</p>}
               </div>
             </div>
           </div>
