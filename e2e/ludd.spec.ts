@@ -55,8 +55,9 @@ test.describe('LUDD Campus Events (mockat API)', () => {
   test('datumval filtrerar events, tomt datum visar tomt-state', async ({ page }) => {
     const { dates } = luddFixture();
 
-    // Välj dagen med event om 5 dagar
-    await page.getByRole('button', { name: dates.inFiveDays.toLocaleDateString('sv-SE'), exact: true }).click();
+    // Välj dagen med event om 5 dagar — eventdagar annonserar ", event denna
+    // dag" i accessible name (skärmläsarstöd), tomma dagar enbart datumet.
+    await page.getByRole('button', { name: `${dates.inFiveDays.toLocaleDateString('sv-SE')}, event denna dag`, exact: true }).click();
     await expect(page.getByText('Mock Brädspelskväll')).toBeVisible();
     await expect(page.getByText('Mock LAN-kväll')).toHaveCount(0);
 
