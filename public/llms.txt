@@ -20,3 +20,8 @@
 Teknologkåren vid Luleå tekniska universitet
 Kontakt: ao@teknologkaren.se
 LinkedIn: https://linkedin.com/in/tkl-nexus/
+
+## Aktuellt innehåll
+
+<!-- BEGIN LISTINGS -->
+<!-- END LISTINGS -->

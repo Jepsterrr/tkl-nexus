@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { toJsonLd } from '@/lib/json-ld';
+import dealsJsonLd from '@/lib/generated/deals-jsonld.json';
 import { DealsContent } from './DealsContent';
 
 export const metadata: Metadata = {
@@ -32,6 +33,9 @@ export default function DealsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumb) }} />
+      {dealsJsonLd.itemListElement.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(dealsJsonLd) }} />
+      )}
       <p className="sr-only">
         NEXUS Deals samlar exklusiva rabatter, erbjudanden och förmåner för dig som är kårmedlem vid Luleå tekniska universitet. Spara pengar på programvara, utrustning, mat och tjänster under din studietid. Förmånerna uppdateras löpande av TKL NEXUS arbetsmarknadsgrupp.
       </p>
