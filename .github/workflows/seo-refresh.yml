@@ -1,31 +1,18 @@
-# Automatisk produktionsdeploy till Firebase Hosting.
+# Daglig SEO/GEO-refresh. Sajten är helstatisk — enda sättet att uppdatera
+# inbäddad JSON-LD/llms.txt är rebuild + redeploy. Innehåll (jobb/events/deals)
+# ändras oberoende av kod, och deadlines passerar, så en daglig cron håller
+# datan färsk. Deployar ENDAST när den publika datan faktiskt ändrats
+# (hash-jämförelse mot live /seo-hash.txt) — ingen falsk sitemap-lastmod.
 #
-# Triggas när E2E-workflowen gått grön på master — aldrig direkt på push.
-# Deployar ENBART hosting; Firestore-regler deployas medvetet manuellt
-# (`firebase deploy --only firestore`) eftersom regeländringar är sällsynta
-# och känsliga.
-#
-# Kräver repository secret FIREBASE_SERVICE_ACCOUNT (utöver NEXT_PUBLIC_*-
-# secrets som E2E-workflowen redan använder):
-#   1. Google Cloud Console → IAM & Admin → Service Accounts (projekt tkl-nexus)
-#      → Create service account → ge rollen "Firebase Hosting Admin" +
-#      "Service Usage Consumer". (Rollen "Firebase Admin" fungerar också men
-#      är bredare än nödvändigt.)
-#   2. Skapa en JSON-nyckel för kontot → klistra in HELA filinnehållet som
-#      secret FIREBASE_SERVICE_ACCOUNT (Settings → Secrets and variables →
-#      Actions).
-#
-# Utan secreten failar jobbet i autentiseringssteget utan att röra produktionen.
+# Kräver samma secrets som deploy.yml (NEXT_PUBLIC_* + FIREBASE_SERVICE_ACCOUNT).
 
-name: Deploy
+name: SEO Refresh
 
 on:
-  workflow_run:
-    workflows: [E2E]
-    types: [completed]
-    branches: [master]
+  schedule:
+    - cron: '0 4 * * *'  # 04:00 UTC ≈ 05–06 svensk tid
+  workflow_dispatch: {}
 
-# Deployen autentiserar via service account — GITHUB_TOKEN behöver bara läsa.
 permissions:
   contents: read
 
@@ -34,8 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    if: github.event.workflow_run.conclusion == 'success'
+  refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -50,10 +36,9 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/.firebase-sa.json
 
     steps:
-      # Deploya exakt den commit som E2E-workflowen testade
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: master
 
       - uses: actions/setup-node@v6
         with:
@@ -63,22 +48,27 @@ jobs:
       - name: Installera beroenden
         run: npm ci
 
+      - name: Generera SEO-data + kontrollera ändring
+        id: seo
+        run: node scripts/generate-seo-data.mjs --check-live
+
       - name: Skriv service account-nyckel
+        if: steps.seo.outputs.changed == 'true'
         run: |
           cat > "$GOOGLE_APPLICATION_CREDENTIALS" <<'EOF'
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           EOF
 
-      - name: Generera SEO-data (JSON-LD + llms.txt)
-        run: node scripts/generate-seo-data.mjs
-
       - name: Stämpla sitemap lastmod till deploy-datum
+        if: steps.seo.outputs.changed == 'true'
         run: node scripts/stamp-sitemap.mjs
 
       - name: Aktivera web frameworks-stöd
+        if: steps.seo.outputs.changed == 'true'
         run: npx --yes firebase-tools experiments:enable webframeworks
 
       - name: Deploya till Firebase Hosting
+        if: steps.seo.outputs.changed == 'true'
         run: npx --yes firebase-tools deploy --only hosting --project tkl-nexus --force
 
       - name: Rensa service account-nyckel
