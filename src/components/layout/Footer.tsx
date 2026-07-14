@@ -44,7 +44,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2.5">
-              <img src="/Logo/TKL NEXUS.svg" alt="TKL NEXUS" width={32} height={32} loading="lazy" decoding="async" />
+              <img src="/Logo/tkl-nexus.svg" alt="TKL NEXUS" width={32} height={32} loading="lazy" decoding="async" />
               <span className="footer-text font-black text-lg tracking-tight select-none">
                 TKL
               </span>

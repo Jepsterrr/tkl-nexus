@@ -50,6 +50,16 @@ export const metadata: Metadata = {
     'arbetsmarknadsdagar Luleå', 'nätverkande studenter',
   ],
   metadataBase: new URL('https://tklnexus.se'),
+  verification: {
+    google: 'Gimj9CssGTPnguypMNRxQlf1lcXFuDZOha5QteAmjlk',
+  },
+  icons: {
+    icon: [
+      { url: '/Logo/tkl-nexus.svg', type: 'image/svg+xml' },
+      { url: '/Logo/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
+    ],
+    apple: [{ url: '/Logo/apple-icon.png', sizes: '180x180' }],
+  },
   openGraph: {
     siteName: 'TKL NEXUS',
     locale: 'sv_SE',
@@ -99,6 +109,7 @@ export default function RootLayout({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'TKL NEXUS',
+    alternateName: 'TKL NEXUS',
     url: 'https://tklnexus.se',
     description: 'Arbetsmarknadsportal för LTU-studenter — exjobb, praktik, trainee och karriärevent.',
   };
@@ -108,7 +119,7 @@ export default function RootLayout({
       <head>
         {/* Blocking script: reads localStorage before first paint to prevent theme flash */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('tkl-theme');if(!t||!['dark','light','system'].includes(t))t='light';var r=t==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;document.documentElement.classList.remove('dark','light');document.documentElement.classList.add(r);}catch(e){}})();` }} />
-        <link rel="icon" href="/Logo/TKL NEXUS.svg" sizes="any" />
+        {/* Favicon/apple-touch hanteras via metadata.icons ovan. */}
         {/* Hero-foton (admin-uppladdade) bor på Cloudinary — värm upp
             DNS+TLS direkt så fotot laddar snabbare när settings-svaret kommer */}
         <link rel="preconnect" href="https://res.cloudinary.com" />

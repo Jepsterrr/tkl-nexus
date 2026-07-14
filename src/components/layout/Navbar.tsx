@@ -138,7 +138,7 @@ export function Navbar() {
               className="flex items-center gap-2.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613] rounded-lg"
               aria-label="TKL NEXUS"
             >
-              <img src="/Logo/TKL NEXUS.svg" alt="TKL NEXUS" width={32} height={32} />
+              <img src="/Logo/tkl-nexus.svg" alt="TKL NEXUS" width={32} height={32} />
               <span className="nav-text font-bold text-base select-none" style={{ letterSpacing: '-0.03em' }}>
                 TKL
               </span>
