@@ -15,24 +15,24 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "firebase": "^12.17.0",
+    "firebase": "^12.18.0",
     "framer-motion": "^12.43.0",
-    "lucide-react": "^1.28.0",
-    "next": "^16.2.12",
-    "posthog-js": "^1.409.0",
+    "lucide-react": "^1.40.0",
+    "next": "^16.3.4",
+    "posthog-js": "^1.426.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.12.1",
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.2.12",
+    "eslint-config-next": "^16.3.4",
     "tailwindcss": "^4.3.2",
     "typescript": "^5"
   }
