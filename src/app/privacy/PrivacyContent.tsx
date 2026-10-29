@@ -73,7 +73,15 @@ export function PrivacyContent() {
           </div>
 
           <RevealItem>
-            <p className="hero-text-muted text-base leading-relaxed mb-10">{p.intro}</p>
+            <p className="hero-text-muted text-base leading-relaxed mb-3">{p.intro}</p>
+          </RevealItem>
+
+          {/* Versionsmarkör — den rättsliga grunden har ändrats sedan tidigare
+              versioner, så läsaren måste kunna se när texten senast reviderades. */}
+          <RevealItem>
+            <p className="hero-text-subtle text-xs mb-10">
+              <time dateTime="2026-08-11">{p.updated}</time>
+            </p>
           </RevealItem>
 
           {/* Personuppgiftsansvarig */}
@@ -99,6 +107,13 @@ export function PrivacyContent() {
           <RevealItem>
             <SectionCard title={p.cookiesTitle}>
               <p className="hero-text-muted text-sm leading-relaxed">{p.cookiesBody}</p>
+            </SectionCard>
+          </RevealItem>
+
+          {/* Nödvändiga tjänster — Firebase/Cloudinary, alltid-på biträden */}
+          <RevealItem>
+            <SectionCard title={p.infraTitle}>
+              <p className="hero-text-muted text-sm leading-relaxed">{p.infraBody}</p>
             </SectionCard>
           </RevealItem>
 

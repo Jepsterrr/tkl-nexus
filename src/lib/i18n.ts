@@ -555,10 +555,13 @@ export const TRANSLATIONS = {
       controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org.nr 897000-5388, Kårhusvägen 5, 977 54 Luleå, är personuppgiftsansvarig för behandlingen av dina uppgifter på denna webbplats.',
 
       dataTitle: 'Vad vi samlar in',
-      dataBody: 'Med ditt samtycke samlar vi in pseudonyma besöksdata via PostHog: sidvisningar, klick, scroll-djup och webbläsartyp. En pseudonym identifierare (UUID) lagras i din webbläsares localStorage. IP-adresser anonymiseras av PostHog omedelbart vid mottagning och lagras aldrig i sin helhet. Inga uppgifter som direkt identifierar dig — som namn eller e-post — samlas in.',
+      dataBody: 'Med ditt samtycke samlar vi in pseudonyma besöksdata via PostHog: sidvisningar, klick, scroll-djup och webbläsartyp. En pseudonym identifierare (UUID) lagras i din webbläsares localStorage. IP-adresser anonymiseras av PostHog omedelbart vid mottagning och lagras aldrig i sin helhet. Inga uppgifter som direkt identifierar dig — som namn eller e-post — samlas in. Utöver detta tar de tjänster som levererar själva webbplatsen emot din IP-adress varje gång en sida laddas, oavsett om du samtyckt till analys eller inte — se avsnittet Nödvändiga tjänster.',
 
       cookiesTitle: 'Cookies och lokal lagring',
-      cookiesBody: 'PostHog lagrar en pseudonym sessions-identifierare under nycklarna ph_* i localStorage. Vi lagrar även ditt samtyckesbeslut under nyckeln tkl-cookie-consent. Inga reklamcookies eller tredjepartscookies för profilering används.',
+      cookiesBody: 'PostHog lagrar en pseudonym sessions-identifierare under nycklarna ph_* i localStorage. Vi lagrar även ditt samtyckesbeslut (tkl-cookie-consent) samt dina val av tema (tkl-theme) och språk (tkl-locale). För att sidorna ska ladda snabbare sparar Firestore dessutom en kopia av det publika innehållet — events, karriärannonser och förmåner — i webbläsarens IndexedDB, tillsammans med en tidsstämpel per innehållstyp (cacheVersion_*). Den lagringen innehåller inga uppgifter om dig, bara samma innehåll som visas på sidan. Inga reklamcookies eller tredjepartscookies för profilering används. Du kan när som helst rensa allt via webbläsarens funktion för att ta bort webbplatsdata.',
+
+      infraTitle: 'Nödvändiga tjänster',
+      infraBody: 'För att webbplatsen ska fungera hämtas sidan, innehållet och bilderna från externa servrar som tar emot din IP-adress. Det sker oavsett ditt cookie-val eftersom det är tekniskt nödvändigt för att visa innehållet, och den rättsliga grunden är vårt berättigade intresse (GDPR artikel 6.1 f) av att tillhandahålla en fungerande webbplats. Google levererar via Firebase Hosting själva webbplatsen och tar emot din IP-adress vid varje sidladdning. Vårt eget innehåll — events, karriärannonser och förmåner — hämtas från databastjänsten Firebase Firestore, vars databas är placerad i Stockholm (regionen europe-north2). Cloudinary Ltd levererar bilder som hero-foton och företagsloggor; din webbläsare öppnar en förbindelse dit redan när sidan laddas, så att bilderna hinner visas snabbare. När du öppnar Campus Events-vyn hämtas externa evenemang direkt från LUDD (Luleå Academic Computer Society), vars servrar står i Luleå tekniska universitets eget nät i Sverige — ingen överföring utanför EU/EES sker för dessa. Ingen av tjänsterna sätter spårningscookies eller använder uppgifterna för profilering eller marknadsföring. Var uppgifterna hamnar geografiskt beskrivs under Internationell överföring.',
 
       cookieSettingsTitle: 'Cookie-inställningar',
       cookieSettingsBody: 'Här kan du när som helst slå på eller av analys-cookies. Nödvändig lokal lagring — tema, språk och ditt samtyckesval — påverkas inte och kräver inget samtycke.',
@@ -567,7 +570,7 @@ export const TRANSLATIONS = {
       cookieSettingsOff: 'Av',
 
       legalTitle: 'Rättslig grund',
-      legalBody: 'Behandlingen grundar sig uteslutande på ditt samtycke (GDPR artikel 6.1 a). Du kan när som helst återkalla samtycket utan att det påverkar lagligheten av behandling som skett dessförinnan.',
+      legalBody: 'Analys av besöksdata via PostHog grundas på ditt samtycke (GDPR artikel 6.1 a). Du kan när som helst återkalla samtycket utan att det påverkar lagligheten av behandling som skett dessförinnan. Nödvändig teknisk drift av webbplatsen (se Nödvändiga tjänster) grundas i stället på vårt berättigade intresse (artikel 6.1 f) av att kunna visa innehållet, och kräver inget samtycke.',
 
       purposeTitle: 'Ändamål',
       purposeBody: 'Datan används uteslutande för att förstå hur webbplatsen används och förbättra upplevelsen för studenter och företag. Ingen data säljs eller delas med tredje part i marknadsföringssyfte.',
@@ -578,15 +581,15 @@ export const TRANSLATIONS = {
       ageTitle: 'Åldersgräns',
       ageBody: 'Tjänsten riktar sig till studenter och företag. I enlighet med GDPR artikel 8 och svensk lag behandlar vi inte personuppgifter för personer under 16 år. Genom att acceptera cookies bekräftar du att du är 16 år eller äldre.',
 
-      processorTitle: 'Personuppgiftsbiträde & underbiträden',
-      processorBody: 'Vi anlitar PostHog, Inc. (USA) som personuppgiftsbiträde, reglerat av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28. PostHog anlitar i sin tur följande underbiträden för EU Cloud: Amazon Web Services (molnlagring, EU-region), Wiz Inc. (säkerhetsövervakning, EU), PlanetScale Inc. (databasövervakning, USA) och Modal Labs Inc. (beräkningsinfrastruktur, USA). Aktuell lista: posthog.com/subprocessors.',
+      processorTitle: 'Personuppgiftsbiträden & underbiträden',
+      processorBody: 'För analys anlitar vi PostHog, Inc. (USA) som personuppgiftsbiträde, reglerat av ett dataskyddsavtal (DPA) i enlighet med GDPR artikel 28. PostHog anlitar i sin tur följande underbiträden för EU Cloud: Amazon Web Services (molnlagring, EU-region), Wiz Inc. (säkerhetsövervakning, EU), PlanetScale Inc. (databasövervakning, USA) och Modal Labs Inc. (beräkningsinfrastruktur, USA). Aktuell lista: posthog.com/subprocessors. För driften av webbplatsen behandlar Google (Firebase Hosting och Firestore) och Cloudinary Ltd besökares IP-adresser för vår räkning, enligt respektive leverantörs publicerade dataskyddsavtal. LUDD är inte vårt personuppgiftsbiträde utan en självständig aktör — när du öppnar Campus Events-vyn hämtar din webbläsare uppgifterna direkt från LUDD:s egna servrar, och LUDD ansvarar själv för den behandlingen.',
       processorLinkLabel: 'PostHogs integritetspolicy',
 
       retentionTitle: 'Lagringstid',
-      retentionBody: 'Data lagras hos PostHog EU i maximalt 1 år, varefter den raderas automatiskt.',
+      retentionBody: 'Analysdata lagras hos PostHog EU i maximalt 1 år, varefter den raderas automatiskt. IP-adresser som tas emot av Google och Cloudinary för att leverera webbplatsen behandlas kortvarigt i driftsyfte och i deras säkerhetsloggar enligt respektive leverantörs villkor — vi har ingen egen åtkomst till dessa loggar och sparar dem inte själva.',
 
       transferTitle: 'Internationell överföring',
-      transferBody: 'Dina data lagras på AWS EU-servrar inom EU/EES. Vissa underbiträden (PlanetScale, Modal Labs) är belägna i USA. Överföringar till USA skyddas av standardavtalsklausuler (SCC) enligt GDPR kapitel V samt EU-US Data Privacy Framework (DPF), under vilket PostHog är certifierat.',
+      transferBody: 'Analysdata lagras hos PostHog på AWS-servrar inom EU/EES; vissa av PostHogs underbiträden (PlanetScale, Modal Labs) finns i USA. Firestore-databasen med vårt innehåll ligger i Stockholm, men Google är en amerikansk leverantör och åtkomst från USA kan förekomma. Cloudinary lagrar bilder på AWS-servrar i USA eller EU och behandlar uppgifter från bland annat USA, Storbritannien, Singapore och Israel. Överföringar till USA skyddas av EU:s standardavtalsklausuler (SCC) enligt GDPR kapitel V, och PostHog, Google och Cloudinary är samtliga certifierade under EU-US Data Privacy Framework (DPF). Israel omfattas av EU-kommissionens beslut om adekvat skyddsnivå. Uppgifter som hämtas från LUDD lämnar aldrig Sverige.',
 
       rightsTitle: 'Dina rättigheter',
       rightsIntro: 'Under GDPR har du följande rättigheter:',
@@ -600,6 +603,8 @@ export const TRANSLATIONS = {
       contactTitle: 'Kontakt',
       contactBody: 'Har du frågor om hur vi hanterar dina uppgifter? Hör av dig till',
       back: 'Tillbaka',
+      // Uppdatera datumet när policyns innehåll ändras i sak — inte vid ren språkputs.
+      updated: 'Senast uppdaterad 11 augusti 2026',
     },
   },
 
@@ -1153,10 +1158,13 @@ export const TRANSLATIONS = {
       controllerBody: 'Teknologkåren vid Luleå tekniska universitet, org. no. 897000-5388, Kårhusvägen 5, 977 54 Luleå, Sweden, is the data controller for the processing of your personal data on this website.',
 
       dataTitle: 'What we collect',
-      dataBody: "With your consent, we collect pseudonymous visit data via PostHog: page views, clicks, scroll depth and browser type. A pseudonymous identifier (UUID) is stored in your browser's localStorage. IP addresses are anonymised by PostHog immediately upon receipt and are never stored in full. No data that directly identifies you — such as name or email — is collected.",
+      dataBody: "With your consent, we collect pseudonymous visit data via PostHog: page views, clicks, scroll depth and browser type. A pseudonymous identifier (UUID) is stored in your browser's localStorage. IP addresses are anonymised by PostHog immediately upon receipt and are never stored in full. No data that directly identifies you — such as name or email — is collected. In addition, the services that deliver the website itself receive your IP address every time a page loads, whether or not you have consented to analytics — see the Necessary services section.",
 
       cookiesTitle: 'Cookies and local storage',
-      cookiesBody: 'PostHog stores a pseudonymous session identifier under the keys ph_* in localStorage. We also store your consent decision under the key tkl-cookie-consent. No advertising cookies or third-party profiling cookies are used.',
+      cookiesBody: 'PostHog stores a pseudonymous session identifier under the keys ph_* in localStorage. We also store your consent decision (tkl-cookie-consent) along with your theme (tkl-theme) and language (tkl-locale) preferences. To make pages load faster, Firestore additionally keeps a copy of the public content — events, career listings and benefits — in your browser\'s IndexedDB, together with a timestamp per content type (cacheVersion_*). That storage contains no information about you, only the same content shown on the page. No advertising cookies or third-party profiling cookies are used. You can clear all of it at any time using your browser\'s option to delete site data.',
+
+      infraTitle: 'Necessary services',
+      infraBody: 'For the website to function, the page, its content and its images are loaded from external servers that receive your IP address. This happens regardless of your cookie choice because it is technically necessary to display the content, and the legal basis is our legitimate interest (GDPR Article 6.1 f) in providing a functioning website. Google, via Firebase Hosting, delivers the website itself and receives your IP address on every page load. Our own content — events, career listings and benefits — is fetched from the Firebase Firestore database service, whose database is located in Stockholm (the europe-north2 region). Cloudinary Ltd delivers images such as hero photos and company logos; your browser opens a connection to them as soon as the page loads so that images appear faster. When you open the Campus Events view, external events are fetched directly from LUDD (Luleå Academic Computer Society), whose servers sit inside Luleå University of Technology\'s own network in Sweden — no transfer outside the EU/EEA takes place for these. None of these services set tracking cookies or use the data for profiling or marketing. Where the data ends up geographically is described under International transfers.',
 
       cookieSettingsTitle: 'Cookie settings',
       cookieSettingsBody: 'Here you can turn analytics cookies on or off at any time. Essential local storage — theme, language and your consent choice — is unaffected and requires no consent.',
@@ -1165,7 +1173,7 @@ export const TRANSLATIONS = {
       cookieSettingsOff: 'Off',
 
       legalTitle: 'Legal basis',
-      legalBody: 'Processing is based solely on your consent (GDPR Article 6.1 a). You may withdraw your consent at any time without affecting the lawfulness of processing carried out before withdrawal.',
+      legalBody: 'Analytics of visitor data via PostHog is based on your consent (GDPR Article 6.1 a). You may withdraw your consent at any time without affecting the lawfulness of processing carried out before withdrawal. Necessary technical operation of the website (see Necessary services) is instead based on our legitimate interest (Article 6.1 f) in being able to display the content, and requires no consent.',
 
       purposeTitle: 'Purpose',
       purposeBody: 'The data is used solely to understand how the site is used and to improve the experience for students and companies. No data is sold or shared with third parties for marketing purposes.',
@@ -1176,15 +1184,15 @@ export const TRANSLATIONS = {
       ageTitle: 'Age restriction',
       ageBody: 'This service is intended for students and companies. In accordance with GDPR Article 8 and Swedish law, we do not process personal data of persons under the age of 16. By accepting cookies, you confirm that you are 16 years of age or older.',
 
-      processorTitle: 'Data Processor & Sub-processors',
-      processorBody: "We use PostHog, Inc. (USA) as a data processor, governed by a Data Processing Agreement (DPA) in accordance with GDPR Article 28. PostHog in turn uses the following sub-processors for EU Cloud: Amazon Web Services (cloud storage, EU region), Wiz Inc. (security monitoring, EU), PlanetScale Inc. (database monitoring, USA) and Modal Labs Inc. (compute infrastructure, USA). Current list: posthog.com/subprocessors.",
+      processorTitle: 'Data Processors & Sub-processors',
+      processorBody: "For analytics we use PostHog, Inc. (USA) as a data processor, governed by a Data Processing Agreement (DPA) in accordance with GDPR Article 28. PostHog in turn uses the following sub-processors for EU Cloud: Amazon Web Services (cloud storage, EU region), Wiz Inc. (security monitoring, EU), PlanetScale Inc. (database monitoring, USA) and Modal Labs Inc. (compute infrastructure, USA). Current list: posthog.com/subprocessors. To operate the website, Google (Firebase Hosting and Firestore) and Cloudinary Ltd process visitors' IP addresses on our behalf under each provider's published data processing agreement. LUDD is not our data processor but an independent party — when you open the Campus Events view, your browser fetches the data directly from LUDD's own servers, and LUDD is responsible for that processing.",
       processorLinkLabel: 'PostHog Privacy Policy',
 
       retentionTitle: 'Retention',
-      retentionBody: 'Data is stored at PostHog EU for a maximum of 1 year, after which it is automatically deleted.',
+      retentionBody: 'Analytics data is stored at PostHog EU for a maximum of 1 year, after which it is automatically deleted. IP addresses received by Google and Cloudinary in order to deliver the website are processed briefly for operational purposes and in their security logs under each provider\'s terms — we have no access to those logs and do not retain them ourselves.',
 
       transferTitle: 'International transfers',
-      transferBody: 'Your data is stored on AWS EU servers within the EU/EEA. Certain sub-processors (PlanetScale, Modal Labs) are located in the USA. Transfers to the USA are protected by Standard Contractual Clauses (SCC) under GDPR Chapter V and the EU-US Data Privacy Framework (DPF), under which PostHog is certified.',
+      transferBody: 'Analytics data is stored at PostHog on AWS servers within the EU/EEA; some of PostHog\'s sub-processors (PlanetScale, Modal Labs) are located in the USA. The Firestore database holding our content is located in Stockholm, but Google is a US provider and access from the USA may occur. Cloudinary stores images on AWS servers in the USA or the EU and processes data from, among others, the USA, the United Kingdom, Singapore and Israel. Transfers to the USA are protected by the EU Standard Contractual Clauses (SCC) under GDPR Chapter V, and PostHog, Google and Cloudinary are all certified under the EU-US Data Privacy Framework (DPF). Israel is covered by the European Commission\'s adequacy decision. Data fetched from LUDD never leaves Sweden.',
 
       rightsTitle: 'Your rights',
       rightsIntro: 'Under GDPR, you have the following rights:',
@@ -1198,6 +1206,7 @@ export const TRANSLATIONS = {
       contactTitle: 'Contact',
       contactBody: 'Questions about how we handle your data? Reach out to',
       back: 'Back',
+      updated: 'Last updated 11 August 2026',
     },
   },
 } as const;

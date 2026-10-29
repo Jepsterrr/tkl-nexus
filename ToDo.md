@@ -2,6 +2,8 @@
 
 Den här filen fungerar som projektets övergripande road map och sprint-backlog. Endast öppna/aktiva uppgifter listas här.
 
+Cloudinary DPA: https://cloudinary-marketing-res.cloudinary.com/image/upload/v1780332751/Cloudinary_Data_Processing_Agreenent_DPA_June_2026.pdf
+
 ## Uppföljning från designgranskning 2026-06-12
 
 - [ ] Ladda upp logotyper för deals
