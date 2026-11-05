@@ -15,6 +15,7 @@ import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StarField } from '@/components/ui/StarField';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import type { BenefitCard } from '@/lib/types';
+import { DEALS_ENABLED } from '@/lib/features';
 
 // Under fold + DOM-mätande (ResizeObserver) — splitta ur initial-bundlen
 const RootNetwork = dynamic(
@@ -70,7 +71,7 @@ export function HomeContent() {
   const bgUrl = heroImages?.homeUrl || '/images/heroes/home.svg';
   const imgLoaded = useImageLoad(bgUrl);
 
-  const FEATURES: BenefitCard[] = [
+  const ALL_FEATURES: BenefitCard[] = [
     {
       title: home.features.career.title,
       description: home.features.career.description,
@@ -97,6 +98,7 @@ export function HomeContent() {
       linkHref: '/students/deals',
     },
   ];
+  const FEATURES = ALL_FEATURES.filter((f) => DEALS_ENABLED || f.linkHref !== '/students/deals');
 
   return (
     <>
@@ -333,9 +335,9 @@ export function HomeContent() {
             </RevealItem>
           </StaggerReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-5 sm:gap-6 items-stretch">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-stretch ${FEATURES.length >= 3 ? 'lg:grid-cols-[2fr_1fr_1fr]' : 'lg:grid-cols-[2fr_1fr]'}`}>
             {FEATURES.map((f, i) => (
-              <div key={f.title} className={i === 0 ? 'sm:col-span-2 lg:col-span-1' : ''}>
+              <div key={f.title} className={i === 0 && FEATURES.length >= 3 ? 'sm:col-span-2 lg:col-span-1' : ''}>
                 <BenefitCardComponent {...f} index={i} />
               </div>
             ))}

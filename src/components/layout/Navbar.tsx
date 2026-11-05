@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays, Briefcase, Gift, PenLine, LayoutGrid, ChevronDown, Phone, SlidersHorizontal } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { EASE_OUT_EXPO } from '@/lib/motion';
+import { Building2, GraduationCap, Info, Home, Menu, X, Sun, Moon, Monitor, CalendarDays, Briefcase, Gift, PenLine, LayoutGrid, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useScrollContainer } from '@/components/providers/ScrollProvider';
 import { useNavbarState } from '@/components/providers/NavbarStateProvider';
 import type { Locale } from '@/lib/i18n';
+import { DEALS_ENABLED } from '@/lib/features';
 
 type NavChild = { href: string; label: string; Icon: LucideIcon };
 type NavLinkItem = { href: string; label: string; Icon: LucideIcon; children?: NavChild[] };
@@ -36,6 +38,7 @@ export function Navbar() {
   const { locale, setLocale, t } = useLanguage();
   const scrollContainer = useScrollContainer();
   const { isDrawerOpen } = useNavbarState();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const container = scrollContainer.current;
@@ -89,7 +92,6 @@ export function Navbar() {
     {
       href: '/corporate', label: t.nav.corporate, Icon: Building2,
       children: [
-        { href: '/about#kontakt', label: t.nav.corporateSubAbout, Icon: Phone },
         { href: '/corporate/post', label: t.nav.corporateSubPost, Icon: PenLine },
         { href: '/corporate/services', label: t.nav.corporateSubServices, Icon: LayoutGrid },
       ],
@@ -98,8 +100,9 @@ export function Navbar() {
       href: '/students', label: t.nav.students, Icon: GraduationCap,
       children: [
         { href: '/career', label: t.nav.studentsSubCareer, Icon: Briefcase },
-        { href: '/events', label: t.nav.studentsSubEvents, Icon: CalendarDays },
-        { href: '/students/deals', label: t.nav.studentsSubDeals, Icon: Gift },
+        ...(DEALS_ENABLED
+          ? [{ href: '/students/deals', label: t.nav.studentsSubDeals, Icon: Gift }]
+          : []),
       ],
     },
     { href: '/events', label: t.nav.events, Icon: CalendarDays },
@@ -117,10 +120,17 @@ export function Navbar() {
       {/* OBS: villkora ALDRIG initial på useReducedMotion() i SSR-renderade
           komponenter — servern renderar false, klienten kan läsa true →
           hydration mismatch. */}
+      {/* Återkomst efter drawer = samma drop-in som vid sidladdning. isDrawerOpen
+          släpps först när drawerns exit är klar (useHideNavbarWhileOpen), så inget
+          ligger över navbaren när den droppar in. Reduced motion: enbart opacity. */}
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
-        animate={{ y: isDrawerOpen ? '-140%' : 0, opacity: isDrawerOpen ? 0 : 1 }}
-        transition={{ duration: isDrawerOpen ? 0.22 : 0.4, ease: isDrawerOpen ? 'easeIn' : 'easeOut' }}
+        animate={isDrawerOpen ? { y: reduceMotion ? 0 : '-120%', opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={
+          isDrawerOpen
+            ? { duration: 0.22, ease: 'easeIn' }
+            : { duration: 0.45, ease: EASE_OUT_EXPO, ...(reduceMotion ? { y: { duration: 0 } } : {}) }
+        }
         className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3/4 lg:max-w-[min(95vw,1500px)]"
         style={{ pointerEvents: isDrawerOpen ? 'none' : 'auto' }}
         role="navigation"
@@ -141,7 +151,9 @@ export function Navbar() {
               <img src="/Logo/tkl-nexus.svg" alt="TKL NEXUS" width={32} height={32} />
               <span className="nav-text font-bold text-base select-none" style={{ letterSpacing: '-0.03em' }}>
                 TKL
-              </span>
+              </span>{' '}
+              {/* ↑ mellanslag: synlig text blir "TKL NEXUS" (inte "TKLNEXUS") och matchar
+                  aria-label — WCAG 2.5.3 Label in Name. Flex-gapet styr avståndet visuellt. */}
               {/* Varumärkesröd i light (4.6:1 AA), ljusare röd i dark (5.0:1) */}
               <span className="font-semibold text-base tracking-wide text-[#E30613] dark:text-red-500">
                 NEXUS

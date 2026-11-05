@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { capture } from '@/lib/analytics';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,10 +11,13 @@ import { useLanguage } from '@/components/providers/LanguageProvider';
 // Service-lagret importeras dynamiskt i effekten — statisk import drar in
 // Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import type { TKLEventType } from '@/lib/schemas/eventType';
+import type { CareerType, OrgType } from '@/lib/schemas/career';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { ACCENT_COLOR_MAP } from '@/lib/types';
+import { DEALS_ENABLED } from '@/lib/features';
+import { buildMailto, type MailtoResult } from '@/lib/mailto';
 
 // Types
 
@@ -26,13 +29,18 @@ interface OpportunityForm {
   title: string;
   titleEn: string;
   company: string;
-  type: 'exjobb' | 'jobb' | 'praktik' | 'trainee' | '';
+  orgType: OrgType;
+  type: CareerType | '';
   location: string;
   startDate: string;
   deadline: string;
   applyUrl: string;
   description: string;
   descriptionEn: string;
+  requirements: string;
+  requirementsEn: string;
+  studentTask: string;
+  studentTaskEn: string;
 }
 
 interface EventForm {
@@ -67,8 +75,9 @@ interface DealForm {
 
 const EMPTY_OPPORTUNITY: OpportunityForm = {
   contactName: '', contactEmail: '', title: '', titleEn: '',
-  company: '', type: '', location: '', startDate: '',
+  company: '', orgType: 'company', type: '', location: '', startDate: '',
   deadline: '', applyUrl: '', description: '', descriptionEn: '',
+  requirements: '', requirementsEn: '', studentTask: '', studentTaskEn: '',
 };
 
 const EMPTY_EVENT: EventForm = {
@@ -89,11 +98,14 @@ function field(label: string, value: string): string {
   return `${label}: ${value || '(ej angivet)'}`;
 }
 
-function buildOpportunityMailto(f: OpportunityForm, email: string): string {
+// Långa body kapas till MAILTO_MAX_LENGTH i buildMailto (src/lib/mailto.ts).
+type Mailto = MailtoResult;
+
+function buildOpportunityMailto(f: OpportunityForm, email: string): Mailto {
   const subject = `[NEXUS Portal] ${f.type} – ${f.company} – ${f.title}`;
   const body = [
     '=== TKL NEXUS — Ny inlämning ===',
-    'Typ: Jobb/Exjobb',
+    'Typ: Annons (jobb, exjobb, sommarjobb m.fl.)',
     `Inlämnad: ${new Date().toLocaleDateString('sv-SE')}`,
     '',
     '--- KONTAKTUPPGIFTER ---',
@@ -105,18 +117,26 @@ function buildOpportunityMailto(f: OpportunityForm, email: string): string {
     field('titleEn', f.titleEn),
     field('company', f.company),
     field('type', f.type),
+    field('orgType', f.orgType),
     field('location', f.location),
     field('startDate', f.startDate),
     field('deadline', f.deadline),
     field('applyUrl', f.applyUrl),
     field('description (sv)', f.description),
     field('descriptionEn', f.descriptionEn),
+    field('requirements (sv)', f.requirements),
+    field('requirementsEn', f.requirementsEn),
+    ...(f.type === 'exjobb'
+      ? [field('studentTask (sv)', f.studentTask), field('studentTaskEn', f.studentTaskEn)]
+      : []),
+    field('contactName', f.contactName),
+    field('contactEmail', f.contactEmail),
     '',
     '--- NOTERINGAR ---',
     'Samling: career',
     'published: false (sätt till true vid publicering)',
   ].join('\n');
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return buildMailto(email, subject, body);
 }
 
 function buildEventMailto(
@@ -124,7 +144,7 @@ function buildEventMailto(
   email: string,
   eventTypeName: string,
   hidden: string[]
-): string {
+): Mailto {
   const subject = `[Event] ${f.contactName} (${f.contactEmail}) – ${f.title}`;
   const body = [
     '=== TKL NEXUS — Ny inlämning ===',
@@ -152,10 +172,10 @@ function buildEventMailto(
   ]
     .filter((line): line is string => line !== null)
     .join('\n');
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return buildMailto(email, subject, body);
 }
 
-function buildDealMailto(f: DealForm, email: string): string {
+function buildDealMailto(f: DealForm, email: string): Mailto {
   const subject = `[Deal] ${f.company} – ${f.title}`;
   const body = [
     '=== TKL NEXUS — Ny inlämning ===',
@@ -181,7 +201,7 @@ function buildDealMailto(f: DealForm, email: string): string {
     'Samling: deals',
     'published: false (sätt till true vid publicering)',
   ].join('\n');
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return buildMailto(email, subject, body);
 }
 
 // Validation
@@ -236,6 +256,10 @@ export function PostContent() {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  // Kapad mailto-body: 'pending' = urklippsskrivningen inte avgjord (renderar inget),
+  // sedan 'copied' | 'notCopied'. copySeq skyddar mot att en gammal promise skriver över ny submit.
+  const [longBody, setLongBody] = useState<'pending' | 'copied' | 'notCopied' | null>(null);
+  const copySeq = useRef(0);
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [eventTypes, setEventTypes] = useState<TKLEventType[]>([]);
   const [eventTypesLoading, setEventTypesLoading] = useState(true);
@@ -342,20 +366,38 @@ export function PostContent() {
       focusFirstInvalid(fields);
       return;
     }
-    let url = '';
-    if (activeTab === 'opportunity') url = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
-    else if (activeTab === 'event') url = buildEventMailto(
+    let mail: Mailto;
+    if (activeTab === 'opportunity') mail = buildOpportunityMailto({ ...opp, contactName, contactEmail }, recipientEmail);
+    else if (activeTab === 'event') mail = buildEventMailto(
       { ...evt, contactName, contactEmail },
       recipientEmail,
       selectedEventType ? (locale === 'en' && selectedEventType.nameEn ? selectedEventType.nameEn : selectedEventType.name) : '',
       eventHidden
     );
-    else url = buildDealMailto({ ...deal, contactName, contactEmail }, recipientEmail);
+    else mail = buildDealMailto({ ...deal, contactName, contactEmail }, recipientEmail);
     capture('corporate_form_submitted', {
       tab_type: activeTab,
       company: activeTab === 'opportunity' ? opp.company : activeTab === 'deal' ? deal.company : evt.title,
     });
-    window.location.href = url;
+    // Kapad body (URL-gräns): lägg hela texten i urklipp (skrivning är tillåten, läsning
+    // inte). Navigering och success väntar inte på promisen — noten visas först när den avgjorts.
+    const seq = ++copySeq.current;
+    if (mail.truncated) {
+      setLongBody('pending');
+      const settle = (result: 'copied' | 'notCopied') => {
+        if (copySeq.current === seq) setLongBody(result);
+      };
+      try {
+        const write = navigator.clipboard?.writeText(mail.body);
+        if (write) write.then(() => settle('copied'), () => settle('notCopied'));
+        else settle('notCopied');
+      } catch {
+        settle('notCopied');
+      }
+    } else {
+      setLongBody(null);
+    }
+    window.location.href = mail.url;
     setSubmitted(true);
   }
 
@@ -365,7 +407,7 @@ export function PostContent() {
     isDealValid({ ...deal, contactName, contactEmail });
 
   function handleTabKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, currentId: ActiveTab) {
-    const tabs: ActiveTab[] = ['opportunity', 'event', 'deal'];
+    const tabs: ActiveTab[] = DEALS_ENABLED ? ['opportunity', 'event', 'deal'] : ['opportunity', 'event'];
     const idx = tabs.indexOf(currentId);
     let nextIdx = idx;
     if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
@@ -382,7 +424,7 @@ export function PostContent() {
   const TABS: { id: ActiveTab; label: string; Icon: typeof Briefcase }[] = [
     { id: 'opportunity', label: cp.tabs.opportunity, Icon: Briefcase },
     { id: 'event', label: cp.tabs.event, Icon: CalendarDays },
-    { id: 'deal', label: cp.tabs.deal, Icon: Gift },
+    ...(DEALS_ENABLED ? [{ id: 'deal' as const, label: cp.tabs.deal, Icon: Gift }] : []),
   ];
 
   const requiredDot = <span className="text-[#3B82F6] ml-0.5">*</span>;
@@ -415,7 +457,7 @@ export function PostContent() {
             <RevealItem>
               <Link
                 href="/corporate"
-                className="inline-flex items-center gap-2 text-sm font-medium mb-8 transition-colors duration-150 hover:opacity-80"
+                className="inline-flex items-center gap-2 min-h-11 -mt-3 mb-5 text-sm font-medium transition-colors duration-150 hover:opacity-80"
                 style={{ color: colors.hex }}
               >
                 <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -464,15 +506,17 @@ export function PostContent() {
         </div>
       </section>
 
-      {/* TAB NAVIGATION */}
+      {/* TAB NAVIGATION — sticky (aktiv sedan <main> fick overflow-x: clip). Desktop-navbaren
+          (lg+) slutar ~98px ned, så flikraden behöver större offset där än --navbar-height. */}
       <div
-        className="sticky top-(--navbar-height) z-20 py-4 px-4 sm:px-6 lg:px-8"
+        data-sticky-subnav
+        className="sticky top-(--navbar-height) lg:top-22 z-20 py-4 px-4 sm:px-6 lg:px-8"
         style={{
           background: 'var(--cosmic-bg)',
           borderBottom: '1px solid var(--glass-border-subtle)',
         }}
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div
             role="tablist"
             aria-label={cp.badge}
@@ -501,7 +545,8 @@ export function PostContent() {
                       ? {
                           background: colors.bg,
                           border: `1px solid ${colors.border}`,
-                          color: colors.hex,
+                          // textColor (temasäker) — rå hex ger bara ~3,1:1 i ljust tema
+                          color: colors.textColor,
                           boxShadow: `0 0 16px ${colors.glow}`,
                         }
                       : {
@@ -522,7 +567,7 @@ export function PostContent() {
 
       {/* FORM CARD */}
       <section className="px-4 sm:px-6 lg:px-8 py-8 pb-24">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 12 }}
@@ -555,6 +600,7 @@ export function PostContent() {
                     <input
                       id="contactName"
                       type="text"
+                      maxLength={120}
                       autoComplete="name"
                       aria-required="true"
                       aria-invalid={hasFieldErr('contactName', contactName) || undefined}
@@ -574,6 +620,7 @@ export function PostContent() {
                     <input
                       id="contactEmail"
                       type="email"
+                      maxLength={160}
                       autoComplete="email"
                       aria-required="true"
                       aria-invalid={hasEmailErr('contactEmail', contactEmail) || undefined}
@@ -605,7 +652,7 @@ export function PostContent() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="opp-title" className={labelCls}>{cp.opportunity.title}{requiredDot}</label>
-                        <input id="opp-title" type="text" aria-required="true"
+                        <input id="opp-title" type="text" maxLength={120} aria-required="true"
                           aria-invalid={hasFieldErr('opp-title', opp.title) || undefined}
                           aria-describedby={hasFieldErr('opp-title', opp.title) ? 'error-opp-title' : undefined}
                           placeholder={cp.opportunity.titlePlaceholder} className={inputCls}
@@ -615,15 +662,15 @@ export function PostContent() {
                       </div>
                       <div>
                         <label htmlFor="opp-titleEn" className={labelCls}>{cp.opportunity.titleEn}</label>
-                        <input id="opp-titleEn" type="text" placeholder={cp.opportunity.titleEnPlaceholder} className={inputCls}
+                        <input id="opp-titleEn" type="text" maxLength={120} placeholder={cp.opportunity.titleEnPlaceholder} className={inputCls}
                           value={opp.titleEn} onChange={e => setOpp(p => ({ ...p, titleEn: e.target.value }))} />
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-3 gap-4">
                       <div>
                         <label htmlFor="opp-company" className={labelCls}>{cp.opportunity.company}{requiredDot}</label>
-                        <input id="opp-company" type="text" aria-required="true"
+                        <input id="opp-company" type="text" maxLength={120} aria-required="true"
                           aria-invalid={hasFieldErr('opp-company', opp.company) || undefined}
                           aria-describedby={hasFieldErr('opp-company', opp.company) ? 'error-opp-company' : undefined}
                           placeholder={cp.opportunity.companyPlaceholder} className={inputCls}
@@ -632,8 +679,9 @@ export function PostContent() {
                         {fieldErr('opp-company', opp.company)}
                       </div>
                       <div>
-                        <label htmlFor="opp-type" className={labelCls}>{cp.opportunity.type}{requiredDot}</label>
-                        <select id="opp-type" aria-required="true"
+                        {/* Select-etiketter kopplas via aria-labelledby (ej htmlFor) så att etiketten inte blir ett klickmål. */}
+                        <label id="opp-type-label" className={labelCls}>{cp.opportunity.type}{requiredDot}</label>
+                        <select id="opp-type" aria-labelledby="opp-type-label" aria-required="true"
                           aria-invalid={hasFieldErr('opp-type', opp.type) || undefined}
                           aria-describedby={hasFieldErr('opp-type', opp.type) ? 'error-opp-type' : undefined}
                           className={inputCls}
@@ -642,17 +690,26 @@ export function PostContent() {
                           <option value="" disabled>{cp.opportunity.typePlaceholder}</option>
                           <option value="exjobb">{cp.opportunity.types.exjobb}</option>
                           <option value="jobb">{cp.opportunity.types.jobb}</option>
+                          <option value="sommarjobb">{cp.opportunity.types.sommarjobb}</option>
                           <option value="praktik">{cp.opportunity.types.praktik}</option>
                           <option value="trainee">{cp.opportunity.types.trainee}</option>
                         </select>
                         {fieldErr('opp-type', opp.type)}
+                      </div>
+                      <div>
+                        <label id="opp-orgType-label" className={labelCls}>{cp.opportunity.orgType}</label>
+                        <select id="opp-orgType" aria-labelledby="opp-orgType-label" className={inputCls}
+                          value={opp.orgType} onChange={e => setOpp(p => ({ ...p, orgType: e.target.value as OpportunityForm['orgType'] }))}>
+                          <option value="company">{cp.opportunity.orgTypes.company}</option>
+                          <option value="public">{cp.opportunity.orgTypes.public}</option>
+                        </select>
                       </div>
                     </div>
 
                     <div className="grid sm:grid-cols-3 gap-4">
                       <div>
                         <label htmlFor="opp-location" className={labelCls}>{cp.opportunity.location}{requiredDot}</label>
-                        <input id="opp-location" type="text" aria-required="true"
+                        <input id="opp-location" type="text" maxLength={120} aria-required="true"
                           aria-invalid={hasFieldErr('opp-location', opp.location) || undefined}
                           aria-describedby={hasFieldErr('opp-location', opp.location) ? 'error-opp-location' : undefined}
                           placeholder={cp.opportunity.locationPlaceholder} className={inputCls}
@@ -662,7 +719,7 @@ export function PostContent() {
                       </div>
                       <div>
                         <label htmlFor="opp-startDate" className={labelCls}>{cp.opportunity.startDate}</label>
-                        <input id="opp-startDate" type="text" placeholder={cp.opportunity.startDatePlaceholder} className={inputCls}
+                        <input id="opp-startDate" type="text" maxLength={120} placeholder={cp.opportunity.startDatePlaceholder} className={inputCls}
                           value={opp.startDate} onChange={e => setOpp(p => ({ ...p, startDate: e.target.value }))} />
                       </div>
                       <div>
@@ -683,29 +740,82 @@ export function PostContent() {
                         value={opp.applyUrl} onChange={e => setOpp(p => ({ ...p, applyUrl: e.target.value }))} />
                     </div>
 
-                    <div>
-                      <label htmlFor="opp-desc" className={labelCls}>
-                        {cp.opportunity.description}
-                        <span className="ml-2 font-normal opacity-60">
-                          {cp.charCount.replace('{count}', String(opp.description.length))}
-                        </span>
-                      </label>
-                      <textarea id="opp-desc" rows={5} maxLength={2000} placeholder={cp.opportunity.descriptionPlaceholder}
-                        className={`${inputCls} resize-y min-h-30`}
-                        value={opp.description} onChange={e => setOpp(p => ({ ...p, description: e.target.value }))} />
+                    <div className="grid lg:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="opp-desc" className={labelCls}>
+                          {cp.opportunity.description}
+                          <span className="ml-2 font-normal opacity-60">
+                            {cp.charCount.replace('{count}', String(opp.description.length))}
+                          </span>
+                        </label>
+                        <textarea id="opp-desc" rows={6} maxLength={2000} placeholder={cp.opportunity.descriptionPlaceholder}
+                          className={`${inputCls} resize-y min-h-36`}
+                          value={opp.description} onChange={e => setOpp(p => ({ ...p, description: e.target.value }))} />
+                      </div>
+                      <div>
+                        <label htmlFor="opp-descEn" className={labelCls}>
+                          {cp.opportunity.descriptionEn}
+                          <span className="ml-2 font-normal opacity-60">
+                            {cp.charCount.replace('{count}', String(opp.descriptionEn.length))}
+                          </span>
+                        </label>
+                        <textarea id="opp-descEn" rows={6} maxLength={2000} placeholder={cp.opportunity.descriptionEnPlaceholder}
+                          className={`${inputCls} resize-y min-h-36`}
+                          value={opp.descriptionEn} onChange={e => setOpp(p => ({ ...p, descriptionEn: e.target.value }))} />
+                      </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="opp-descEn" className={labelCls}>
-                        {cp.opportunity.descriptionEn}
-                        <span className="ml-2 font-normal opacity-60">
-                          {cp.charCount.replace('{count}', String(opp.descriptionEn.length))}
-                        </span>
-                      </label>
-                      <textarea id="opp-descEn" rows={4} maxLength={2000} placeholder={cp.opportunity.descriptionEnPlaceholder}
-                        className={`${inputCls} resize-y min-h-25`}
-                        value={opp.descriptionEn} onChange={e => setOpp(p => ({ ...p, descriptionEn: e.target.value }))} />
+                    <div className="grid lg:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="opp-req" className={labelCls}>
+                          {cp.opportunity.requirements}
+                          <span className="ml-2 font-normal opacity-60">
+                            {cp.charCount.replace('{count}', String(opp.requirements.length))}
+                          </span>
+                        </label>
+                        <textarea id="opp-req" rows={4} maxLength={2000} placeholder={cp.opportunity.requirementsPlaceholder}
+                          className={`${inputCls} resize-y min-h-28`}
+                          value={opp.requirements} onChange={e => setOpp(p => ({ ...p, requirements: e.target.value }))} />
+                      </div>
+                      <div>
+                        <label htmlFor="opp-reqEn" className={labelCls}>
+                          {cp.opportunity.requirementsEn}
+                          <span className="ml-2 font-normal opacity-60">
+                            {cp.charCount.replace('{count}', String(opp.requirementsEn.length))}
+                          </span>
+                        </label>
+                        <textarea id="opp-reqEn" rows={4} maxLength={2000} placeholder={cp.opportunity.requirementsEnPlaceholder}
+                          className={`${inputCls} resize-y min-h-28`}
+                          value={opp.requirementsEn} onChange={e => setOpp(p => ({ ...p, requirementsEn: e.target.value }))} />
+                      </div>
                     </div>
+
+                    {opp.type === 'exjobb' && (
+                      <div className="grid lg:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="opp-task" className={labelCls}>
+                            {cp.opportunity.studentTask}
+                            <span className="ml-2 font-normal opacity-60">
+                              {cp.charCount.replace('{count}', String(opp.studentTask.length))}
+                            </span>
+                          </label>
+                          <textarea id="opp-task" rows={4} maxLength={2000} placeholder={cp.opportunity.studentTaskPlaceholder}
+                            className={`${inputCls} resize-y min-h-28`}
+                            value={opp.studentTask} onChange={e => setOpp(p => ({ ...p, studentTask: e.target.value }))} />
+                        </div>
+                        <div>
+                          <label htmlFor="opp-taskEn" className={labelCls}>
+                            {cp.opportunity.studentTaskEn}
+                            <span className="ml-2 font-normal opacity-60">
+                              {cp.charCount.replace('{count}', String(opp.studentTaskEn.length))}
+                            </span>
+                          </label>
+                          <textarea id="opp-taskEn" rows={4} maxLength={2000} placeholder={cp.opportunity.studentTaskEnPlaceholder}
+                            className={`${inputCls} resize-y min-h-28`}
+                            value={opp.studentTaskEn} onChange={e => setOpp(p => ({ ...p, studentTaskEn: e.target.value }))} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </fieldset>
               )}
@@ -803,7 +913,7 @@ export function PostContent() {
                         <div className="grid sm:grid-cols-2 gap-4">
                           <div>
                             <label htmlFor="evt-title" className={labelCls}>{cp.event.title}{requiredDot}</label>
-                            <input id="evt-title" type="text" aria-required="true"
+                            <input id="evt-title" type="text" maxLength={120} aria-required="true"
                               aria-invalid={hasFieldErr('evt-title', evt.title) || undefined}
                               aria-describedby={hasFieldErr('evt-title', evt.title) ? 'error-evt-title' : undefined}
                               placeholder={cp.event.titlePlaceholder} className={inputCls}
@@ -813,7 +923,7 @@ export function PostContent() {
                           </div>
                           <div>
                             <label htmlFor="evt-titleEn" className={labelCls}>{cp.event.titleEn}</label>
-                            <input id="evt-titleEn" type="text" placeholder={cp.event.titleEnPlaceholder} className={inputCls}
+                            <input id="evt-titleEn" type="text" maxLength={120} placeholder={cp.event.titleEnPlaceholder} className={inputCls}
                               value={evt.titleEn} onChange={e => setEvt(p => ({ ...p, titleEn: e.target.value }))} />
                           </div>
                         </div>
@@ -863,7 +973,7 @@ export function PostContent() {
                             {!eventHidden.includes('location') && (
                               <div>
                                 <label htmlFor="evt-location" className={labelCls}>{cp.event.location}{requiredDot}</label>
-                                <input id="evt-location" type="text" aria-required="true"
+                                <input id="evt-location" type="text" maxLength={120} aria-required="true"
                                   aria-invalid={hasFieldErr('evt-location', evt.location) || undefined}
                                   aria-describedby={hasFieldErr('evt-location', evt.location) ? 'error-evt-location' : undefined}
                                   placeholder={cp.event.locationPlaceholder} className={inputCls}
@@ -874,8 +984,8 @@ export function PostContent() {
                             )}
                             {!eventHidden.includes('section') && (
                               <div>
-                                <label htmlFor="evt-section" className={labelCls}>{cp.event.section}{requiredDot}</label>
-                                <select id="evt-section" aria-required="true"
+                                <label id="evt-section-label" className={labelCls}>{cp.event.section}{requiredDot}</label>
+                                <select id="evt-section" aria-labelledby="evt-section-label" aria-required="true"
                                   aria-invalid={hasFieldErr('evt-section', evt.section) || undefined}
                                   aria-describedby={hasFieldErr('evt-section', evt.section) ? 'error-evt-section' : undefined}
                                   className={inputCls}
@@ -1075,20 +1185,40 @@ export function PostContent() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.25 }}
-                      className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl"
-                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)' }}
-                      role="status"
-                      aria-live="polite"
                     >
-                      <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#10B981' }} aria-hidden="true" />
-                      <p className="text-sm font-medium" style={{ color: 'var(--text-green)' }}>{cp.submitSuccess}</p>
-                      <button
-                        onClick={() => setSubmitted(false)}
-                        className="sm:ml-auto text-xs underline transition-opacity hover:opacity-70 shrink-0"
-                        style={{ color: 'var(--text-green)' }}
+                      <div
+                        className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl"
+                        style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)' }}
+                        role="status"
+                        aria-live="polite"
                       >
-                        {cp.sendAnother}
-                      </button>
+                        <CheckCircle className="w-5 h-5 shrink-0" style={{ color: '#10B981' }} aria-hidden="true" />
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-green)' }}>{cp.submitSuccess}</p>
+                        <button
+                          type="button"
+                          onClick={() => { copySeq.current++; setSubmitted(false); setLongBody(null); }}
+                          className="sm:ml-auto inline-flex items-center min-h-11 px-2 -mx-2 text-xs underline transition-opacity hover:opacity-70 shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-green)"
+                          style={{ color: 'var(--text-green)' }}
+                        >
+                          {cp.sendAnother}
+                        </button>
+                      </div>
+                      {/* Alltid monterad live-region — innehållet sätts först när urklippsskrivningen avgjorts */}
+                      <div id="long-body-status" role="status" aria-live="polite">
+                        {(longBody === 'copied' || longBody === 'notCopied') && (
+                          <p
+                            id="long-body-note"
+                            className="mt-3 text-sm p-4 rounded-xl"
+                            style={{
+                              background: 'var(--glass-bg-subtle)',
+                              border: '1px solid var(--glass-border-subtle)',
+                              color: 'var(--foreground)',
+                            }}
+                          >
+                            {longBody === 'copied' ? cp.longBodyCopied : cp.longBodyNotCopied}
+                          </p>
+                        )}
+                      </div>
                     </motion.div>
                   ) : (
                     <motion.div key="form-actions" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -1097,19 +1227,14 @@ export function PostContent() {
                         type="button"
                         onClick={handleSubmit}
                         aria-label={cp.submitAriaLabel}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                        style={
-                          isValid
-                            ? {
-                                background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
-                                boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
-                              }
-                            : {
-                                background: 'var(--glass-bg-subtle)',
-                                border: '1px solid var(--glass-border-subtle)',
-                                color: 'var(--hero-text-muted)',
-                              }
-                        }
+                        // Alltid fylld primärknapp: formuläret validerar vid klick (fel visas och
+                        // första ogiltiga fält fokuseras). En grå "nästan inaktiv" variant utan
+                        // disabled/förklaring såg trasig ut.
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-11 px-8 py-4 rounded-2xl font-semibold text-sm sm:text-base text-white transition-all duration-200 hover:scale-[1.02] active:scale-95 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-blue) focus-visible:ring-offset-2 focus-visible:ring-offset-cosmic-bg"
+                        style={{
+                          background: 'linear-gradient(135deg, #2563EB, var(--cta-blue))',
+                          boxShadow: `0 0 28px ${colors.glow}, 0 8px 32px rgba(0,0,0,0.25)`,
+                        }}
                       >
                         {cp.submit}
                         <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />

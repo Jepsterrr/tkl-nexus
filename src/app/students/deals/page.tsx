@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { toJsonLd } from '@/lib/json-ld';
+import { DEALS_ENABLED } from '@/lib/features';
 import dealsJsonLd from '@/lib/generated/deals-jsonld.json';
 import { DealsContent } from './DealsContent';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/students/deals' },
+  robots: DEALS_ENABLED ? undefined : { index: false, follow: false },
   title: 'Studentförmåner & Rabatter för LTU-studenter | NEXUS Deals',
   description:
     'Exklusiva rabatter, erbjudanden och förmåner för kårmedlemmar i Teknologkåren vid Luleå tekniska universitet. Spara pengar som LTU-student med NEXUS Deals.',
@@ -26,7 +28,7 @@ export default function DealsPage() {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
-      { '@type': 'ListItem', position: 2, name: 'För studenter', item: 'https://tklnexus.se/students' },
+      { '@type': 'ListItem', position: 2, name: 'Studenter', item: 'https://tklnexus.se/students' },
       { '@type': 'ListItem', position: 3, name: 'NEXUS Deals', item: 'https://tklnexus.se/students/deals' },
     ],
   };

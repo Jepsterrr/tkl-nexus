@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useDeferredValue } from 'react';
+import { useState, useEffect, useRef, useCallback, useDeferredValue, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { CalendarDays, MapPin, Tag, Search, Sparkles, X, PlusCircle, ArrowRight } from 'lucide-react';
+import { CalendarDays, MapPin, Tag, Search, Sparkles, X, PlusCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 import { useSettings } from '@/components/providers/SettingsProvider';
@@ -14,6 +14,8 @@ import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { FilterTab } from '@/components/ui/FilterTab';
 import { EventDrawer } from '@/components/ui/EventDrawer';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
+// Endast typ — raderas vid kompilering, så dynamic()-uppdelningen bevaras
+import type { LuddCalendarView } from '@/components/ui/LuddCalendar';
 // Service-lagret importeras dynamiskt i effekterna — statisk import drar in
 // Firestore-SDK:t (~145 kB gzip) i sidans hydration-bundle och försämrar LCP.
 import { useDrawerUrl } from '@/lib/hooks/useDrawerUrl';
@@ -28,20 +30,43 @@ const LuddCalendar = dynamic(
   { ssr: false },
 );
 
-// LUDD API är extern data — validera istället för att lita på formen
+// LUDD API är extern data — validera istället för att lita på formen.
+// Verklig shape (/api/events, nov 2026): id, title, slug, start_datetime,
+// end_datetime (unix-sek), place {name, address, …}, tags, media, online_locations,
+// parentId, multidate. Listan har INGEN beskrivning och detaljsidan saknar CORS —
+// beskrivningar finns bara på events.ludd.ltu.se. Allt utom start_datetime är
+// tolerant (.catch) så att ett avvikande fält aldrig fäller hela posten.
+const LuddPlaceSchema = z.object({
+  name: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+});
 const LuddItemSchema = z.object({
-  id: z.union([z.string(), z.number()]).optional(),
-  title: z.string().optional(),
-  description: z.string().nullable().optional(),
+  id: z.union([z.string(), z.number()]).optional().catch(undefined),
+  title: z.string().optional().catch(undefined),
+  description: z.string().nullable().optional().catch(undefined),
   start_datetime: z.number(),
-  place_name: z.string().nullable().optional(),
-  place_address: z.string().nullable().optional(),
-  tags: z.array(z.string()).optional(),
+  end_datetime: z.number().nullable().optional().catch(undefined),
+  place: LuddPlaceSchema.nullable().optional().catch(undefined),
+  // Äldre/platta fält — bakåtkompatibla fallbacks
+  place_name: z.string().nullable().optional().catch(undefined),
+  place_address: z.string().nullable().optional().catch(undefined),
+  tags: z.array(z.string()).optional().catch(undefined),
   // Renderas i href — annat schema än http(s) (t.ex. javascript:) förkastas
   // och fallback-URL:en till events.ludd.ltu.se används i stället.
   url: z.string().refine((v) => /^https?:\/\//i.test(v)).optional().catch(undefined),
-  slug: z.string().optional(),
+  slug: z.string().optional().catch(undefined),
 });
+
+/** LUDD skickar unix-sekunder; tål även millisekunder. */
+const luddToMs = (t: number) => (t > 9999999999 ? t : t * 1000);
+
+/**
+ * Har eventet något drawern visar utöver kortet? Kortet visar redan titel,
+ * plats, datum och två taggar — drawerns egentliga mervärde är beskrivningen
+ * ("Om eventet"). Utan den blir drawern en återvändsgränd.
+ */
+const hasDetails = (event: TKLEvent) =>
+  Boolean(event.description?.trim() || event.descriptionEn?.trim());
 
 // Section logo map
 const SECTION_LOGOS: Record<Section, string | null> = {
@@ -70,8 +95,27 @@ const SECTION_COLORS: Record<Section, string> = {
 const sectionText = (color: string) =>
   `color-mix(in srgb, ${color} 45%, var(--hero-text))`;
 
+// Kortets footer-CTA (knapp eller extern länk). Pillret är visuellt ~26px högt;
+// ::before förlänger träffytan till ≥44px utan att ändra kortets layout.
+const ctaCls =
+  'relative flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 ' +
+  'hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110 ' +
+  'before:absolute before:-inset-x-1 before:-inset-y-2.5';
+
+// NEXUS/Campus-växlaren — mobil: halva bredden var, centrerat innehåll. Ingen nowrap:
+// vid 360 px får "TKL NEXUS Events" hellre radbryta än flöda över sin kolumn.
+const TOGGLE_CLS =
+  'flex items-center justify-center gap-2 min-w-0 min-h-11 px-3 sm:px-6 py-2 rounded-xl text-sm leading-tight text-center font-semibold sm:whitespace-nowrap ' +
+  'transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-purple)';
+
+const RETRY_CLS =
+  'min-h-11 px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95 ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-purple) focus-visible:ring-offset-2 focus-visible:ring-offset-(--cosmic-bg)';
+const RETRY_STYLE = { background: 'linear-gradient(135deg, var(--cta-purple-from), var(--cta-blue))' } as const;
+
 type FilterKey = Section | 'all';
-type ExtendedEvent = TKLEvent & { externalUrl?: string };
+/** source: 'ludd' = campus-event från LUDD-API:t (märks med källa, inte sektion) */
+type ExtendedEvent = TKLEvent & { externalUrl?: string; source?: 'ludd' };
 
 // Event Card
 function EventCard({
@@ -142,7 +186,8 @@ function EventCard({
               className="text-[0.6875rem] font-semibold uppercase tracking-widest"
               style={{ color: sectionText(color) }}
             >
-              {ev.sections[event.section]}
+              {/* LUDD-event saknar sektion — "Allmänt" var en missvisande fallback */}
+              {event.source === 'ludd' ? ev.sourceLudd : ev.sections[event.section]}
             </span>
           </div>
 
@@ -150,11 +195,13 @@ function EventCard({
             {displayTitle}
           </h3>
 
-          <p className="hero-text-muted text-sm leading-relaxed line-clamp-2 mb-3">
-            {displayDesc}
-          </p>
+          {displayDesc?.trim() && (
+            <p className="hero-text-muted text-sm leading-relaxed line-clamp-2 mb-3">
+              {displayDesc}
+            </p>
+          )}
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs hero-text-subtle">
+          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs hero-text-subtle ${displayDesc?.trim() ? '' : 'mt-2'}`}>
             <span className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
               {event.location}
@@ -169,9 +216,9 @@ function EventCard({
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER — min-h håller samma höjd oavsett om en CTA renderas */}
       <div
-        className="flex items-center justify-between px-5 py-3 mt-1 relative z-20"
+        className="flex items-center justify-between gap-3 min-h-12.5 px-5 py-3 mt-1 relative z-20"
         style={{ borderTop: '1px solid var(--about-card-border)' }}
       >
         <span className="flex items-center gap-1.5 text-xs hero-text-subtle">
@@ -179,15 +226,34 @@ function EventCard({
           {dateObj.toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'long' })}
         </span>
 
-        <button
-          onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
-          aria-label={`${ev.visaMer}: ${displayTitle}`}
-          className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-all duration-200 hover:gap-2.5 px-2.5 py-1 rounded-lg hover:brightness-110"
-          style={{ color: sectionText(color), background: `${color}12`, border: `1px solid ${color}28` }}
-        >
-          {ev.visaMer}
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-        </button>
+        {/* Mer att visa → drawer. Annars direkt till källan (LUDD) om den finns,
+            annars ingen CTA alls — en drawer utan beskrivning är en återvändsgränd. */}
+        {hasDetails(event) ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onViewDetails(e); }}
+            aria-label={`${ev.visaMer}: ${displayTitle}`}
+            className={ctaCls}
+            style={{ color: sectionText(color), background: `${color}12`, border: `1px solid ${color}28` }}
+          >
+            {ev.visaMer}
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
+        ) : event.externalUrl ? (
+          <a
+            href={event.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            // Replacer-funktion: extern titel med $&/$' tolkas annars som ersättningsmönster
+            aria-label={ev.readOnLuddAria.replace('{title}', () => displayTitle)}
+            className={ctaCls}
+            style={{ color: sectionText(color), background: `${color}12`, border: `1px solid ${color}28` }}
+          >
+            {ev.readOnLudd}
+            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+          </a>
+        ) : null}
       </div>
     </motion.article>
   );
@@ -227,11 +293,24 @@ export function EventsContent() {
     [pushId],
   );
 
+  // State variables for LUDD Data
+  const [calendarView, setCalendarView] = useState<'nexus' | 'ludd'>('nexus');
+  const [luddEvents, setLuddEvents] = useState<ExtendedEvent[]>([]);
+  // ?id=ludd-… som väntar på att LUDD-listan hämtas (direktlänk, omladdning, bakåt/framåt).
+  // LUDD-event finns inte i Firestore — getEventById kan aldrig hitta dem.
+  const [pendingLuddId, setPendingLuddId] = useState<string | null>(null);
+
   // Initial URL-check (direktnavigering till /events?id=xxx)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) return;
+    if (id.startsWith('ludd-')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- engångssynk från URL efter hydration
+      setPendingLuddId(id);
+      setCalendarView('ludd');
+      return;
+    }
     void import('@/lib/services/events').then((m) => m.getEventById(id)).then((ev) => {
       if (ev) setSelectedEvent(ev as ExtendedEvent);
     });
@@ -246,9 +325,12 @@ export function EventsContent() {
         setSelectedEvent(null);
         return;
       }
-      const cached = allEvents.find((e) => e.id === id);
+      const cached = allEvents.find((e) => e.id === id) ?? luddEvents.find((e) => e.id === id);
       if (cached) {
         setSelectedEvent(cached);
+      } else if (id.startsWith('ludd-')) {
+        setPendingLuddId(id);
+        setCalendarView('ludd');
       } else {
         void import('@/lib/services/events').then((m) => m.getEventById(id)).then((ev) => {
           if (ev) setSelectedEvent(ev as ExtendedEvent);
@@ -257,12 +339,20 @@ export function EventsContent() {
     };
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
-  }, [allEvents]);
+  }, [allEvents, luddEvents]);
 
-  // State variables for LUDD Data
-  const [calendarView, setCalendarView] = useState<'nexus' | 'ludd'>('nexus');
-  const [luddEvents, setLuddEvents] = useState<ExtendedEvent[]>([]);
+  // Väntande LUDD-id löses när listan finns. Saknas eventet (passerat/borttaget)
+  // rensas id:t ur URL:en i stället för att lämna en död länk kvar.
+  useEffect(() => {
+    if (!pendingLuddId || luddEvents.length === 0) return;
+    const found = luddEvents.find((e) => e.id === pendingLuddId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- synk mot asynkront hämtad LUDD-lista
+    setPendingLuddId(null);
+    if (found) setSelectedEvent(found);
+    else clearId();
+  }, [pendingLuddId, luddEvents, clearId]);
   const [luddLoading, setLuddLoading] = useState(false);
+  const [luddCalendarView, setLuddCalendarView] = useState<LuddCalendarView>('week');
   const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | null>(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -337,7 +427,12 @@ export function EventsContent() {
             const parsed = LuddItemSchema.safeParse(raw);
             if (!parsed.success) return [];
             const item = parsed.data;
-            const timeMs = item.start_datetime > 9999999999 ? item.start_datetime : item.start_datetime * 1000;
+            const timeMs = luddToMs(item.start_datetime);
+            // end_datetime före start (eller saknas) → faller tillbaka på start
+            const endMs = item.end_datetime ? Math.max(luddToMs(item.end_datetime), timeMs) : timeMs;
+            // Publika LUDD-sidan nås via slug (id fungerar som reserv)
+            // || (inte ??): tom slug ska falla tillbaka på id
+            const luddRef = item.slug || item.id;
             return [{
               // Stabil key-fallback — Math.random() ger ny identitet per render
               // och bryter Reacts reconciliation (omount + tappade animationer)
@@ -345,13 +440,17 @@ export function EventsContent() {
               title: item.title || ev.luddFallbackTitle,
               description: item.description ? item.description.replace(/<[^>]*>?/gm, '').trim() : '',
               date: new Date(timeMs).toISOString(),
-              endDate: new Date(timeMs).toISOString(),
-              location: item.place_name || item.place_address || ev.luddFallbackLocation,
+              endDate: new Date(endMs).toISOString(),
+              location:
+                item.place?.name || item.place?.address || item.place_name || item.place_address || ev.luddFallbackLocation,
               tags: item.tags ?? [],
               section: 'general' as const,
+              source: 'ludd' as const,
               published: true,
               createdAt: new Date().toISOString(),
-              externalUrl: item.url || `https://events.ludd.ltu.se/event/${item.slug ?? item.id}`,
+              externalUrl:
+                item.url ??
+                (luddRef !== undefined ? `https://events.ludd.ltu.se/event/${encodeURIComponent(String(luddRef))}` : undefined),
             }];
           });
 
@@ -371,6 +470,13 @@ export function EventsContent() {
   // ev med i deps för i18n-fallbacks — guarden luddEvents.length === 0
   // förhindrar omhämtning vid språkbyte.
   }, [calendarView, luddEvents.length, ev]);
+
+  // Veckovyns chips: drawer bara när det finns mer att visa (beskrivning). Annars
+  // direktlänk till LUDD i ny flik, eller — utan länk — en icke-klickbar rad.
+  const calendarEvents = useMemo(
+    () => luddEvents.map((e) => (hasDetails(e) ? e : { ...e, href: e.externalUrl, inert: !e.externalUrl })),
+    [luddEvents],
+  );
 
   // Deferred sök — inputfältet uppdateras direkt, medan grid-filtreringen
   // (AnimatePresence + layout-animationer) får släpa efter utan att blockera skrivandet.
@@ -548,31 +654,35 @@ export function EventsContent() {
         <div className="max-w-6xl mx-auto">
 
           {/* Dual Calendar Toggle */}
-          <div className="flex justify-center mb-10 overflow-x-auto">
+          {/* Mobil: två lika breda kolumner över hela bredden (px-6 + ikon flödade
+              tidigare över 358 px och klipptes); från sm: kompakt centrerad pill. */}
+          <div className="flex justify-center mb-10">
             <div
-              className="inline-flex items-center p-1.5 rounded-2xl shrink-0"
+              className="grid grid-cols-2 w-full sm:inline-flex sm:w-auto items-center gap-1 p-1.5 rounded-2xl"
               style={{ background: 'var(--glass-bg-subtle)', border: '1px solid var(--glass-border-subtle)' }}
             >
               <button
+                type="button"
                 onClick={() => setCalendarView('nexus')}
                 aria-pressed={calendarView === 'nexus'}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
+                className={TOGGLE_CLS}
                 style={calendarView === 'nexus'
                   ? { background: 'rgba(139,92,246,0.20)', color: 'var(--text-purple)', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
                   : { color: 'var(--hero-text-muted)' }}
               >
-                <Sparkles className="w-4 h-4" aria-hidden="true" />
+                <Sparkles className="w-4 h-4 shrink-0" aria-hidden="true" />
                 {ev.nexusTab}
               </button>
               <button
+                type="button"
                 onClick={() => { setCalendarView('ludd'); capture('campus_calendar_viewed'); }}
                 aria-pressed={calendarView === 'ludd'}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px]"
+                className={TOGGLE_CLS}
                 style={calendarView === 'ludd'
                   ? { background: 'rgba(139,92,246,0.20)', color: 'var(--text-purple)', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }
                   : { color: 'var(--hero-text-muted)' }}
               >
-                <CalendarDays className="w-4 h-4" aria-hidden="true" />
+                <CalendarDays className="w-4 h-4 shrink-0" aria-hidden="true" />
                 {ev.campusTab}
               </button>
             </div>
@@ -595,21 +705,23 @@ export function EventsContent() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder={ev.searchPlaceholder}
-                      className="w-full rounded-xl pl-10 pr-10 py-2.5 text-sm outline-none transition-all duration-150"
+                      className="w-full min-h-11 rounded-xl pl-10 pr-11 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-2 focus-visible:ring-(--text-purple)"
                       style={{
                         background: 'var(--glass-bg-subtle)',
-                        border: '1px solid var(--glass-border-subtle)',
+                        // --input-border (3:1, WCAG 1.4.11) — samma fältkant som övriga formulär
+                        border: '1px solid var(--input-border)',
                         color: 'var(--hero-text)',
                       }}
                       aria-label={ev.searchPlaceholder}
                     />
                     {search && (
                       <button
+                        type="button"
                         onClick={() => setSearch('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-opacity hover:opacity-70"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-11 h-11 rounded-full transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-purple)"
                         aria-label={ev.clearSearch}
                       >
-                        <X className="w-3.5 h-3.5" style={{ color: 'var(--hero-text-subtle)' }} />
+                        <X className="w-3.5 h-3.5" style={{ color: 'var(--hero-text-subtle)' }} aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -645,9 +757,10 @@ export function EventsContent() {
                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
                       <p className="text-red-400 light:text-red-700 font-medium">{error}</p>
                       <button
+                        type="button"
                         onClick={() => setFetchKey((k) => k + 1)}
-                        className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                        style={{ background: 'linear-gradient(135deg, #6D28D9, #1D4ED8)' }}
+                        className={RETRY_CLS}
+                        style={RETRY_STYLE}
                       >
                         {ev.retry}
                       </button>
@@ -669,7 +782,7 @@ export function EventsContent() {
                     {filter === 'all' && (
                       <Link
                         href="/corporate/post"
-                        className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="mt-6 inline-flex items-center gap-2 min-h-11 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
                         style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: 'var(--text-purple)' }}
                       >
                         <PlusCircle className="w-4 h-4" aria-hidden="true" />
@@ -708,12 +821,12 @@ export function EventsContent() {
                 transition={{ duration: 0.3 }}
               >
                 {/* Header: powered-by */}
-                <div className="flex items-center mb-8">
+                <div className="flex items-center mb-6">
                   <a
                     href="https://www.ludd.ltu.se/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium hero-text-subtle hover:text-(--text-blue) transition-colors flex items-center gap-1.5"
+                    className="min-h-11 text-xs font-medium hero-text-subtle hover:text-(--text-blue) transition-colors flex items-center gap-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-blue)"
                   >
                     {ev.luddPoweredBy} <span className="font-bold text-white light:text-black tracking-wide">/LUDD/</span>
                   </a>
@@ -737,9 +850,10 @@ export function EventsContent() {
                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center max-w-md flex flex-col items-center gap-4">
                       <p className="text-red-400 light:text-red-700 font-medium">{ev.luddFetchError}</p>
                       <button
+                        type="button"
                         onClick={() => { setLuddError(false); setLuddEvents([]); }}
-                        className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-105 active:scale-95"
-                        style={{ background: 'linear-gradient(135deg, #6D28D9, #1D4ED8)' }}
+                        className={RETRY_CLS}
+                        style={RETRY_STYLE}
                       >
                         {ev.retry}
                       </button>
@@ -760,18 +874,25 @@ export function EventsContent() {
                 {!luddLoading && luddEvents.length > 0 && (
                   <>
                     <LuddCalendar
-                      events={luddEvents}
+                      events={calendarEvents}
                       selectedDate={calendarSelectedDate}
                       onDaySelect={setCalendarSelectedDate}
+                      view={luddCalendarView}
+                      onViewChange={setLuddCalendarView}
+                      onEventOpen={(id, trigger) => {
+                        const event = luddEvents.find((e) => e.id === id);
+                        if (event && hasDetails(event)) handleOpenEvent(event, trigger);
+                      }}
                     />
 
-                    {calendarSelectedDate !== null && filteredLuddEvents.length === 0 && (
+                    {/* "Valt datum"-listan hör till månadsvyn — veckovyn visar eventen i dagsrutorna */}
+                    {luddCalendarView === 'month' && calendarSelectedDate !== null && filteredLuddEvents.length === 0 && (
                       <p role="status" className="text-center hero-text-muted py-10">
                         {ev.calendarNoEvents}
                       </p>
                     )}
 
-                    {calendarSelectedDate !== null && filteredLuddEvents.length > 0 && (
+                    {luddCalendarView === 'month' && calendarSelectedDate !== null && filteredLuddEvents.length > 0 && (
                       <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
                         <AnimatePresence mode="popLayout">
                           {filteredLuddEvents.map((event, idx) => (

@@ -69,11 +69,14 @@ export function DealCard({ deal, idx = 0, variant, onViewDetails }: DealCardProp
         layout
         onClick={onViewDetails}
         className="glass-card group relative overflow-hidden rounded-2xl aspect-square flex flex-col items-center justify-center p-4 w-full cursor-pointer"
-        aria-label={`${displayTitle}${deal.discount ? ` — ${deal.discount}` : ''}`}
       >
-        <div className="flex-1 flex items-center justify-center w-3/5 pointer-events-none">
+        {/* Namnet kommer från innehållet ("Titel — Rabatt") i stället för aria-label:
+            den synliga rabatttexten ingår då alltid i namnet (WCAG 2.5.3 Label in Name).
+            Logotypen/initialen är dekor här — titeln bär betydelsen. */}
+        <div className="flex-1 flex items-center justify-center w-3/5 pointer-events-none" aria-hidden="true">
           {logoNode}
         </div>
+        <span className="sr-only">{`${displayTitle}${deal.discount ? ' — ' : ''}`}</span>
 
         {deal.discount && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none">

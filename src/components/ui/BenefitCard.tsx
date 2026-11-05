@@ -106,7 +106,7 @@ export function BenefitCardComponent({
             {linkLabel && linkHref && (
               <Link
                 href={linkHref}
-                className="inline-flex items-center gap-2 text-sm font-semibold transition-all duration-150 group/link"
+                className="inline-flex items-center gap-2 min-h-11 -my-3 text-sm font-semibold transition-all duration-150 group/link"
                 style={{ color: colors.textColor }}
               >
                 {linkLabel}
@@ -156,7 +156,7 @@ export function BenefitCardComponent({
       {linkLabel && linkHref && (
         <Link
           href={linkHref}
-          className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium transition-colors duration-150"
+          className="inline-flex items-center gap-1.5 min-h-11 mt-1 -mb-3 text-sm font-medium transition-colors duration-150"
           style={{ color: colors.textColor }}
         >
           {linkLabel} →

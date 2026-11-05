@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, ExternalLink, Copy, Check } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import { useNavbarState } from '@/components/providers/NavbarStateProvider';
+import { useHideNavbarWhileOpen } from '@/components/providers/NavbarStateProvider';
 import type { TKLDeal } from '@/lib/schemas/deal';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary-url';
@@ -21,7 +21,6 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
   const { t, locale } = useLanguage();
   const deals = t.deals;
   const shouldReduceMotion = useReducedMotion();
-  const { setDrawerOpen } = useNavbarState();
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [copied, setCopied] = useState(false);
@@ -48,12 +47,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
     return () => clearTimeout(t);
   }, [deal?.id]);
 
-  useEffect(() => {
-    setDrawerOpen(isOpen);
-    return () => {
-      if (isOpen) setDrawerOpen(false);
-    };
-  }, [isOpen, setDrawerOpen]);
+  const releaseNavbar = useHideNavbarWhileOpen(isOpen);
 
   // Escape
   useEffect(() => {
@@ -92,7 +86,7 @@ export function DealDrawer({ deal, onClose }: DealDrawerProps) {
   // exit-animationen är säker ändå: AnimatePresence fryser det senast
   // renderade trädet när deal blir null.
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={releaseNavbar}>
       {deal && (
         <>
           <motion.div

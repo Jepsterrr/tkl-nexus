@@ -144,7 +144,10 @@ export default function RootLayout({
                     <GlobalBanner />
                     <Navbar />
                     <ScrollContainer>
-                      <main id="main-content" className="relative overflow-x-hidden">
+                      {/* overflow-x: clip (inte hidden) — hidden gör <main> till scrollcontainer
+                          och bryter position: sticky i sidinnehållet (t.ex. filterpanelen på /career).
+                          hidden ligger kvar som fallback för webbläsare utan clip. */}
+                      <main id="main-content" className="relative overflow-x-hidden supports-[overflow:clip]:overflow-x-clip">
                         {children}
                       </main>
                       <Footer />

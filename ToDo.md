@@ -19,47 +19,15 @@ Cloudinary DPA: https://cloudinary-marketing-res.cloudinary.com/image/upload/v17
 
   Steg 3, verifiering: Propageringen tar från några minuter upp till någon timme. Firebase utfärdar SSL-certifikat automatiskt när posten syns. Kontrollera att https://www.tklnexus.se omdirigerar till https://tklnexus.se utan certifikatvarning. Ingen kod eller deploy berörs, detta är enbart konfiguration.
 
-## Uppföljning från kodgranskning
+## Uppföljning från Nexus Hemsida-feedback
 
-- [ ] GCP-åtkomst saknas för WIF-setup (byte från service account-JSON till Workload Identity Federation i deploy-pipelinen)
-
-  Underlag att skicka till projektets ägare eller Teknologkårens Google Workspace-admin (den som skapade Firebase-projektet, eller den som skapade service-kontot bakom GitHub-secreten `FIREBASE_SERVICE_ACCOUNT`):
-
-  GitHub Actions deployar idag sajten till Firebase Hosting med en långlivad service account-nyckel (JSON) som ligger som secret i GitHub. Den ska ersättas med Workload Identity Federation (WIF), där GitHub istället får kortlivade tokens direkt från Google — ingen nyckel som kan läcka eller behöver roteras. Problemet: webmaster-kontot web@tklnexus.se har Firebase-behörigheter men saknar IAM-åtkomst på GCP-nivå (`resourcemanager.projects.get` och `iam.*` nekas), så setupen går inte att göra utan er hjälp. Projektet heter tkl-nexus (projektnummer 194298580940) och ligger i er Google-organisation (ID 764598542395). Åtgärden tar cirka 10 minuter.
-
-  Alternativ A (enklast): Logga in på console.cloud.google.com, gå till IAM för projektet tkl-nexus och ge web@tklnexus.se rollen Owner. Då gör webmastern resten själv, och framtida GCP-ärenden kräver ingen ny kontakt.
-
-  Alternativ B (minimala roller): Ge web@tklnexus.se rollerna Viewer, Workload Identity Pool Admin, Service Account Admin och Project IAM Admin på projektet tkl-nexus.
-
-  Alternativ C (ni gör setupen själva): 1) IAM & Admin → Workload Identity Federation → skapa pool `github-pool` med OIDC-provider `github-provider`, issuer `https://token.actions.githubusercontent.com`, attribute mapping `google.subject = assertion.sub` och `attribute.repository = assertion.repository`, attribute condition `assertion.repository == "Jepsterrr/tkl-nexus"`. 2) Skapa service account `github-deploy` med rollerna Firebase Hosting Admin + Service Usage Consumer — skapa INGEN nyckel. 3) På kontot github-deploy@tkl-nexus.iam.gserviceaccount.com: Permissions → Grant access → principal `principalSet://iam.googleapis.com/projects/194298580940/locations/global/workloadIdentityPools/github-pool/attribute.repository/Jepsterrr/tkl-nexus` med rollen Workload Identity User. Meddela webmastern när det är klart — workflow-ändringen i repot görs därefter.
-
-  Efter första gröna deployen med WIF: radera JSON-nyckeln på det gamla service-kontot och ta bort GitHub-secreten `FIREBASE_SERVICE_ACCOUNT`.
-
-  OBS: flyttas GitHub-repot till en kår-ägd organisation (se README) måste attribute condition och principal-bindningen uppdateras med det nya repo-namnet.
-
-## Uppföljning från vibelegit-skanning 2026-07-09 (score 83/100)
-
-- [ ] Användarvillkor-sida (`/terms`) — låg prioritet, ej juridiskt krav:
-  Samma tvåfilsmönster som `/privacy` (`page.tsx` + `TermsContent.tsx`), i18n sv/en, länk i footern bredvid integritetspolicyn. Innehåll: tillåten användning, ansvarsfriskrivning, immaterialrätt, tillämplig lag (svensk), kontakt. Villkorstexten ska godkännas av kåren innan deploy.
+- [ ] Återinför NEXUS Deals: sätt `DEALS_ENABLED = true` i `src/lib/features.ts` och justera/ta bort testet 'Deals är dolt' i `e2e/navigation.spec.ts` (lägg även tillbaka `/students/deals` i `public/sitemap.xml` och `public/llms.txt` och ta bort `noindex` i `src/app/students/deals/page.tsx`)
+- [ ] Övriga texter nämner fortfarande förmåner/deals trots att Deals är dolt — besluta om de ska ändras eller vara kvar: `home.ctaStudentsSub` ("Exjobb, events & förmåner"), `subPostDesc` ("Publicera jobb, event och deals.")
+- [ ] Städa dödkod: `src/components/ui/JobCard.tsx` (ersatt av `JobRow`, importeras ingenstans), `JobCardSkeleton` variant `'card'` och i18n-nycklarna `opportunities.pills`/`resultsCount`/`startLabel` (verifiera med grep att de är oanvända innan borttagning)
 
 ## E2E-tester att lägga till
 
 Befintlig svit (`e2e/`) täcker: rutter/404/skip-länk, språk/tema-toggle, career-drawer, axe WCAG AA (7 sidor × 2 viewports × 2 teman), security headers. Följande saknas, i prioritetsordning:
-
-### P1 — kärninteraktivitet
-- [x] Filter-tabs på `/career` (`filters-search.spec.ts`)
-- [x] Sökfältet på `/career` — no-results med query, rensa-knapp
-- [x] Filter-tabs + sök på `/events`
-- [x] Deals vytoggle ikon/detalj + localStorage-persistens (`deals.spec.ts`)
-- [x] DealCard klick-för-kopiera — clipboard + "Kopierat!"-feedback
-- [x] DealDrawer — livscykel (URL-synk, Escape, fokus)
-- [x] EventDrawer — livscykel (`drawer.spec.ts`, datadrivet skip tills events publiceras)
-
-### P2 — integrationer och riskabla områden
-- [x] LUDD-fliken — mockat API via `page.route()` med relativa fixture-datum (`ludd.spec.ts`), inkl. API-fel/retry
-- [x] LuddCalendar — månadsnavigering, datumval, tomt datum
-- [x] Hash-ankarlänkar — `/about#kontakt` via klick + direktnavigering (`anchors.spec.ts`)
-- [x] Corporate/post — ARIA-tabbar + piltangenter, validerings-gate, success-state (`post-form.spec.ts`). OBS: mailto-`href`-innehållet asserteras inte (submit sätter `window.location.href`, inte ett `<a>` — mailto blockeras tyst i headless)
 
 ### P3 — kräver förutsättningar som saknas idag
 - [ ] CookieConsent accept/decline-flöde + CookieSettings-toggeln på `/privacy` (inkl. event-synk banner↔toggle) — blockerad tills `ANALYTICS_ENABLED=true` (ingen av dem renderas nu)

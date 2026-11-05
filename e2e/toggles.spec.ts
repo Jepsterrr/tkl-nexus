@@ -18,12 +18,13 @@ test.describe('Språktoggle', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'sv');
 
     await openControls(page, isMobile);
-    await page.getByRole('button', { name: /^Engelska$|English/ }).first().click();
+    // Namnet börjar med den synliga texten "EN" (WCAG 2.5.3 Label in Name)
+    await page.getByRole('button', { name: /^EN – Engelska$/ }).first().click();
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     // aria-pressed flyttas till EN-knappen
     await expect(
-      page.getByRole('button', { name: /English \(active\)/ }).first(),
+      page.getByRole('button', { name: /^EN – English$/ }).first(),
     ).toHaveAttribute('aria-pressed', 'true');
 
     // Persistens via localStorage (tkl-locale)

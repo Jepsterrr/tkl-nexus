@@ -4,11 +4,11 @@ import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, MapPin, CalendarDays, Tag, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import { useNavbarState } from '@/components/providers/NavbarStateProvider';
+import { useHideNavbarWhileOpen } from '@/components/providers/NavbarStateProvider';
 import type { TKLEvent, Section } from '@/lib/schemas/event';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
-type ExtendedEvent = TKLEvent & { externalUrl?: string };
+type ExtendedEvent = TKLEvent & { externalUrl?: string; source?: 'ludd' };
 
 const SECTION_COLORS: Record<Section, string> = {
   data: '#f7cf3b',
@@ -40,7 +40,6 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
   const { t, locale } = useLanguage();
   const ev = t.events;
   const shouldReduceMotion = useReducedMotion();
-  const { setDrawerOpen } = useNavbarState();
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -109,15 +108,10 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  useEffect(() => {
-    setDrawerOpen(isOpen);
-    return () => {
-      if (isOpen) setDrawerOpen(false);
-    };
-  }, [isOpen, setDrawerOpen]);
+  const releaseNavbar = useHideNavbarWhileOpen(isOpen);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={releaseNavbar}>
       {isOpen && (
         <>
           {/* Overlay */}
@@ -172,12 +166,13 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
 
               <button
                 ref={closeButtonRef}
+                type="button"
                 onClick={onClose}
-                className="absolute right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-opacity duration-200 hover:opacity-80"
-                style={{ top: '20px', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
+                className="absolute right-2 z-10 flex items-center justify-center w-11 h-11 rounded-full cursor-pointer transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-purple)"
+                style={{ top: '12px', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
                 aria-label={ev.drawerClose}
               >
-                <X className="w-4 h-4 hero-text-muted" />
+                <X className="w-4 h-4 hero-text-muted" aria-hidden="true" />
               </button>
 
               <div className="relative z-10 flex items-center gap-2 mb-2.5">
@@ -186,7 +181,7 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                   className="text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                   style={{ color: sectionText(color), background: `${color}18`, border: `1px solid ${color}30` }}
                 >
-                  {ev.sections[event!.section]}
+                  {event!.source === 'ludd' ? ev.sourceLudd : ev.sections[event!.section]}
                 </span>
               </div>
 
@@ -229,12 +224,18 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                 )}
               </div>
 
-              <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
-                {ev.drawerAbout}
-              </p>
-              <p className="text-sm leading-relaxed hero-text-muted" style={{ maxWidth: '65ch' }}>
-                {displayDesc}
-              </p>
+              {/* LUDD-event saknar beskrivning i API:t — då ingen tom "Om eventet"-rubrik;
+                  "Läs på LUDD" i footern är vägen vidare. */}
+              {displayDesc?.trim() && (
+                <>
+                  <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
+                    {ev.drawerAbout}
+                  </p>
+                  <p className="text-sm leading-relaxed hero-text-muted" style={{ maxWidth: '65ch' }}>
+                    {displayDesc}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Footer */}
@@ -248,7 +249,8 @@ export function EventDrawer({ event, onClose }: EventDrawerProps) {
                   href={event!.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
+                  aria-label={ev.readOnLuddAria.replace('{title}', () => displayTitle)}
+                  className="flex items-center gap-2 min-h-11 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
                   style={{ color: sectionText(color), background: `${color}15`, border: `1px solid ${color}30` }}
                 >
                   {ev.readOnLudd}

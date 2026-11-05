@@ -1,18 +1,16 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
 
-// Maps accent hex → WCAG-safe text CSS variable (light: darker shade, dark: same hex)
+// Accenthex → WCAG-säker texttoken. Bara purple används (Events "Alla sektioner");
+// övriga anropare skickar sektionsfärger (gul/grå/marin/mörkröd) som saknar token.
 const ACCENT_TEXT: Record<string, string> = {
   '#8B5CF6': 'var(--text-purple)',
-  '#3B82F6': 'var(--text-blue)',
-  '#10B981': 'var(--text-green)',
-  '#F59E0B': 'var(--text-orange)',
-  '#6366F1': 'var(--text-purple)',
-  '#0EA5E9': 'var(--text-blue)',
-  '#06B6D4': 'var(--text-blue)',
 };
+
+// Rå sektionshex som text är oläslig (marinblå #172191 ~1,3:1 på mörk bg, gul faller i
+// ljust tema) — blanda mot --hero-text, samma princip som EventCards sectionText.
+const safeText = (color: string) => ACCENT_TEXT[color] ?? `color-mix(in srgb, ${color} 45%, var(--hero-text))`;
 
 interface FilterTabProps {
   active: boolean;
@@ -21,21 +19,20 @@ interface FilterTabProps {
   color: string;
   /** Valfri logotyp (sektionsikon för Events) */
   logo?: string | null;
-  /** Visa Sparkles-ikon när aktiv (Career-stil) */
-  showActiveIcon?: boolean;
 }
 
-export function FilterTab({ active, onClick, label, color, logo, showActiveIcon }: FilterTabProps) {
-  const textColor = ACCENT_TEXT[color] ?? color;
+export function FilterTab({ active, onClick, label, color, logo }: FilterTabProps) {
+  const textColor = safeText(color);
   const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.button
+      type="button"
       onClick={onClick}
       whileHover={shouldReduceMotion ? {} : { scale: 1.04, y: -1 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap min-h-[44px] transition-[background-color,border-color,color,box-shadow] duration-200"
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap min-h-11 transition-[background-color,border-color,color,box-shadow] duration-200"
       style={{
         background: active ? `${color}22` : 'var(--glass-bg-subtle)',
         border: `1px solid ${active ? color + '55' : 'var(--glass-border-subtle)'}`,
@@ -46,13 +43,6 @@ export function FilterTab({ active, onClick, label, color, logo, showActiveIcon 
     >
       {logo && (
         <img src={logo} alt="" width={16} height={16} className="object-contain" aria-hidden="true" loading="lazy" decoding="async" />
-      )}
-      {showActiveIcon && (
-        <Sparkles
-          className="w-4 h-4 transition-opacity duration-200"
-          style={{ color: textColor, opacity: active ? 1 : 0.35 }}
-          aria-hidden="true"
-        />
       )}
       {label}
     </motion.button>

@@ -29,7 +29,7 @@ export default function CorporatePage() {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
-      { '@type': 'ListItem', position: 2, name: 'För företag', item: 'https://tklnexus.se/corporate' },
+      { '@type': 'ListItem', position: 2, name: 'Företag', item: 'https://tklnexus.se/corporate' },
     ],
   };
   return (

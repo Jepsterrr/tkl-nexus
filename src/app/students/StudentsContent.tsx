@@ -21,6 +21,7 @@ import { GradientOrb } from '@/components/ui/GradientOrb';
 import { StaggerReveal, RevealItem } from '@/components/motion/StaggerReveal';
 import { DestinationCard } from '@/components/ui/DestinationCard';
 import type { BenefitCard, JobCardProps } from '@/lib/types';
+import { DEALS_ENABLED } from '@/lib/features';
 
 export function StudentsContent() {
   const { t } = useLanguage();
@@ -62,7 +63,7 @@ export function StudentsContent() {
     },
   ];
 
-  const DESTINATIONS = [
+  const ALL_DESTINATIONS = [
     {
       href: '/events',
       label: students.destinations.events.label,
@@ -91,6 +92,9 @@ export function StudentsContent() {
       cta: students.destinations.deals.cta,
     },
   ];
+  const DESTINATIONS = ALL_DESTINATIONS.filter(
+    (d) => DEALS_ENABLED || d.href !== '/students/deals',
+  );
 
   return (
     <>
@@ -195,7 +199,8 @@ export function StudentsContent() {
                 <Link
                   href="#mojligheter"
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #10B981, #059669)', boxShadow: '0 0 28px rgba(16,185,129,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}
+                  // Mörk emerald-fyllning: vit text på #10B981→#059669 gav bara 2,5–3,8:1
+                  style={{ background: 'linear-gradient(135deg, var(--cta-green-from), var(--cta-green-to))', boxShadow: '0 0 28px rgba(16,185,129,0.4), 0 8px 32px rgba(0,0,0,0.3)' }}
                 >
                   {students.ctaExplore}
                 </Link>
@@ -270,7 +275,7 @@ export function StudentsContent() {
             <div className="h-px flex-1 bg-border" aria-hidden="true" />
           </RevealItem>
         </StaggerReveal>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${DESTINATIONS.length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
           {DESTINATIONS.map((d, i) => (
             <DestinationCard key={d.href} {...d} index={i} />
           ))}

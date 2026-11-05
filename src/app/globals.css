@@ -7,7 +7,19 @@
   /* 100% = respektera användarens webbläsarinställning (WCAG 1.4.4).
      Aldrig fast px-värde här — det låser rem-basen. */
   --font-size: 100%;
+  /* Navbarens nederkant (fixed top-4 + höjd) — styr scroll-padding för ankarlänkar;
+     fel värde döljer målet under navbaren. Mätt: 98px från lg (se @media nedan).
+     Mobil mäter 80px men 72px behålls: /corporate/post-flikradens sticky top bygger
+     på det, och ankarmålen har ≥64px egen toppadding (mätt: rubriken hamnar 64px under). */
   --navbar-height: 72px;
+
+  /* Primärknappar med vit text — fyllning ≥4,5:1 mot #fff i BÅDA teman
+     (ljusa accenthexar som #10B981/#8B5CF6 ger bara 2,5–4,2:1). */
+  --cta-purple-from: #7C3AED;
+  --cta-purple-to:   #5B21B6;
+  --cta-green-from:  #047857;
+  --cta-green-to:    #065F46;
+  --cta-blue:        #1D4ED8;
 
   /* Hero text — light-mode defaults (safe before ThemeProvider hydrates) */
   --hero-text: #0d0b1a;
@@ -177,9 +189,16 @@
   --text-blue: #3B82F6;
   --text-purple: #A78BFA;
   --text-red: #fb2c36; /* red-500 — 5,0:1 på cosmic-bg (tkl-red ger bara ~3,4:1) */
+  --text-rose: #fb7185; /* rose-400 — sommarjobb-badge; ≥4,5:1 även på glasskort (text-red faller under) */
+  --text-blue-strong: #60a5fa; /* blue-400 — blå text på blå tint (kalenderchips/toggle); text-blue gav bara 3,4–4,25:1 */
 
   /* Formulärfält — kant måste nå 3:1 mot bakgrunden (WCAG 1.4.11) */
   --input-border: rgba(255, 255, 255, 0.35);
+}
+
+/* Desktopnavbaren (lg+) är högre — 16px top-offset + ~82px rad. */
+@media (min-width: 64rem) {
+  :root { --navbar-height: 98px; }
 }
 
 /* Light */
@@ -281,6 +300,8 @@
   --text-blue: #1d4ed8;
   --text-purple: #5b21b6;
   --text-red: #E30613; /* varumärkesröd — 4,6:1 på ljus bg */
+  --text-rose: #be123c; /* rose-700 — sommarjobb-badge, ~6:1 på vitt */
+  --text-blue-strong: #1d4ed8; /* = text-blue; ≥4,6:1 även på blå tint i ljust tema */
 
   /* Formulärfält — kant måste nå 3:1 mot bakgrunden (WCAG 1.4.11) */
   --input-border: rgba(13, 11, 26, 0.45);
@@ -379,7 +400,7 @@
   html {
     font-size: var(--font-size);
     scroll-behavior: smooth;
-    scroll-padding-top: var(--navbar-height, 72px);
+    scroll-padding-top: calc(var(--navbar-height, 72px) + 0.5rem);
     scrollbar-width: none; /* Firefox */
   }
 
@@ -411,11 +432,12 @@
   }
 
   /* Tailwind v4 preflight sätter inte längre pointer på knappar —
-     återinför den för allt klickbart (inkl. role="link"-kort). */
+     återinför den för allt klickbart (inkl. role="link"-kort).
+     Labels får medvetet ingen global pointer: textfält-/select-etiketter är inte
+     klickmål. Checkbox-/radio-/filetiketter sätter `cursor-pointer` explicit. */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [role="link"],
-  label[for],
   select:not(:disabled),
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled),
@@ -429,7 +451,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  scroll-padding-top: var(--navbar-height, 72px);
+  scroll-padding-top: calc(var(--navbar-height, 72px) + 0.5rem);
+}
+
+/* Sida med sticky rad under navbaren (/corporate/post-flikarna, ~175px totalt) —
+   tangentbordsfokus får inte hamna dolt under raden (WCAG 2.4.11). scroll-padding
+   (inte scroll-margin) så att även datumfältens inre segment respekterar det. */
+.scroll-container:has([data-sticky-subnav]) {
+  scroll-padding-top: calc(var(--navbar-height, 72px) + 7.5rem);
 }
 
 /* Hero h1-reveal — ren CSS-animation så LCP-elementet målas direkt vid
@@ -494,6 +523,64 @@
   html,
   .scroll-container {
     scroll-behavior: auto;
+  }
+}
+
+/* RootNetwork — uppritning som CSS-animationer (pathLength=1) i stället för framer-motion
+   per stig: inga JS-skrivningar per frame. Easing = EASE_OUT_EXPO, fade 0.12 s — samma
+   värden som tidigare. Delay/duration/slutopacitet sätts per element via --rn-*. */
+.rn-draw {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.rn-pop {
+  opacity: 0;
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.rn-live .rn-draw {
+  animation:
+    rn-draw var(--rn-dur) cubic-bezier(0.22, 1, 0.36, 1) var(--rn-delay) both,
+    rn-fade 0.12s ease-out var(--rn-delay) both;
+}
+.rn-live .rn-pop {
+  animation: rn-pop var(--rn-dur) cubic-bezier(0.22, 1, 0.36, 1) var(--rn-delay) both;
+}
+/* Filterlagren (glow-blur, ljust temas drop-shadow) komponeras på GPU bara medan
+   uppritningen pågår; därefter rastras de en gång och cachas */
+.rn-drawing {
+  will-change: transform;
+}
+.rn-pulse {
+  opacity: 0;
+  animation: rn-pulse 2.4s cubic-bezier(0, 0, 0.58, 1) infinite;
+}
+@keyframes rn-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes rn-fade {
+  from { opacity: 0; }
+  to { opacity: var(--rn-o); }
+}
+@keyframes rn-pop {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: var(--rn-o); transform: scale(1); }
+}
+@keyframes rn-pulse {
+  from { opacity: 0.45; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Ingen uppritning — varje element går direkt till slutläget (delays i takt med korten) */
+  .rn-live .rn-draw,
+  .rn-live .rn-pop {
+    animation-duration: 0s;
+  }
+  .rn-pulse {
+    animation: none;
   }
 }
 

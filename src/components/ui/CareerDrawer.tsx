@@ -5,24 +5,13 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, MapPin, Calendar, Building2, Clock, ExternalLink } from 'lucide-react';
 import { capture } from '@/lib/analytics';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import { useNavbarState } from '@/components/providers/NavbarStateProvider';
-import type { TKLCareer, CareerType } from '@/lib/schemas/career';
+import { useHideNavbarWhileOpen } from '@/components/providers/NavbarStateProvider';
+import type { TKLCareer } from '@/lib/schemas/career';
+import { TYPE_COLORS, TYPE_TEXT } from '@/lib/careerTypes';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
-const TYPE_COLORS: Record<CareerType, string> = {
-  exjobb:  '#8B5CF6',
-  jobb:    '#3B82F6',
-  praktik: '#10B981',
-  trainee: '#F59E0B',
-};
-
-// WCAG-säkra textvarianter av accenthexen (ljust tema mappar till mörkare nyans)
-const TYPE_TEXT: Record<CareerType, string> = {
-  exjobb:  'var(--text-purple)',
-  jobb:    'var(--text-blue)',
-  praktik: 'var(--text-green)',
-  trainee: 'var(--text-orange)',
-};
+const SECTION_HEADING = 'text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading';
+const SECTION_BODY = 'text-sm leading-relaxed hero-text-muted whitespace-pre-line';
 
 interface CareerDrawerProps {
   job: TKLCareer | null;
@@ -33,7 +22,6 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
   const { t, locale } = useLanguage();
   const opp = t.opportunities;
   const shouldReduceMotion = useReducedMotion();
-  const { setDrawerOpen } = useNavbarState();
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -47,6 +35,13 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
   const displayStart = job
     ? (isEnglish && job.startDateEn ? job.startDateEn : job.startDate) ?? opp.ongoing
     : '';
+  const displayRequirements = job
+    ? (isEnglish && job.requirementsEn ? job.requirementsEn : job.requirements) ?? ''
+    : '';
+  const displayStudentTask = job
+    ? (isEnglish && job.studentTaskEn ? job.studentTaskEn : job.studentTask) ?? ''
+    : '';
+  const showStudentTask = job?.type === 'exjobb' && !!displayStudentTask;
   const localeStr = isEnglish ? 'en-US' : 'sv-SE';
   const deadlineLabel = job
     ? new Date(job.deadline).toLocaleDateString(localeStr, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -85,15 +80,10 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  useEffect(() => {
-    setDrawerOpen(isOpen);
-    return () => {
-      if (isOpen) setDrawerOpen(false);
-    };
-  }, [isOpen, setDrawerOpen]);
+  const releaseNavbar = useHideNavbarWhileOpen(isOpen);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={releaseNavbar}>
       {isOpen && (
         <>
           <motion.div
@@ -146,15 +136,16 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
 
               <button
                 ref={closeButtonRef}
+                type="button"
                 onClick={onClose}
-                className="absolute right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-opacity duration-200 hover:opacity-80"
-                style={{ top: '20px', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
+                className="absolute right-2 z-10 flex items-center justify-center w-11 h-11 rounded-full cursor-pointer transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-blue)"
+                style={{ top: '12px', background: 'var(--drawer-bg)', border: '1px solid var(--drawer-border)' }}
                 aria-label={opp.drawerClose}
               >
                 <X className="w-4 h-4 hero-text-muted" />
               </button>
 
-              <div className="relative z-10 flex items-center gap-2 mb-2.5">
+              <div className="relative z-10 flex items-center gap-2 mb-2.5 pr-10">
                 {/* Temasäker badge: vit på halvtransparent accent underkänns i ljust tema */}
                 <span
                   className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
@@ -174,7 +165,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
               </div>
 
               <h2
-                className="relative z-10 font-heading font-extrabold leading-tight hero-text"
+                className="relative z-10 font-heading font-extrabold leading-tight hero-text pr-10"
                 style={{ fontSize: 'clamp(18px, 2.5vw, 22px)', letterSpacing: '-0.03em' }}
               >
                 {displayTitle}
@@ -200,7 +191,7 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                     style={{ background: 'var(--about-card-bg)', border: '1px solid var(--about-card-border)' }}
                   >
                     <Clock className="w-3 h-3 shrink-0" aria-hidden="true" />
-                    {opp.startLabel} {displayStart}
+                    {opp.drawerTime}: {displayStart}
                   </span>
                 )}
                 <span
@@ -212,12 +203,49 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                 </span>
               </div>
 
-              <p className="text-[0.625rem] font-bold uppercase tracking-widest hero-text-subtle mb-3 font-heading">
-                {opp.drawerAbout}
-              </p>
-              <p className="text-sm leading-relaxed hero-text-muted" style={{ maxWidth: '65ch' }}>
-                {displayDesc}
-              </p>
+              {/* Ordning: Kontakt → Beskrivning → Kompletterande kunskap → Studentens uppgift.
+                  Tomma sektioner renderas inte; space-y ger jämn rytm oavsett vilka som finns. */}
+              <div className="space-y-6">
+                {(job!.contactName || job!.contactEmail) && (
+                  <div>
+                    <h3 className={SECTION_HEADING}>{opp.drawerContact}</h3>
+                    <p className="text-sm hero-text-muted wrap-break-word">
+                      {job!.contactName}
+                      {job!.contactName && job!.contactEmail ? ' · ' : ''}
+                      {job!.contactEmail && (
+                        <a
+                          href={`mailto:${job!.contactEmail}`}
+                          className="underline underline-offset-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-blue)"
+                          style={{ color: 'var(--text-blue)' }}
+                        >
+                          {job!.contactEmail}
+                        </a>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {displayDesc && (
+                  <div>
+                    <h3 className={SECTION_HEADING}>{opp.drawerAbout}</h3>
+                    <p className={SECTION_BODY} style={{ maxWidth: '65ch' }}>{displayDesc}</p>
+                  </div>
+                )}
+
+                {displayRequirements && (
+                  <div>
+                    <h3 className={SECTION_HEADING}>{opp.drawerRequirements}</h3>
+                    <p className={SECTION_BODY} style={{ maxWidth: '65ch' }}>{displayRequirements}</p>
+                  </div>
+                )}
+
+                {showStudentTask && (
+                  <div>
+                    <h3 className={SECTION_HEADING}>{opp.drawerStudentTask}</h3>
+                    <p className={SECTION_BODY} style={{ maxWidth: '65ch' }}>{displayStudentTask}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
@@ -233,8 +261,10 @@ export function CareerDrawer({ job, onClose }: CareerDrawerProps) {
                   href={job!.applyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-opacity duration-200 hover:opacity-80"
-                  style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
+                  // Primär åtgärd: fylld knapp (career-blå, vit text 6,7:1 i båda teman) — den
+                  // tonade varianten läste som sekundär. min-h-11 = 44 px träffyta.
+                  className="shrink-0 inline-flex items-center justify-center gap-2 min-h-11 text-sm font-semibold text-white px-5 rounded-xl transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-blue) focus-visible:ring-offset-2 focus-visible:ring-offset-(--drawer-bg)"
+                  style={{ background: 'var(--cta-blue)', boxShadow: '0 4px 16px rgba(29,78,216,0.35)' }}
                   onClick={() =>
                     capture('career_apply_clicked', {
                       job_id: job!.id,

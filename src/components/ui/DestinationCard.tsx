@@ -38,9 +38,11 @@ export function DestinationCard({
       transition={{ duration: 0.5, delay: index * 0.08, ease: EASE_OUT_EXPO }}
       className="group relative"
     >
-      <Link
-        href={href}
-        className="block relative rounded-2xl overflow-hidden p-6 transition-transform duration-300 group-hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-2"
+      {/* Utsträckt länk: länken sitter på rubriken och dess ::after täcker hela kortet.
+          Tillgängligt namn = synlig rubrik (WCAG 2.5.3 Label in Name) — beskrivning och
+          CTA läses som vanlig text i stället för att bakas in i länknamnet. */}
+      <div
+        className="block relative rounded-2xl overflow-hidden p-6 transition-transform duration-300 group-hover:-translate-y-1.5 has-[a:focus-visible]:ring-2"
         style={{
           background: `${accentColor}1a`,
           border: `1px solid ${accentColor}38`,
@@ -48,7 +50,6 @@ export function DestinationCard({
           // Focus ring uses accent
           outlineColor: accentColor,
         }}
-        aria-label={label}
       >
         {/* Light mode: white glass overlay for visual substance */}
         <div className="absolute inset-0 light:bg-white/15 pointer-events-none rounded-2xl" aria-hidden="true" />
@@ -82,7 +83,12 @@ export function DestinationCard({
         <h3
           className="font-semibold text-base mb-1.5 hero-text"
         >
-          {label}
+          <Link
+            href={href}
+            className="outline-none after:absolute after:inset-0 after:rounded-2xl after:content-['']"
+          >
+            {label}
+          </Link>
         </h3>
         <p className="text-sm hero-text leading-relaxed">{description}</p>
 
@@ -94,7 +100,7 @@ export function DestinationCard({
           <span>{cta}</span>
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 }

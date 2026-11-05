@@ -152,9 +152,11 @@ export function ProductForm({ initial }: ProductFormProps) {
       </div>
 
       <div>
-        <label htmlFor="pf-category" className={labelCls}>Kategori *</label>
+        {/* aria-labelledby i stället för htmlFor: etiketten ska inte vara ett klickmål. */}
+        <label id="pf-category-label" className={labelCls}>Kategori *</label>
         <select
           id="pf-category"
+          aria-labelledby="pf-category-label"
           className={inputCls}
           value={form.category}
           onChange={(e) => set('category', e.target.value as TKLProductFormData['category'])}
@@ -194,7 +196,7 @@ export function ProductForm({ initial }: ProductFormProps) {
             onChange={(e) => set('published', e.target.checked)}
             className="w-4 h-4 rounded"
           />
-          <label htmlFor="published" className="text-sm text-[oklch(75%_0.01_265)]">Publicerad</label>
+          <label htmlFor="published" className="text-sm text-[oklch(75%_0.01_265)] cursor-pointer">Publicerad</label>
         </div>
       </div>
 

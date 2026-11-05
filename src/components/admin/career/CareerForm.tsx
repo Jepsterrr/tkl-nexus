@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { inputCls, labelCls, errorCls, sectionHdCls } from '@/components/admin/shared/formStyles';
 import { createCareer, updateCareer } from '@/lib/services/career';
 import { CareerFormSchema } from '@/lib/schemas/career';
-import type { TKLCareer, CareerFormData, CareerType } from '@/lib/schemas/career';
+import type { TKLCareer, CareerFormData, CareerType, OrgType } from '@/lib/schemas/career';
 
 interface CareerFormProps {
   mode: 'create' | 'edit';
@@ -16,10 +16,16 @@ interface CareerFormProps {
 type FormErrors = Partial<Record<keyof CareerFormData, string>>;
 
 const TYPES: { value: CareerType; label: string }[] = [
-  { value: 'exjobb',  label: 'Exjobb'   },
-  { value: 'jobb',    label: 'Jobb'     },
-  { value: 'praktik', label: 'Praktik'  },
-  { value: 'trainee', label: 'Trainee'  },
+  { value: 'exjobb',     label: 'Exjobb'     },
+  { value: 'jobb',       label: 'Jobb'       },
+  { value: 'sommarjobb', label: 'Sommarjobb' },
+  { value: 'praktik',    label: 'Praktik'    },
+  { value: 'trainee',    label: 'Trainee'    },
+];
+
+const ORG_TYPES: { value: OrgType; label: string }[] = [
+  { value: 'company', label: 'Företag'              },
+  { value: 'public',  label: 'Myndighet / institut' },
 ];
 
 function toDatetimeLocal(iso: string | undefined): string {
@@ -52,6 +58,13 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
   const [deadline, setDeadline]             = useState(toDatetimeLocal(initialData?.deadline));
   const [applyUrl, setApplyUrl]             = useState(initialData?.applyUrl ?? '');
   const [published, setPublished]           = useState(initialData?.published ?? false);
+  const [orgType, setOrgType]               = useState<OrgType>(initialData?.orgType ?? 'company');
+  const [requirements, setRequirements]     = useState(initialData?.requirements ?? '');
+  const [requirementsEn, setRequirementsEn] = useState(initialData?.requirementsEn ?? '');
+  const [studentTask, setStudentTask]       = useState(initialData?.studentTask ?? '');
+  const [studentTaskEn, setStudentTaskEn]   = useState(initialData?.studentTaskEn ?? '');
+  const [contactName, setContactName]       = useState(initialData?.contactName ?? '');
+  const [contactEmail, setContactEmail]     = useState(initialData?.contactEmail ?? '');
 
   const [errors, setErrors]           = useState<FormErrors>({});
   const [submitting, setSubmitting]   = useState(false);
@@ -71,9 +84,17 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
       titleEn: titleEn || undefined,
       company,
       type,
+      orgType,
       location,
       description: description || undefined,
       descriptionEn: descriptionEn || undefined,
+      requirements: requirements || undefined,
+      requirementsEn: requirementsEn || undefined,
+      // Studentens uppgift gäller bara exjobb — rensa annars så att gamla värden inte ligger kvar
+      studentTask: type === 'exjobb' ? studentTask || undefined : undefined,
+      studentTaskEn: type === 'exjobb' ? studentTaskEn || undefined : undefined,
+      contactName: contactName || undefined,
+      contactEmail: contactEmail.trim() || undefined,
       startDate: startDate || undefined,
       startDateEn: startDateEn || undefined,
       deadline: fromDatetimeLocal(deadline),
@@ -98,6 +119,12 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
         location: 'cf-location',
         description: 'cf-description',
         descriptionEn: 'cf-description-en',
+        requirements: 'cf-requirements',
+        requirementsEn: 'cf-requirements-en',
+        studentTask: 'cf-student-task',
+        studentTaskEn: 'cf-student-task-en',
+        contactName: 'cf-contact-name',
+        contactEmail: 'cf-contact-email',
         startDate: 'cf-start-date',
         startDateEn: 'cf-start-date-en',
         deadline: 'cf-deadline',
@@ -164,7 +191,7 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
         </div>
       </div>
 
-      <div className="space-y-10 max-w-3xl">
+      <div className="space-y-10 max-w-5xl">
         <section>
           <h2 className={sectionHdCls}>Identitet</h2>
           <div className="space-y-4">
@@ -224,21 +251,109 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
                 ))}
               </div>
             </div>
+            <div>
+              <p id="cf-org-label" className={labelCls}>Organisationstyp</p>
+              <div role="group" aria-labelledby="cf-org-label" className="flex flex-wrap gap-2">
+                {ORG_TYPES.map(o => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    aria-pressed={orgType === o.value}
+                    onClick={() => setOrgType(o.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      orgType === o.value
+                        ? 'bg-[oklch(55%_0.12_265)] text-white'
+                        : 'bg-[oklch(18%_0.012_265)] border border-[oklch(28%_0.015_265)] text-[oklch(52%_0.02_265)] hover:text-[oklch(80%_0.01_265)]'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         <section>
           <h2 className={sectionHdCls}>Innehåll</h2>
           <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="cf-description" className={labelCls}>Beskrivning (sv, valfritt)</label>
+                <textarea id="cf-description" value={description}
+                  onChange={e => setDescription(e.target.value)} rows={5} className={inputCls}
+                  aria-invalid={errors.description ? true : undefined}
+                  aria-describedby={errors.description ? 'cf-description-error' : undefined} />
+                {errors.description && <p id="cf-description-error" role="alert" className={errorCls}>{errors.description}</p>}
+              </div>
+              <div>
+                <label htmlFor="cf-description-en" className={labelCls}>Beskrivning (en, valfritt)</label>
+                <textarea id="cf-description-en" value={descriptionEn}
+                  onChange={e => setDescriptionEn(e.target.value)} rows={5} className={inputCls}
+                  aria-invalid={errors.descriptionEn ? true : undefined}
+                  aria-describedby={errors.descriptionEn ? 'cf-description-en-error' : undefined} />
+                {errors.descriptionEn && <p id="cf-description-en-error" role="alert" className={errorCls}>{errors.descriptionEn}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="cf-requirements" className={labelCls}>Kompletterande kunskap (sv, valfritt)</label>
+                <textarea id="cf-requirements" value={requirements}
+                  onChange={e => setRequirements(e.target.value)} rows={4} className={inputCls}
+                  aria-invalid={errors.requirements ? true : undefined}
+                  aria-describedby={errors.requirements ? 'cf-requirements-error' : undefined} />
+                {errors.requirements && <p id="cf-requirements-error" role="alert" className={errorCls}>{errors.requirements}</p>}
+              </div>
+              <div>
+                <label htmlFor="cf-requirements-en" className={labelCls}>Kompletterande kunskap (en, valfritt)</label>
+                <textarea id="cf-requirements-en" value={requirementsEn}
+                  onChange={e => setRequirementsEn(e.target.value)} rows={4} className={inputCls}
+                  aria-invalid={errors.requirementsEn ? true : undefined}
+                  aria-describedby={errors.requirementsEn ? 'cf-requirements-en-error' : undefined} />
+                {errors.requirementsEn && <p id="cf-requirements-en-error" role="alert" className={errorCls}>{errors.requirementsEn}</p>}
+              </div>
+            </div>
+            {type === 'exjobb' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="cf-student-task" className={labelCls}>Studentens uppgift (sv, valfritt)</label>
+                  <textarea id="cf-student-task" value={studentTask}
+                    onChange={e => setStudentTask(e.target.value)} rows={4} className={inputCls}
+                    aria-invalid={errors.studentTask ? true : undefined}
+                    aria-describedby={errors.studentTask ? 'cf-student-task-error' : undefined} />
+                  {errors.studentTask && <p id="cf-student-task-error" role="alert" className={errorCls}>{errors.studentTask}</p>}
+                </div>
+                <div>
+                  <label htmlFor="cf-student-task-en" className={labelCls}>Studentens uppgift (en, valfritt)</label>
+                  <textarea id="cf-student-task-en" value={studentTaskEn}
+                    onChange={e => setStudentTaskEn(e.target.value)} rows={4} className={inputCls}
+                    aria-invalid={errors.studentTaskEn ? true : undefined}
+                    aria-describedby={errors.studentTaskEn ? 'cf-student-task-en-error' : undefined} />
+                  {errors.studentTaskEn && <p id="cf-student-task-en-error" role="alert" className={errorCls}>{errors.studentTaskEn}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section>
+          <h2 className={sectionHdCls}>Kontakt (visas publikt om ifylld)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="cf-description" className={labelCls}>Beskrivning (sv, valfritt)</label>
-              <textarea id="cf-description" value={description}
-                onChange={e => setDescription(e.target.value)} rows={5} className={inputCls} />
+              <label htmlFor="cf-contact-name" className={labelCls}>Kontaktperson (valfritt)</label>
+              <input id="cf-contact-name" type="text" value={contactName}
+                onChange={e => setContactName(e.target.value)} className={inputCls}
+                aria-invalid={errors.contactName ? true : undefined}
+                aria-describedby={errors.contactName ? 'cf-contact-name-error' : undefined} />
+              {errors.contactName && <p id="cf-contact-name-error" role="alert" className={errorCls}>{errors.contactName}</p>}
             </div>
             <div>
-              <label htmlFor="cf-description-en" className={labelCls}>Beskrivning (en, valfritt)</label>
-              <textarea id="cf-description-en" value={descriptionEn}
-                onChange={e => setDescriptionEn(e.target.value)} rows={5} className={inputCls} />
+              <label htmlFor="cf-contact-email" className={labelCls}>Kontakt-e-post (valfritt)</label>
+              <input id="cf-contact-email" type="email" value={contactEmail}
+                onChange={e => setContactEmail(e.target.value)} className={inputCls}
+                aria-invalid={errors.contactEmail ? true : undefined}
+                aria-describedby={errors.contactEmail ? 'cf-contact-email-error' : undefined} />
+              {errors.contactEmail && <p id="cf-contact-email-error" role="alert" className={errorCls}>{errors.contactEmail}</p>}
             </div>
           </div>
         </section>
@@ -284,7 +399,7 @@ export function CareerForm({ mode, initialData }: CareerFormProps) {
         </section>
       </div>
 
-      <div className="flex items-center justify-between mt-10 pt-6 border-t border-[oklch(20%_0.012_265)] max-w-3xl">
+      <div className="flex items-center justify-between mt-10 pt-6 border-t border-[oklch(20%_0.012_265)] max-w-5xl">
         <div>
           {submitError && <p className={errorCls} role="alert">{submitError}</p>}
         </div>

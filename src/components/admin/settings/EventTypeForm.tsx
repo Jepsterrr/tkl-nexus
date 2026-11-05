@@ -234,7 +234,7 @@ export function EventTypeForm({ initial }: Props) {
           onChange={(e) => set('published', e.target.checked)}
           className="w-4 h-4 rounded"
         />
-        <label htmlFor="et-published" className="text-sm text-[oklch(75%_0.01_265)]">
+        <label htmlFor="et-published" className="text-sm text-[oklch(75%_0.01_265)] cursor-pointer">
           Publicerad
         </label>
       </div>

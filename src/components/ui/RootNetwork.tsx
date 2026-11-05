@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback, useMemo, useId } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { capture } from '@/lib/analytics';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { useTheme } from '@/components/providers/ThemeProvider';
+import { DEALS_ENABLED } from '@/lib/features';
 
 // Geometry helpers
 
@@ -92,11 +93,11 @@ interface Geometry {
   mainTrunk: string;
   mainLeft: string;
   mainRight: string;
-  sTrunk: string; sJunc: Vec; sPBY: number;
-  sBranches: string[]; sChildTops: Vec[];
+  sTrunk: string; sJunc: Vec;
+  sBranches: string[]; sBranchGlow: boolean[]; sChildTops: Vec[];
   sStubs: Stub[];
-  cTrunk: string; cJunc: Vec; cPBY: number;
-  cBranches: string[]; cChildTops: Vec[];
+  cTrunk: string; cJunc: Vec;
+  cBranches: string[]; cBranchGlow: boolean[]; cChildTops: Vec[];
   cStubs: Stub[];
 }
 
@@ -125,10 +126,119 @@ export interface RootNetworkStrings {
   subServicesLabel: string; subServicesDesc: string;
 }
 
-// Stub angle configs
-const S_STUB_ANGLES = [-118, -90, -62] as const;
-const C_STUB_ANGLES = [-108, -90, -72] as const;
+// Stub angle configs - [outermost-left, outermost-right] range, spread evenly over 1–3 children
+const S_STUB_RANGE = [-118, -62] as const;
+const C_STUB_RANGE = [-108, -72] as const;
+function stubAngle(range: readonly [number, number], i: number, n: number): number {
+  if (n <= 1) return (range[0] + range[1]) / 2;
+  return range[0] + (range[1] - range[0]) * (i / (n - 1));
+}
+
+// Desktop row stagger (index-based; arrays sized for max 3 children per branch)
+const S_PT    = [0, 40, 16] as const;
+const S_DELAY = [1.10, 1.20, 1.30] as const;
+const C_PT    = [24, 0, 20] as const;
+const C_DELAY = [1.30, 1.40, 1.50] as const;
 const E = EASE_OUT_EXPO;
+
+// Rendera bara trädet som syns (Tailwind `sm` = 40rem) — tidigare monterades och
+// animerades både desktop- och mobilträdet, det dolda i display:none.
+const SM_QUERY = '(min-width: 40rem)';
+function subscribeSm(cb: () => void) {
+  const mq = window.matchMedia(SM_QUERY);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+const getSm = () => window.matchMedia(SM_QUERY).matches;
+const getSmServer = () => true;
+
+// Sista uppritningen klar (s): desktop-stubbar 1.70 + 2·0.07 + 0.22, mobil-prick 0.53 + 0.28
+const DRAW_END_DESKTOP = 2.2;
+const DRAW_END_MOBILE = 0.9;
+
+// Glow tidigare: SVG-filter (feGaussianBlur + feMerge med SourceGraphic) per element.
+// Element med noll-bredd-bbox (lodräta stammar, gren rakt under sin junction) renderades
+// inte alls av objectBoundingBox-filterregionen — `glow: false` bevarar exakt det utseendet.
+const MIN_GLOW_EXTENT = 1;
+
+// SVG layers — uppritning via CSS (pathLength=1, stroke-dashoffset + opacity),
+// glow som ETT blur-lager istället för ett filter per animerad stig
+
+interface StrokeSpec {
+  d: string; color: string;
+  bloomW: number; crispW: number;
+  bloomO: number; crispO: number;
+  delay: number; dur: number;
+  glow: boolean;
+}
+
+interface DotSpec { x: number; y: number; r: number; color: string; delay: number; glow: boolean }
+
+type AnimVars = React.CSSProperties & Record<'--rn-o' | '--rn-delay' | '--rn-dur', string | number>;
+
+function drawStyle(o: number, delay: number, dur: number): AnimVars {
+  return { '--rn-o': o, '--rn-delay': `${delay}s`, '--rn-dur': `${dur}s` };
+}
+
+interface TreeLayersProps {
+  w: number; h: number;
+  strokes: StrokeSpec[]; dots: DotSpec[];
+  blur: number;
+  live: boolean;      // i viewport — starta CSS-animationerna
+  drawing: boolean;   // uppritning pågår — filterlagren komponeras på GPU (will-change)
+  isLight: boolean;
+}
+
+function TreeLayers({ w, h, strokes, dots, blur, live, drawing, isLight }: TreeLayersProps) {
+  const base = `absolute inset-0 pointer-events-none${live ? ' rn-live' : ''}`;
+  const layer = { width: w, height: h, 'aria-hidden': true } as const;
+  const glowStrokes = strokes.filter(s => s.glow);
+  return (
+    <>
+      {/* Glow (blurrad kopia): ett lager, en blur-pass. Komponerat endast under uppritningen —
+          efteråt rastras det en gång och cachas som tidigare. */}
+      <svg {...layer} className={`${base}${drawing ? ' rn-drawing' : ''}`}
+        style={{ overflow: 'visible', filter: `blur(${blur}px)` }}>
+        {glowStrokes.map((s, i) => (
+          <path key={i} d={s.d} pathLength={1} className="rn-draw" fill="none"
+            stroke={s.color} strokeWidth={s.bloomW} strokeLinecap="round"
+            style={drawStyle(s.bloomO, s.delay, s.dur)} />
+        ))}
+        {dots.filter(d => d.glow).map((d, i) => (
+          <circle key={i} cx={d.x} cy={d.y} r={d.r} className="rn-pop" fill={d.color}
+            style={drawStyle(0.88, d.delay, 0.28)} />
+        ))}
+      </svg>
+
+      {/* Glow (skarp SourceGraphic-del) */}
+      <svg {...layer} className={base} style={{ overflow: 'visible' }}>
+        {glowStrokes.map((s, i) => (
+          <path key={i} d={s.d} pathLength={1} className="rn-draw" fill="none"
+            stroke={s.color} strokeWidth={s.bloomW} strokeLinecap="round"
+            style={drawStyle(s.bloomO, s.delay, s.dur)} />
+        ))}
+      </svg>
+
+      {/* Skarpa linjer — ljust tema: drop-shadow (.rn-path-crisp) på hela lagret i stället för per stig */}
+      <svg {...layer} className={`${base} rn-path-crisp${drawing && isLight ? ' rn-drawing' : ''}`}
+        style={{ overflow: 'visible' }}>
+        {strokes.map((s, i) => (
+          <path key={i} d={s.d} pathLength={1} className="rn-draw" fill="none"
+            stroke={s.color} strokeWidth={s.crispW} strokeLinecap="round"
+            style={drawStyle(s.crispO, s.delay, s.dur)} />
+        ))}
+      </svg>
+
+      {/* Junction- och ändpunktsprickar */}
+      <svg {...layer} className={base} style={{ overflow: 'visible' }}>
+        {dots.map((d, i) => (
+          <circle key={i} cx={d.x} cy={d.y} r={d.r} className="rn-pop" fill={d.color}
+            style={drawStyle(0.88, d.delay, 0.28)} />
+        ))}
+      </svg>
+    </>
+  );
+}
 
 // Sub-card component (defined outside RootNetwork to prevent unmount/remount on parent re-render)
 
@@ -256,12 +366,24 @@ export function RootNetwork({
   const mCC1 = useRef<HTMLDivElement>(null);
   const mCC2 = useRef<HTMLDivElement>(null);
 
+  // Ref slots per branch (only the first N are mounted, N = number of destinations)
+  const sRefs  = [sC0, sC1, sC2];
+  const cRefs  = [cC0, cC1, cC2];
+  const mSRefs = [mSC0, mSC1, mSC2];
+  const mCRefs = [mCC0, mCC1, mCC2];
+
   // State
   const [geo, setGeo]      = useState<Geometry | null>(null);
   const [mobileGeo, setMobileGeo] = useState<MobileGeometry | null>(null);
   const isInView           = useInView(inViewRef, { once: true, margin: '-50px' });
   const reduceMotion       = useReducedMotion();
-  const filterId           = useId();
+  const isDesktop          = useSyncExternalStore(subscribeSm, getSm, getSmServer);
+  const [drawn, setDrawn]  = useState(false);
+
+  // Hoppa över setState när geometrin är oförändrad (ResizeObserver + timeout + tema
+  // gav annars flera identiska omrenderingar av hela trädet)
+  const geoKey  = useRef('');
+  const mGeoKey = useRef('');
 
   // Measurement
   const measure = useCallback(() => {
@@ -271,17 +393,18 @@ export function RootNetwork({
     const hub = hubRef.current;
     const sp  = sParentRef.current;
     const cp  = cParentRef.current;
-    const scs = [sC0.current, sC1.current, sC2.current];
-    const ccs = [cC0.current, cC1.current, cC2.current];
-    if (!hub || !sp || !cp || scs.some(r => !r) || ccs.some(r => !r)) return;
+    // Only mounted children (branch may have 1–3 destinations)
+    const scs = [sC0.current, sC1.current, sC2.current].filter((r): r is HTMLDivElement => r !== null);
+    const ccs = [cC0.current, cC1.current, cC2.current].filter((r): r is HTMLDivElement => r !== null);
+    if (!hub || !sp || !cp || scs.length === 0 || ccs.length === 0) return;
 
     const hubB  = getBottomCenter(hub, c);
     const sPT   = getTopCenter(sp, c);
     const cPT   = getTopCenter(cp, c);
     const sPB   = getBottomCenter(sp, c);
     const cPB   = getBottomCenter(cp, c);
-    const sTops = (scs as HTMLDivElement[]).map(r => getTopCenter(r, c));
-    const cTops = (ccs as HTMLDivElement[]).map(r => getTopCenter(r, c));
+    const sTops = scs.map(r => getTopCenter(r, c));
+    const cTops = ccs.map(r => getTopCenter(r, c));
 
     // Offset connection points so branches visually enter into the card boxes
     const ENTER_PARENT = 9; // px inside parent card tops/bottoms
@@ -297,49 +420,45 @@ export function RootNetwork({
     const mainJunc: Vec = { x: hubB.x, y: hubB.y + (midParentY - hubB.y) * 0.55 };
 
     // Sub-junctions: 40% from each parent inner bottom toward avg inner child top
-    const sAvgY = sTops_in.reduce((s, v) => s + v.y, 0) / 3;
-    const cAvgY = cTops_in.reduce((s, v) => s + v.y, 0) / 3;
+    const sAvgY = sTops_in.reduce((s, v) => s + v.y, 0) / sTops_in.length;
+    const cAvgY = cTops_in.reduce((s, v) => s + v.y, 0) / cTops_in.length;
     const sJunc: Vec = { x: sPB.x, y: sPB.y + (sAvgY - sPB.y) * 0.40 };
     const cJunc: Vec = { x: cPB.x, y: cPB.y + (cAvgY - cPB.y) * 0.40 };
 
     // Decorative stubs along sub-branches
     const sStubs: Stub[] = sTops_in.map((top, i) => ({
       origin: lerp(sJunc, top, 0.58),
-      angle: S_STUB_ANGLES[i],
+      angle: stubAngle(S_STUB_RANGE, i, sTops_in.length),
       len: 20 + i * 6,
     }));
     const cStubs: Stub[] = cTops_in.map((top, i) => ({
       origin: lerp(cJunc, top, 0.58),
-      angle: C_STUB_ANGLES[i],
+      angle: stubAngle(C_STUB_RANGE, i, cTops_in.length),
       len: 18 + i * 5,
     }));
 
     const cr = c.getBoundingClientRect();
-    setGeo({
+    const next: Geometry = {
       svgW: cr.width, svgH: cr.height,
       hubBottom: hubB,
       mainJunc,
       mainTrunk: trunkD(hubB, mainJunc),
       mainLeft:  mainBranchD(mainJunc, sPT_in),
       mainRight: mainBranchD(mainJunc, cPT_in),
-      sTrunk: trunkD(sPB, sJunc), sJunc, sPBY: sPB.y,
-      sBranches: sTops_in.map(t => branchD(sJunc, t)), sChildTops: sTops_in, sStubs,
-      cTrunk: trunkD(cPB, cJunc), cJunc, cPBY: cPB.y,
-      cBranches: cTops_in.map(t => branchD(cJunc, t)), cChildTops: cTops_in, cStubs,
-    });
+      sTrunk: trunkD(sPB, sJunc), sJunc,
+      sBranches: sTops_in.map(t => branchD(sJunc, t)),
+      sBranchGlow: sTops_in.map(t => Math.abs(t.x - sJunc.x) >= MIN_GLOW_EXTENT),
+      sChildTops: sTops_in, sStubs,
+      cTrunk: trunkD(cPB, cJunc), cJunc,
+      cBranches: cTops_in.map(t => branchD(cJunc, t)),
+      cBranchGlow: cTops_in.map(t => Math.abs(t.x - cJunc.x) >= MIN_GLOW_EXTENT),
+      cChildTops: cTops_in, cStubs,
+    };
+    const key = JSON.stringify(next);
+    if (key === geoKey.current) return;
+    geoKey.current = key;
+    setGeo(next);
   }, []);
-
-  useEffect(() => {
-    const c = containerRef.current;
-    if (!c) return;
-    const t = setTimeout(measure, 80);
-    const ro = new ResizeObserver(measure);
-    ro.observe(c);
-    return () => { clearTimeout(t); ro.disconnect(); };
-  }, [measure]);
-
-  // Re-measure on theme change so geometry reflects new layout if anything shifts
-  useEffect(() => { measure(); }, [isLight, measure]);
 
   // Mobile measurement
   const measureMobile = useCallback(() => {
@@ -349,17 +468,17 @@ export function RootNetwork({
     const hub = mHubRef.current;
     const sp  = mSParentRef.current;
     const cp  = mCParentRef.current;
-    const scs = [mSC0.current, mSC1.current, mSC2.current];
-    const ccs = [mCC0.current, mCC1.current, mCC2.current];
-    if (!hub || !sp || !cp || scs.some(r => !r) || ccs.some(r => !r)) return;
+    const scs = [mSC0.current, mSC1.current, mSC2.current].filter((r): r is HTMLDivElement => r !== null);
+    const ccs = [mCC0.current, mCC1.current, mCC2.current].filter((r): r is HTMLDivElement => r !== null);
+    if (!hub || !sp || !cp || scs.length === 0 || ccs.length === 0) return;
 
     const hubB  = getBottomCenter(hub, c);
     const sPT   = getTopCenter(sp, c);
     const cPT   = getTopCenter(cp, c);
     const sPB   = getBottomCenter(sp, c);
     const cPB   = getBottomCenter(cp, c);
-    const sTops = (scs as HTMLDivElement[]).map(r => getTopCenter(r, c));
-    const cTops = (ccs as HTMLDivElement[]).map(r => getTopCenter(r, c));
+    const sTops = scs.map(r => getTopCenter(r, c));
+    const cTops = ccs.map(r => getTopCenter(r, c));
 
     const ENTER_PARENT = 9;
     const ENTER_SUB    = 5;
@@ -371,14 +490,14 @@ export function RootNetwork({
     const midParentY = (sPT.y + cPT.y) / 2;
     const mainJunc: Vec = { x: hubB.x, y: hubB.y + (midParentY - hubB.y) * 0.55 };
 
-    const sAvgY = sTops_in.reduce((s, v) => s + v.y, 0) / 3;
-    const cAvgY = cTops_in.reduce((s, v) => s + v.y, 0) / 3;
+    const sAvgY = sTops_in.reduce((s, v) => s + v.y, 0) / sTops_in.length;
+    const cAvgY = cTops_in.reduce((s, v) => s + v.y, 0) / cTops_in.length;
     const mSJunc: Vec = { x: sPB.x, y: sPB.y + (sAvgY - sPB.y) * 0.40 };
     const mCJunc: Vec = { x: cPB.x, y: cPB.y + (cAvgY - cPB.y) * 0.40 };
 
     const cr = c.getBoundingClientRect();
     if (cr.width === 0) return; // container is CSS-hidden on desktop (sm:hidden)
-    setMobileGeo({
+    const next: MobileGeometry = {
       svgW: cr.width, svgH: cr.height,
       hubBottom: hubB,
       mainJunc,
@@ -389,25 +508,42 @@ export function RootNetwork({
       mCTrunk: trunkD(cPB, mCJunc), mCJunc, mCPBY: cPB.y,
       mSBranches: sTops_in.map(t => branchD(mSJunc, t)), mSChildTops: sTops_in,
       mCBranches: cTops_in.map(t => branchD(mCJunc, t)), mCChildTops: cTops_in,
-    });
+    };
+    const key = JSON.stringify(next);
+    if (key === mGeoKey.current) return;
+    mGeoKey.current = key;
+    setMobileGeo(next);
   }, []);
 
+  // Mät det aktiva trädet: vid mount, efter 80 ms, vid storleksändring och vid temabyte.
+  // Samlas till max en mätning per frame (rAF).
   useEffect(() => {
-    const c = mContainerRef.current;
+    const c = (isDesktop ? containerRef : mContainerRef).current;
     if (!c) return;
-    const t = setTimeout(measureMobile, 80);
-    const ro = new ResizeObserver(measureMobile);
+    const run = isDesktop ? measure : measureMobile;
+    let raf = 0;
+    const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(run); };
+    schedule();
+    const t = setTimeout(schedule, 80);
+    const ro = new ResizeObserver(schedule);
     ro.observe(c);
-    return () => { clearTimeout(t); ro.disconnect(); };
-  }, [measureMobile]);
+    return () => { clearTimeout(t); cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [isDesktop, isLight, measure, measureMobile]);
 
-  useEffect(() => { measureMobile(); }, [isLight, measureMobile]);
+  // Uppritningen klar → släpp GPU-lagren (will-change) så att glow rastras en gång och cachas
+  useEffect(() => {
+    if (!isInView) return;
+    const t = setTimeout(() => setDrawn(true), (isDesktop ? DRAW_END_DESKTOP : DRAW_END_MOBILE) * 1000);
+    return () => clearTimeout(t);
+  }, [isInView, isDesktop]);
 
   // Destination data
   const STUDENT_DESTS = useMemo<Dest[]>(() => [
     { href: '/career',         label: subCareerLabel, desc: subCareerDesc, Icon: Briefcase,    hex: '#3B82F6' },
     { href: '/events',         label: subEventsLabel, desc: subEventsDesc, Icon: CalendarDays, hex: '#8B5CF6' },
-    { href: '/students/deals', label: subDealsLabel,  desc: subDealsDesc,  Icon: Gift,         hex: '#F59E0B' },
+    ...(DEALS_ENABLED
+      ? [{ href: '/students/deals', label: subDealsLabel, desc: subDealsDesc, Icon: Gift, hex: '#F59E0B' }]
+      : []),
   ], [subCareerLabel, subCareerDesc, subEventsLabel, subEventsDesc, subDealsLabel, subDealsDesc]);
 
   const CORPORATE_DESTS = useMemo<Dest[]>(() => [
@@ -416,33 +552,51 @@ export function RootNetwork({
     { href: '/about#kontakt',      label: subCorporateLabel, desc: subCorporateDesc, Icon: Phone,      hex: '#E30613' },
   ], [subPostLabel, subPostDesc, subServicesLabel, subServicesDesc, subCorporateLabel, subCorporateDesc]);
 
-  // Animation helpers
-  const pathAnim = (delay: number, dur: number, finalOpacity = 1) => ({
-    initial: { pathLength: 0, opacity: 0 },
-    animate: isInView ? { pathLength: 1, opacity: finalOpacity } : { pathLength: 0, opacity: 0 },
-    transition: {
-      pathLength: { duration: reduceMotion ? 0 : dur, delay, ease: E },
-      opacity:    { duration: 0.12, delay },
-    },
-  });
+  // SVG layer specs — samma bredder, färger, opaciteter, delays och durationer som tidigare
+  // motion.path-/motion.circle-versionen (ordning: stam → huvudgrenar → stammar → grenar → stubbar)
+  const desktopLayers = useMemo(() => {
+    if (!geo) return null;
+    const strokes: StrokeSpec[] = [
+      { d: geo.mainTrunk, color: RED,    bloomW: 14, crispW: 4,   bloomO, crispO: lineO, delay: 0.15, dur: 0.25, glow: false },
+      { d: geo.mainLeft,  color: GREEN,  bloomW: 9,  crispW: 3,   bloomO, crispO: lineO, delay: 0.35, dur: 0.38, glow: true },
+      { d: geo.mainRight, color: PURPLE, bloomW: 9,  crispW: 3,   bloomO, crispO: lineO, delay: 0.35, dur: 0.38, glow: true },
+      { d: geo.sTrunk,    color: GREEN,  bloomW: 9,  crispW: 2.5, bloomO, crispO: lineO, delay: 0.75, dur: 0.28, glow: false },
+      { d: geo.cTrunk,    color: PURPLE, bloomW: 9,  crispW: 2.5, bloomO, crispO: lineO, delay: 0.85, dur: 0.28, glow: false },
+      ...geo.sBranches.map((d, i): StrokeSpec => (
+        { d, color: GREEN, bloomW: 6, crispW: 1.5, bloomO, crispO: lineO, delay: 0.90 + i * 0.08, dur: 0.48, glow: geo.sBranchGlow[i] })),
+      ...geo.cBranches.map((d, i): StrokeSpec => (
+        { d, color: PURPLE, bloomW: 6, crispW: 1.5, bloomO, crispO: lineO, delay: 1.08 + i * 0.08, dur: 0.48, glow: geo.cBranchGlow[i] })),
+      ...geo.sStubs.map((s, i): StrokeSpec => (
+        { d: stubD(s.origin, s.angle, s.len), color: GREEN, bloomW: 4, crispW: 0.9, bloomO: stubO, crispO: lineO * 0.55, delay: 1.55 + i * 0.07, dur: 0.22, glow: true })),
+      ...geo.cStubs.map((s, i): StrokeSpec => (
+        { d: stubD(s.origin, s.angle, s.len), color: PURPLE, bloomW: 4, crispW: 0.9, bloomO: stubO, crispO: lineO * 0.55, delay: 1.70 + i * 0.07, dur: 0.22, glow: true })),
+    ];
+    const dots: DotSpec[] = [
+      { x: geo.mainJunc.x, y: geo.mainJunc.y, r: 5.5, color: RED,    delay: 0.53, glow: true },
+      { x: geo.sJunc.x,    y: geo.sJunc.y,    r: 4.5, color: GREEN,  delay: 0.74, glow: true },
+      { x: geo.cJunc.x,    y: geo.cJunc.y,    r: 4.5, color: PURPLE, delay: 0.84, glow: true },
+      ...geo.sChildTops.map((p, i): DotSpec => (
+        { x: p.x, y: p.y, r: 3, color: STUDENT_DESTS[i]?.hex ?? GREEN, delay: 1.08 + i * 0.10, glow: false })),
+      ...geo.cChildTops.map((p, i): DotSpec => (
+        { x: p.x, y: p.y, r: 3, color: CORPORATE_DESTS[i]?.hex ?? PURPLE, delay: 1.28 + i * 0.10, glow: false })),
+    ];
+    return { strokes, dots };
+  }, [geo, RED, GREEN, PURPLE, bloomO, lineO, stubO, STUDENT_DESTS, CORPORATE_DESTS]);
 
-  const dotAnim = (delay: number) => ({
-    initial: { scale: 0, opacity: 0 },
-    animate: isInView ? { scale: 1, opacity: 0.88 } : { scale: 0, opacity: 0 },
-    transition: { duration: reduceMotion ? 0 : 0.28, delay, ease: E },
-  });
+  const mobileLayers = useMemo(() => {
+    if (!mobileGeo) return null;
+    const strokes: StrokeSpec[] = [
+      { d: mobileGeo.mainTrunk, color: RED,    bloomW: 10, crispW: 3,   bloomO, crispO: lineO, delay: 0.15, dur: 0.25, glow: false },
+      { d: mobileGeo.mainLeft,  color: GREEN,  bloomW: 7,  crispW: 2.5, bloomO, crispO: lineO, delay: 0.35, dur: 0.38, glow: true },
+      { d: mobileGeo.mainRight, color: PURPLE, bloomW: 7,  crispW: 2.5, bloomO, crispO: lineO, delay: 0.35, dur: 0.38, glow: true },
+    ];
+    const dots: DotSpec[] = [
+      { x: mobileGeo.mainJunc.x, y: mobileGeo.mainJunc.y, r: 4.5, color: RED, delay: 0.53, glow: true },
+    ];
+    return { strokes, dots };
+  }, [mobileGeo, RED, GREEN, PURPLE, bloomO, lineO]);
 
-  // Row layout data (stagger offsets in px)
-  const STUDENT_ROWS = [
-    { d: STUDENT_DESTS[0],   elRef: sC0, pt: 0,  delay: 1.10 },
-    { d: STUDENT_DESTS[1],   elRef: sC1, pt: 40, delay: 1.20 },
-    { d: STUDENT_DESTS[2],   elRef: sC2, pt: 16, delay: 1.30 },
-  ];
-  const CORPORATE_ROWS = [
-    { d: CORPORATE_DESTS[0], elRef: cC0, pt: 24, delay: 1.30 },
-    { d: CORPORATE_DESTS[1], elRef: cC1, pt: 0,  delay: 1.40 },
-    { d: CORPORATE_DESTS[2], elRef: cC2, pt: 20, delay: 1.50 },
-  ];
+  const drawing = isInView && !drawn;
 
   return (
     <div ref={inViewRef} className="w-full" aria-labelledby="rootnetwork-heading">
@@ -456,183 +610,13 @@ export function RootNetwork({
       </h2>
 
       {/* Desktop */}
+      {isDesktop && (
       <div ref={containerRef} className="relative hidden sm:block">
 
         {/* SVG overlay */}
-        {geo && (
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            width={geo.svgW}
-            height={geo.svgH}
-            aria-hidden="true"
-            style={{ overflow: 'visible' }}
-          >
-            <defs>
-              <filter id={filterId} x="-150%" y="-150%" width="400%" height="400%">
-                <feGaussianBlur stdDeviation="7" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-              <clipPath id={`${filterId}-cs`}>
-                <rect x={0} y={geo.sPBY} width={geo.svgW} height={geo.svgH} />
-              </clipPath>
-              <clipPath id={`${filterId}-cc`}>
-                <rect x={0} y={geo.cPBY} width={geo.svgW} height={geo.svgH} />
-              </clipPath>
-            </defs>
-
-            {/* Main trunk: hub to central junction */}
-            <motion.path d={geo.mainTrunk} fill="none" strokeWidth={14} strokeLinecap="round"
-              filter={`url(#${filterId})`} style={{ stroke: RED }}
-              {...pathAnim(0.15, 0.25, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={geo.mainTrunk} fill="none" strokeWidth={4} strokeLinecap="round"
-                style={{ stroke: RED }}
-                {...pathAnim(0.15, 0.25, lineO)} />
-            </g>
-
-            {/* Main left branch: junction to student parent */}
-            <motion.path d={geo.mainLeft} fill="none" strokeWidth={9} strokeLinecap="round"
-              filter={`url(#${filterId})`} style={{ stroke: GREEN }}
-              {...pathAnim(0.35, 0.38, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={geo.mainLeft} fill="none" strokeWidth={3} strokeLinecap="round"
-                style={{ stroke: GREEN }}
-                {...pathAnim(0.35, 0.38, lineO)} />
-            </g>
-
-            {/* Main right branch: junction to corporate parent */}
-            <motion.path d={geo.mainRight} fill="none" strokeWidth={9} strokeLinecap="round"
-              filter={`url(#${filterId})`} style={{ stroke: PURPLE }}
-              {...pathAnim(0.35, 0.38, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={geo.mainRight} fill="none" strokeWidth={3} strokeLinecap="round"
-                style={{ stroke: PURPLE }}
-                {...pathAnim(0.35, 0.38, lineO)} />
-            </g>
-
-            {/* Central junction dot */}
-            <motion.circle cx={geo.mainJunc.x} cy={geo.mainJunc.y} r={5.5}
-              filter={`url(#${filterId})`}
-              {...dotAnim(0.53)}
-              style={{ fill: RED, transformOrigin: `${geo.mainJunc.x}px ${geo.mainJunc.y}px` }}
-            />
-
-            {/* Student trunk */}
-            <motion.path d={geo.sTrunk} fill="none" strokeWidth={9} strokeLinecap="round"
-              filter={`url(#${filterId})`} style={{ stroke: GREEN }}
-              clipPath={`url(#${filterId}-cs)`}
-              {...pathAnim(0.75, 0.28, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={geo.sTrunk} fill="none" strokeWidth={2.5} strokeLinecap="round"
-                style={{ stroke: GREEN }}
-                {...pathAnim(0.75, 0.28, lineO)} />
-            </g>
-
-            {/* Corporate trunk */}
-            <motion.path d={geo.cTrunk} fill="none" strokeWidth={9} strokeLinecap="round"
-              filter={`url(#${filterId})`} style={{ stroke: PURPLE }}
-              clipPath={`url(#${filterId}-cc)`}
-              {...pathAnim(0.85, 0.28, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={geo.cTrunk} fill="none" strokeWidth={2.5} strokeLinecap="round"
-                style={{ stroke: PURPLE }}
-                {...pathAnim(0.85, 0.28, lineO)} />
-            </g>
-
-            {/* Student sub-junction dot */}
-            <motion.circle cx={geo.sJunc.x} cy={geo.sJunc.y} r={4.5}
-              filter={`url(#${filterId})`}
-              {...dotAnim(0.74)}
-              style={{ fill: GREEN, transformOrigin: `${geo.sJunc.x}px ${geo.sJunc.y}px` }}
-            />
-
-            {/* Corporate sub-junction dot */}
-            <motion.circle cx={geo.cJunc.x} cy={geo.cJunc.y} r={4.5}
-              filter={`url(#${filterId})`}
-              {...dotAnim(0.84)}
-              style={{ fill: PURPLE, transformOrigin: `${geo.cJunc.x}px ${geo.cJunc.y}px` }}
-            />
-
-            {/* Student sub-branches */}
-            {geo.sBranches.map((d, i) => (
-              <g key={`sb${i}`}>
-                <motion.path d={d} fill="none" strokeWidth={6} strokeLinecap="round"
-                  filter={`url(#${filterId})`} style={{ stroke: GREEN }}
-                  {...pathAnim(0.90 + i * 0.08, 0.48, bloomO)} />
-                <g className="rn-path-crisp">
-                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
-                    style={{ stroke: GREEN }}
-                    {...pathAnim(0.90 + i * 0.08, 0.48, lineO)} />
-                </g>
-              </g>
-            ))}
-
-            {/* Corporate sub-branches */}
-            {geo.cBranches.map((d, i) => (
-              <g key={`cb${i}`}>
-                <motion.path d={d} fill="none" strokeWidth={6} strokeLinecap="round"
-                  filter={`url(#${filterId})`} style={{ stroke: PURPLE }}
-                  {...pathAnim(1.08 + i * 0.08, 0.48, bloomO)} />
-                <g className="rn-path-crisp">
-                  <motion.path d={d} fill="none" strokeWidth={1.5} strokeLinecap="round"
-                    style={{ stroke: PURPLE }}
-                    {...pathAnim(1.08 + i * 0.08, 0.48, lineO)} />
-                </g>
-              </g>
-            ))}
-
-            {/* Decorative stubs — student */}
-            {geo.sStubs.map((s, i) => {
-              const d = stubD(s.origin, s.angle, s.len);
-              return (
-                <g key={`ss${i}`}>
-                  <motion.path d={d} fill="none" strokeWidth={4} strokeLinecap="round"
-                    filter={`url(#${filterId})`} style={{ stroke: GREEN }}
-                    {...pathAnim(1.55 + i * 0.07, 0.22, stubO)} />
-                  <g className="rn-path-crisp">
-                    <motion.path d={d} fill="none" strokeWidth={0.9} strokeLinecap="round"
-                      style={{ stroke: GREEN }}
-                      {...pathAnim(1.55 + i * 0.07, 0.22, lineO * 0.55)} />
-                  </g>
-                </g>
-              );
-            })}
-
-            {/* Decorative stubs — corporate */}
-            {geo.cStubs.map((s, i) => {
-              const d = stubD(s.origin, s.angle, s.len);
-              return (
-                <g key={`cs${i}`}>
-                  <motion.path d={d} fill="none" strokeWidth={4} strokeLinecap="round"
-                    filter={`url(#${filterId})`} style={{ stroke: PURPLE }}
-                    {...pathAnim(1.70 + i * 0.07, 0.22, stubO)} />
-                  <g className="rn-path-crisp">
-                    <motion.path d={d} fill="none" strokeWidth={0.9} strokeLinecap="round"
-                      style={{ stroke: PURPLE }}
-                      {...pathAnim(1.70 + i * 0.07, 0.22, lineO * 0.55)} />
-                  </g>
-                </g>
-              );
-            })}
-
-            {/* Endpoint circles — student leaves */}
-            {geo.sChildTops.map((pos, i) => (
-              <motion.circle key={`scd${i}`}
-                cx={pos.x} cy={pos.y} r={3}
-                {...dotAnim(1.08 + i * 0.10)}
-                style={{ fill: STUDENT_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
-              />
-            ))}
-
-            {/* Endpoint circles — corporate leaves */}
-            {geo.cChildTops.map((pos, i) => (
-              <motion.circle key={`ccd${i}`}
-                cx={pos.x} cy={pos.y} r={3}
-                {...dotAnim(1.28 + i * 0.10)}
-                style={{ fill: CORPORATE_DESTS[i].hex, transformOrigin: `${pos.x}px ${pos.y}px` }}
-              />
-            ))}
-          </svg>
+        {geo && desktopLayers && (
+          <TreeLayers w={geo.svgW} h={geo.svgH} strokes={desktopLayers.strokes} dots={desktopLayers.dots}
+            blur={7} live={isInView} drawing={drawing} isLight={isLight} />
         )}
 
         {/* Row 1: Central NEXUS hub */}
@@ -649,11 +633,10 @@ export function RootNetwork({
               boxShadow: '0 0 22px var(--rn-red-glow)',
             }}
           >
-            <motion.span
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{ border: '1px solid var(--rn-red)', opacity: 0 }}
-              animate={reduceMotion ? { scale: 1, opacity: 0 } : { scale: [1, 1.20], opacity: [0.45, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+            {/* Puls som CSS-animation (transform/opacity på kompositorn) i stället för JS per frame */}
+            <span
+              className="rn-pulse absolute inset-0 rounded-2xl pointer-events-none"
+              style={{ border: '1px solid var(--rn-red)' }}
               aria-hidden="true"
             />
             <span aria-hidden="true" style={{ color: 'var(--rn-red)', fontSize: '18px' }}>⬡</span>
@@ -731,79 +714,32 @@ export function RootNetwork({
         <div className="flex justify-between mt-16 gap-8">
           {/* Student leaves */}
           <div className="flex-1 flex gap-4">
-            {STUDENT_ROWS.map(({ d, elRef, pt, delay }) => (
-              <div key={d.href} style={{ paddingTop: pt, flex: 1 }}>
-                <ChildCard key={d.href} d={d} elRef={elRef} delay={delay} isInView={isInView} reduceMotion={reduceMotion} />
+            {STUDENT_DESTS.map((d, i) => (
+              <div key={d.href} style={{ paddingTop: S_PT[i], flex: 1 }}>
+                <ChildCard d={d} elRef={sRefs[i]} delay={S_DELAY[i]} isInView={isInView} reduceMotion={reduceMotion} />
               </div>
             ))}
           </div>
           {/* Corporate leaves */}
           <div className="flex-1 flex gap-4" style={{ paddingTop: '48px' }}>
-            {CORPORATE_ROWS.map(({ d, elRef, pt, delay }) => (
-              <div key={d.href} style={{ paddingTop: pt, flex: 1 }}>
-                <ChildCard key={d.href} d={d} elRef={elRef} delay={delay} isInView={isInView} reduceMotion={reduceMotion} />
+            {CORPORATE_DESTS.map((d, i) => (
+              <div key={d.href} style={{ paddingTop: C_PT[i], flex: 1 }}>
+                <ChildCard d={d} elRef={cRefs[i]} delay={C_DELAY[i]} isInView={isInView} reduceMotion={reduceMotion} />
               </div>
             ))}
           </div>
         </div>
       </div>
+      )}
 
       {/* Mobile */}
+      {!isDesktop && (
       <div ref={mContainerRef} className="relative sm:hidden overflow-hidden">
 
         {/* SVG overlay — mobile */}
-        {mobileGeo && (
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            width={mobileGeo.svgW}
-            height={mobileGeo.svgH}
-            aria-hidden="true"
-            style={{ overflow: 'visible' }}
-          >
-            <defs>
-              <filter id={`${filterId}-m`} x="-150%" y="-150%" width="400%" height="400%">
-                <feGaussianBlur stdDeviation="6" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-
-            {/* Main trunk */}
-            <motion.path d={mobileGeo.mainTrunk} fill="none" strokeWidth={10} strokeLinecap="round"
-              filter={`url(#${filterId}-m)`} style={{ stroke: RED }}
-              {...pathAnim(0.15, 0.25, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={mobileGeo.mainTrunk} fill="none" strokeWidth={3} strokeLinecap="round"
-                style={{ stroke: RED }}
-                {...pathAnim(0.15, 0.25, lineO)} />
-            </g>
-
-            {/* Main left branch → students */}
-            <motion.path d={mobileGeo.mainLeft} fill="none" strokeWidth={7} strokeLinecap="round"
-              filter={`url(#${filterId}-m)`} style={{ stroke: GREEN }}
-              {...pathAnim(0.35, 0.38, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={mobileGeo.mainLeft} fill="none" strokeWidth={2.5} strokeLinecap="round"
-                style={{ stroke: GREEN }}
-                {...pathAnim(0.35, 0.38, lineO)} />
-            </g>
-
-            {/* Main right branch → corporate */}
-            <motion.path d={mobileGeo.mainRight} fill="none" strokeWidth={7} strokeLinecap="round"
-              filter={`url(#${filterId}-m)`} style={{ stroke: PURPLE }}
-              {...pathAnim(0.35, 0.38, bloomO)} />
-            <g className="rn-path-crisp">
-              <motion.path d={mobileGeo.mainRight} fill="none" strokeWidth={2.5} strokeLinecap="round"
-                style={{ stroke: PURPLE }}
-                {...pathAnim(0.35, 0.38, lineO)} />
-            </g>
-
-            {/* Central junction dot */}
-            <motion.circle cx={mobileGeo.mainJunc.x} cy={mobileGeo.mainJunc.y} r={4.5}
-              filter={`url(#${filterId}-m)`}
-              {...dotAnim(0.53)}
-              style={{ fill: RED, transformOrigin: `${mobileGeo.mainJunc.x}px ${mobileGeo.mainJunc.y}px` }}
-            />
-          </svg>
+        {mobileGeo && mobileLayers && (
+          <TreeLayers w={mobileGeo.svgW} h={mobileGeo.svgH} strokes={mobileLayers.strokes} dots={mobileLayers.dots}
+            blur={6} live={isInView} drawing={drawing} isLight={isLight} />
         )}
 
         {/* NEXUS hub — mobile */}
@@ -820,11 +756,10 @@ export function RootNetwork({
               boxShadow: '0 0 18px var(--rn-red-glow)',
             }}
           >
-            <motion.span
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{ border: '1px solid var(--rn-red)', opacity: 0 }}
-              animate={reduceMotion ? { scale: 1, opacity: 0 } : { scale: [1, 1.20], opacity: [0.45, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+            {/* Puls som CSS-animation (transform/opacity på kompositorn) i stället för JS per frame */}
+            <span
+              className="rn-pulse absolute inset-0 rounded-2xl pointer-events-none"
+              style={{ border: '1px solid var(--rn-red)' }}
               aria-hidden="true"
             />
             <span aria-hidden="true" style={{ color: 'var(--rn-red)', fontSize: '16px' }}>⬡</span>
@@ -875,9 +810,9 @@ export function RootNetwork({
                 aria-hidden="true"
               />
               <div className="flex flex-col gap-2">
-                <MobileChildCard d={STUDENT_DESTS[0]} elRef={mSC0} delay={0.80} isInView={isInView} reduceMotion={reduceMotion} />
-                <MobileChildCard d={STUDENT_DESTS[1]} elRef={mSC1} delay={0.90} isInView={isInView} reduceMotion={reduceMotion} />
-                <MobileChildCard d={STUDENT_DESTS[2]} elRef={mSC2} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
+                {STUDENT_DESTS.map((d, i) => (
+                  <MobileChildCard key={d.href} d={d} elRef={mSRefs[i]} delay={0.80 + i * 0.10} isInView={isInView} reduceMotion={reduceMotion} />
+                ))}
               </div>
             </div>
           </div>
@@ -917,15 +852,16 @@ export function RootNetwork({
                 aria-hidden="true"
               />
               <div className="flex flex-col gap-2">
-                <MobileChildCard d={CORPORATE_DESTS[0]} elRef={mCC0} delay={1.00} isInView={isInView} reduceMotion={reduceMotion} />
-                <MobileChildCard d={CORPORATE_DESTS[1]} elRef={mCC1} delay={1.10} isInView={isInView} reduceMotion={reduceMotion} />
-                <MobileChildCard d={CORPORATE_DESTS[2]} elRef={mCC2} delay={1.20} isInView={isInView} reduceMotion={reduceMotion} />
+                {CORPORATE_DESTS.map((d, i) => (
+                  <MobileChildCard key={d.href} d={d} elRef={mCRefs[i]} delay={1.00 + i * 0.10} isInView={isInView} reduceMotion={reduceMotion} />
+                ))}
               </div>
             </div>
           </div>
 
         </div>
       </div>
+      )}
     </div>
   );
 }

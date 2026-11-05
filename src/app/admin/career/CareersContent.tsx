@@ -11,6 +11,7 @@ import type { TKLCareer, CareerType } from '@/lib/schemas/career';
 const TYPE_LABELS: Record<CareerType, string> = {
   exjobb:  'Exjobb',
   jobb:    'Jobb',
+  sommarjobb: 'Sommarjobb',
   praktik: 'Praktik',
   trainee: 'Trainee',
 };

@@ -27,7 +27,7 @@ export default function PostPage() {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
-      { '@type': 'ListItem', position: 2, name: 'För företag', item: 'https://tklnexus.se/corporate' },
+      { '@type': 'ListItem', position: 2, name: 'Företag', item: 'https://tklnexus.se/corporate' },
       { '@type': 'ListItem', position: 3, name: 'Publicera erbjudande', item: 'https://tklnexus.se/corporate/post' },
     ],
   };

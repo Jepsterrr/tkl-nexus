@@ -41,10 +41,13 @@ export function CorporateContent() {
   const bgUrl = heroImages?.corporateUrl || '/images/heroes/corporate.svg';
   const imgLoaded = useImageLoad(bgUrl);
 
+  const members = stats?.members ?? '1 600+';
+  // Antal sektioner kommer enbart från admin (settings/stats) — en hårdkodad
+  // fallback motsade admin-värdet. Saknas det visas statistiken inte alls.
   const STATS: StatItem[] = [
-    { value: stats?.members ?? '1 600+', label: corporate.stats.members },
+    { value: members, label: corporate.stats.members },
     { value: stats?.programs ?? '30', label: corporate.stats.programs },
-    { value: stats?.sections ?? '4', label: corporate.stats.sections },
+    ...(stats?.sections ? [{ value: stats.sections, label: corporate.stats.sections }] : []),
   ];
 
   const SERVICES = [
@@ -94,20 +97,22 @@ export function CorporateContent() {
         {/* LEFT PANEL — heading only */}
         <motion.div
           style={{ y: heroTextY }}
-          className="relative flex items-end lg:items-center px-8 sm:px-12 lg:px-16 pt-32 pb-8 lg:py-24 z-10"
+          className="relative flex items-end lg:items-center min-w-0 px-8 sm:px-12 lg:px-16 pt-32 pb-8 lg:py-24 z-10"
         >
-          <StaggerReveal delay={0.05}>
+          {/* @container: rubriken skalar mot kolumnens bredd (cqi), inte viewporten —
+              vw-baserad storlek korsade högerkolumnen vid 1024–1440 px. */}
+          <StaggerReveal delay={0.05} className="@container w-full min-w-0">
             {/* hero-reveal (CSS) — LCP-elementet får inte vänta på hydration */}
             <div className="hero-reveal">
               <h1
                 id="corporate-hero-heading"
-                className="hero-text"
+                className="hero-text wrap-break-word"
                 style={{
                   fontFamily: 'var(--font-heading)',
                   fontWeight: 900,
                   lineHeight: 0.92,
                   letterSpacing: '-0.05em',
-                  fontSize: 'clamp(3rem, 6vw + 1rem, 7rem)',
+                  fontSize: 'clamp(2.25rem, 13cqi, 7rem)',
                 }}
               >
                 {corporate.heading}
@@ -146,35 +151,28 @@ export function CorporateContent() {
             </RevealItem>
 
             <RevealItem>
-              <p className="text-base sm:text-lg hero-text-muted leading-relaxed max-w-[52ch] mb-8">
+              <p className="text-xl sm:text-2xl font-medium hero-text leading-snug max-w-[30ch] text-balance mb-6">
                 {corporate.description}
               </p>
             </RevealItem>
 
-            {/* Trust chips — visible on all sizes */}
-            <RevealItem className="flex flex-wrap gap-2 mb-10">
-              {[corporate.pills.members, corporate.pills.programs, corporate.pills.location].map((label) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}
-                >
-                  <span className="w-1 h-1 rounded-full bg-[#8B5CF6] shrink-0" />
-                  {label}
-                </span>
-              ))}
+            {/* Discreet facts line */}
+            <RevealItem className="mb-10">
+              <p className="text-xs font-semibold tracking-wide" style={{ color: 'var(--text-purple)' }}>
+                {corporate.pillsLine.replace('{members}', () => members)}
+              </p>
             </RevealItem>
 
             <RevealItem className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/about#kontakt"
+                href="/corporate/post"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 active:scale-95"
                 style={{
                   background: 'linear-gradient(135deg, #7C3AED, #6D28D9)',
                   boxShadow: '0 0 28px rgba(139,92,246,0.4), 0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                {corporate.ctaContact}
+                {corporate.ctaPost}
               </Link>
               <Link
                 href="#tjanster"
@@ -243,7 +241,7 @@ export function CorporateContent() {
                   </div>
                   <Link
                     href={service.linkHref}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold hero-text-muted hover:hero-text transition-colors duration-150 group"
+                    className="inline-flex items-center gap-1.5 self-start min-h-11 -my-2 text-sm font-semibold hero-text-muted hover:hero-text transition-colors duration-150 group"
                     onClick={() =>
                       capture('corporate_service_clicked', {
                         service: service.linkHref,
@@ -276,7 +274,7 @@ export function CorporateContent() {
               </div>
               <Link
                 href="/about#kontakt"
-                className="shrink-0 px-8 py-3.5 rounded-2xl bg-linear-to-r from-[#8B5CF6] to-[#6d28d9] text-white font-semibold text-sm hover:scale-105 hover:shadow-lg hover:shadow-[#8B5CF6]/30 transition-all active:scale-95"
+                className="shrink-0 inline-flex items-center justify-center min-h-11 px-8 py-3.5 rounded-2xl bg-linear-to-r from-(--cta-purple-from) to-(--cta-purple-to) text-white font-semibold text-sm hover:scale-105 hover:shadow-lg hover:shadow-[#8B5CF6]/30 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--text-purple) focus-visible:ring-offset-2 focus-visible:ring-offset-cosmic-bg"
               >
                 {corporate.ctaBannerBtn}
               </Link>

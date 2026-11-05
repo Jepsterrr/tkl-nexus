@@ -28,7 +28,7 @@ export default function StudentsPage() {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Hem', item: 'https://tklnexus.se/' },
-      { '@type': 'ListItem', position: 2, name: 'För studenter', item: 'https://tklnexus.se/students' },
+      { '@type': 'ListItem', position: 2, name: 'Studenter', item: 'https://tklnexus.se/students' },
     ],
   };
   return (

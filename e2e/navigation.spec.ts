@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { waitForAppReady } from './helpers';
+import { DEALS_ENABLED } from '../src/lib/features';
 
 /**
  * Grundläggande navigering — sidor renderar, navbar fungerar, 404 hanteras.
@@ -45,5 +47,33 @@ test.describe('Navigering', () => {
     await page.goto('/');
     const skip = page.locator('a.skip-nav');
     await expect(skip).toHaveAttribute('href', '#main-content');
+  });
+
+  test('Deals är dolt: ingen länk pekar mot /students/deals', async ({ page }) => {
+    test.skip(DEALS_ENABLED, 'Deals är aktiverat');
+    for (const route of ['/', '/students', '/corporate', '/about']) {
+      await page.goto(route);
+      // RootNetwork laddas klientsida (dynamic, ssr:false) — vänta tills den monterats
+      await waitForAppReady(page);
+      await expect(page.locator('a[href*="/students/deals"]'), `${route}`).toHaveCount(0);
+    }
+  });
+
+  test('Studenter- och Företag-dropdown saknar Events respektive Kontakt', async ({ page, isMobile }) => {
+    test.skip(!!isMobile, 'Desktop-dropdown');
+    await page.goto('/');
+    await waitForAppReady(page);
+    const nav = page.getByRole('navigation').first();
+
+    // Dropdown-panelen är den direkta föräldern till barnlänkarna och renderas bara när den är öppen.
+    await nav.getByRole('link', { name: /^(STUDENTER|STUDENTS)$/i }).hover();
+    const studentsPanel = nav.locator('a[href="/career"]').first().locator('..');
+    await expect(studentsPanel.locator('a')).toHaveCount(DEALS_ENABLED ? 2 : 1); // Karriär (+ Deals om aktiverat); Events borta
+    await expect(studentsPanel.locator('a[href="/events"]')).toHaveCount(0);
+
+    await nav.getByRole('link', { name: /^(FÖRETAG|COMPANIES)$/i }).hover();
+    const corporatePanel = nav.locator('a[href="/corporate/post"]').first().locator('..');
+    await expect(corporatePanel.locator('a')).toHaveCount(2); // Annonsera + Tjänster (Kontakt borta)
+    await expect(corporatePanel.locator('a[href="/about#kontakt"]')).toHaveCount(0);
   });
 });

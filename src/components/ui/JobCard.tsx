@@ -3,7 +3,8 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { MapPin, Calendar, Building2, ExternalLink, ArrowRight, Clock } from 'lucide-react';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import type { TKLCareer, CareerType } from '@/lib/schemas/career';
+import type { TKLCareer } from '@/lib/schemas/career';
+import { TYPE_COLORS, TYPE_TEXT } from '@/lib/careerTypes';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 
 interface JobCardProps {
@@ -12,13 +13,6 @@ interface JobCardProps {
   entryDelay?: number;
   onViewDetails?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
-
-const TYPE_COLORS: Record<CareerType, string> = {
-  exjobb: '#8B5CF6',
-  jobb: '#3B82F6',
-  praktik: '#10B981',
-  trainee: '#F59E0B',
-};
 
 // Maps accent hex → WCAG-safe text CSS variable (light: darker shade, dark: same hex)
 const ACCENT_TEXT: Record<string, string> = {
@@ -84,7 +78,7 @@ export function JobCard({ job, color, entryDelay = 0, onViewDetails }: JobCardPr
             <span
               className="text-[0.625rem] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full whitespace-nowrap"
               style={{
-                color: ACCENT_TEXT[badgeColor] ?? badgeColor,
+                color: TYPE_TEXT[job.type],
                 background: 'var(--about-card-bg)',
                 border: `1px solid color-mix(in srgb, ${badgeColor} 35%, transparent)`,
                 boxShadow: `0 0 12px ${badgeColor}40`,
