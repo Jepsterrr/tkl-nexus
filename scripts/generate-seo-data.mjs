@@ -64,7 +64,7 @@ async function fetchPublished(db, name) {
 }
 
 // Ska spegla employmentTypeMap i src/app/career/CareerContent.tsx
-const CAREER_EMPLOYMENT = { exjobb: 'INTERN', praktik: 'INTERN', trainee: 'FULL_TIME', jobb: 'FULL_TIME', sommarjobb: 'SUMMER_JOB' };
+const CAREER_EMPLOYMENT = { exjobb: 'INTERN', praktik: 'INTERN', trainee: 'FULL_TIME', jobb: 'FULL_TIME', sommarjobb: 'TEMPORARY' };
 
 function itemList(name, elements) {
   return { '@context': 'https://schema.org', '@type': 'ItemList', name, itemListElement: elements };
