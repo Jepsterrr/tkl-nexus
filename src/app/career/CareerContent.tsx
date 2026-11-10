@@ -357,11 +357,13 @@ export function CareerContent() {
               </h1>
             </div>
 
-            <RevealItem>
+            {/* hero-reveal (CSS) — stycket är LCP-element på mobil och får
+                inte vänta på hydration; fördröjningen behåller staggern */}
+            <div className="hero-reveal" style={{ animationDelay: '0.2s' }}>
               <p className="mt-4 text-base sm:text-lg hero-text-muted max-w-[52ch] leading-relaxed">
                 {opportunity.description}
               </p>
-            </RevealItem>
+            </div>
           </StaggerReveal>
         </motion.div>
 

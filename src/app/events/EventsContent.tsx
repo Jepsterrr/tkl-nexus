@@ -633,9 +633,11 @@ export function EventsContent() {
                   {ev.heading}{' '}<span className="text-accent-purple">{ev.headingAccent}</span>
                 </h1>
               </div>
-              <RevealItem>
+              {/* hero-reveal (CSS) — stycket är LCP-element på mobil och får
+                  inte vänta på hydration; fördröjningen behåller staggern */}
+              <div className="hero-reveal" style={{ animationDelay: '0.2s' }}>
                 <p className="mt-6 text-base sm:text-lg hero-text-muted max-w-2xl mx-auto leading-relaxed">{ev.description}</p>
-              </RevealItem>
+              </div>
               <RevealItem className="flex flex-wrap justify-center gap-2 mt-4">
                 {[ev.pills.nexus, ev.pills.campus, ev.pills.sections].map((label) => (
                   <span key={label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.22)', color: 'var(--text-purple)' }}>

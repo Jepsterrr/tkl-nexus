@@ -168,7 +168,7 @@ export function AboutContent() {
             {/* Typografisk caption — ersätter badge-pill + temasäker röd */}
             <RevealItem>
               <p className="text-accent-red text-xs font-mono uppercase tracking-[0.2em] mb-5">
-                Est. 2025 · TKL NEXUS
+                Est. 2026 · TKL NEXUS
               </p>
             </RevealItem>
 

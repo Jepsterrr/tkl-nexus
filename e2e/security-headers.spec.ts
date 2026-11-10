@@ -4,7 +4,8 @@ import { test, expect } from '@playwright/test';
  * Security headers — verifierar next.config.ts-headers via `next start`.
  * OBS: I produktion serveras headers av firebase.json (statisk hosting kör
  * aldrig headers()). Filerna SKA vara i synk — detta test fångar regressioner
- * i next.config.ts; firebase.json-pariteten granskas i code review.
+ * i next.config.ts; firebase.json-pariteten vaktas av
+ * e2e/unit/security-headers-parity.spec.ts.
  */
 
 test.describe('Security headers (next start-spegling av firebase.json)', () => {

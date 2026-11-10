@@ -15,6 +15,8 @@ on:
 
 permissions:
   contents: read
+  # Läser E2E-workflowens körningar för att hitta senaste gröna commit
+  actions: read
 
 concurrency:
   group: deploy-production
@@ -33,12 +35,30 @@ jobs:
       NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
       NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
       NEXT_PUBLIC_CLOUDINARY_DELETE_URL: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_DELETE_URL }}
+      NEXT_PUBLIC_POSTHOG_DASHBOARD_URL: ${{ secrets.NEXT_PUBLIC_POSTHOG_DASHBOARD_URL }}
       GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/.firebase-sa.json
 
     steps:
+      # Deploya ALDRIG master HEAD rakt av: en push som fallerat E2E stoppas av
+      # deploy.yml, och cronen får inte smyga ut samma commit nästa morgon.
+      # Senaste gröna E2E-körningen på master är samma commit som deploy.yml
+      # deployade (och har därmed redan passerat vakten för helstatiskt bygge).
+      - name: Hitta senaste E2E-gröna commit på master
+        id: green
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh api "repos/${{ github.repository }}/actions/workflows/e2e.yml/runs?branch=master&event=push&status=success&per_page=1" --jq '.workflow_runs[0].head_sha // empty')
+          if [ -z "$sha" ]; then
+            echo "::error::Hittade ingen grön E2E-körning på master — avbryter utan deploy."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Deployar från $sha"
+
       - uses: actions/checkout@v7
         with:
-          ref: master
+          ref: ${{ steps.green.outputs.sha }}
 
       - uses: actions/setup-node@v7
         with:

@@ -83,9 +83,10 @@ export default function RootLayout({
     url: 'https://tklnexus.se',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://tklnexus.se/og-image.png',
-      width: 1200,
-      height: 630,
+      // Kvadratisk logga — inte og-bilden (1200×630). Google kräver minst 112×112.
+      url: 'https://tklnexus.se/Logo/apple-icon.png',
+      width: 180,
+      height: 180,
     },
     description: 'TKL NEXUS är Teknologkårens officiella arbetsmarknadsportal vid Luleå tekniska universitet — kopplar samman LTU-studenter med exjobb, praktik och karriärmöjligheter.',
     sameAs: [
